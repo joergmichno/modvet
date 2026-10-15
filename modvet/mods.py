@@ -133,8 +133,18 @@ def _refine_code_findings(findings: list[Finding]) -> list[Finding]:
     return out
 
 
+def detect_kind(root: Path) -> str:
+    """Erkennt den Erweiterungs-Typ: mod (plugin.json), skill (SKILL.md), sonst generic."""
+    if (root / "plugin.json").is_file():
+        return "mod"
+    if (root / "SKILL.md").is_file():
+        return "skill"
+    return "generic"
+
+
 def scan_mod(root: Path) -> ScanReport:
-    """Scannt einen Mod-Ordner: Engine + Capability-Patterns, ein konsolidierter Report."""
+    """Scannt einen Mod-/Skill-Ordner: Engine + Capability-Patterns, ein konsolidierter Report."""
+    kind = detect_kind(root)
     findings: list[Finding] = []
     for p in discover_mod_files(root):
         rel = str(p.relative_to(root))
@@ -145,6 +155,18 @@ def scan_mod(root: Path) -> ScanReport:
         # 1) Engine-Scan (Prompt-Injection, Commands, Social Engineering)
         eng = scan_text(text, source=rel)
         findings.extend(_refine_code_findings(eng.findings))
+        # 1b) MCP-Manifest-Hinweis (Skill-/Agent-Konfigurationen)
+        if p.name in (".mcp.json", "mcp.json", "mcp_config.json") and "mcpServers" in text:
+            findings.append(Finding(
+                severity=Severity.MEDIUM,
+                category="MCP Config",
+                pattern_name="MCP Manifest",
+                matched_text="mcpServers",
+                line_number=1,
+                context=f"{rel}: MCP-Server-Konfiguration — Server-Quellen einzeln prüfen",
+                recommendation="Prüfe jede mcpServers-Quelle (URL/Command) auf Vertrauenswürdigkeit.",
+                confidence=90,
+            ))
         # 2) Capability-Scan mit Zeilennummern
         for line_no, line in enumerate(text.splitlines(), 1):
             for name, rx, sev, rec in CAPABILITY_PATTERNS:
@@ -163,7 +185,7 @@ def scan_mod(root: Path) -> ScanReport:
     total_score = sum(f.severity.score() for f in findings)
     return ScanReport(
         timestamp=datetime.now(timezone.utc).isoformat(),
-        source=f"mod:{root}",
+        source=f"{kind}:{root}",
         total_lines=0,
         total_findings=len(findings),
         risk_score=total_score,

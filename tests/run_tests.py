@@ -40,7 +40,16 @@ def test_malicious_mod():
     assert "Network POST (Exfil-Pfad)" in names, names
     assert "Env Read" in names, names
     assert "Hardcoded Secret" in names, names
+    assert "MCP Manifest" in names, names
     print(f"PASS malicious-mod ({rep['total_findings']} findings, level={rep['risk_level']})")
+
+
+def test_skill_detection():
+    r = run(["scan", str(FIX / "skill-demo"), "--json"])
+    assert r.returncode == 0, f"exit={r.returncode} stderr={r.stderr}"
+    rep = json.loads(r.stdout)
+    assert rep["source"].startswith("skill:"), rep["source"]
+    print("PASS skill-detection")
 
 
 def test_snapshot_diff():
@@ -73,7 +82,7 @@ def test_usage_error():
 
 
 if __name__ == "__main__":
-    tests = [test_clean_mod, test_malicious_mod, test_snapshot_diff, test_usage_error]
+    tests = [test_clean_mod, test_malicious_mod, test_snapshot_diff, test_usage_error, test_skill_detection]
     for t in tests:
         t()
     print(f"\nALL {len(tests)} TESTS PASSED")

@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "remote-demo": { "url": "https://mcp.example.com/sse" }
+  }
+}
