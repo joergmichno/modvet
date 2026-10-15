@@ -1,0 +1,22 @@
+# ModVet CI-Gate — scannt einen Mod vor jedem Merge.
+# Nutzung: Datei nach <dein-mod-repo>/.github/workflows/modvet.yml kopieren.
+name: modvet-scan
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  modvet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ModVet
+        run: |
+          pip install git+https://github.com/<owner>/modvet.git
+      - name: Scan mod
+        run: modvet scan . --fail-on HIGH

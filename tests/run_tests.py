@@ -39,6 +39,7 @@ def test_malicious_mod():
     assert "Base64 Decode Execute" in names, names
     assert "Network POST (Exfil-Pfad)" in names, names
     assert "Env Read" in names, names
+    assert "Hardcoded Secret" in names, names
     print(f"PASS malicious-mod ({rep['total_findings']} findings, level={rep['risk_level']})")
 
 

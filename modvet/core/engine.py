@@ -2085,7 +2085,7 @@ def format_human(report: ScanReport) -> str:
     lines = [
         "",
         "═" * 64,
-        f"  🛡️  ClawGuard v0.3.0 – Security Scan Report",
+        f"  🛡️  ModVet v0.1.0 – Mod Security Scan Report",
         "═" * 64,
         f"  Timestamp : {report.timestamp}",
         f"  Source    : {report.source}",
@@ -2159,13 +2159,13 @@ def main():
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
     parser = argparse.ArgumentParser(
-        description="🛡️  ClawGuard – The Firewall for Autonomous AI Agents",
+        description="🛡️  ModVet – deterministic mod security scanner",
         epilog="(c) 2026 Jörg Michno. Zero dependencies. Zero cost. Maximum security.",
     )
     parser.add_argument("file", nargs="?", help="Text file to scan")
     parser.add_argument("--stdin", action="store_true", help="Read from standard input")
     parser.add_argument("--json", action="store_true", help="Output report as JSON (for automation)")
-    parser.add_argument("--version", action="version", version="ClawGuard v0.3.0")
+    parser.add_argument("--version", action="version", version="ModVet v0.1.0 (engine: ClawGuard 0.5.0 port)")
 
     args = parser.parse_args()
 

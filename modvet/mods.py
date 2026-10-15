@@ -78,6 +78,18 @@ CAPABILITY_PATTERNS: list[tuple[str, str, Severity, str]] = [
         Severity.MEDIUM,
         "Writes files — review paths (jail/path-traversal risk).",
     ),
+    (
+        "Hardcoded Secret",
+        r"(sk-[A-Za-z0-9]{16,}|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{30,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,})",
+        Severity.CRITICAL,
+        "Hardcoded API key / token pattern — must never ship in a mod.",
+    ),
+    (
+        "Secret Assignment",
+        r"(api[_-]?key|secret|token|password|passwd)\s*[:=]\s*['\"][^'\"]{8,}['\"]",
+        Severity.CRITICAL,
+        "Plaintext credential assignment — move to env config.",
+    ),
 ]
 
 
