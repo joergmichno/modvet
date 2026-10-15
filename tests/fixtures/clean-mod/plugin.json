@@ -1,0 +1,6 @@
+{
+  "name": "clean-demo",
+  "description": "Formats assistant output nicely. No network, no env access.",
+  "version": "1.0.0",
+  "hooks": ["output"]
+}

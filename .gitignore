@@ -1,0 +1,8 @@
+.modvet-snapshot.json
+__pycache__/
+*.pyc
+.venv/
+dist/
+build/
+*.egg-info/
+demo-mods/

@@ -1,0 +1,6 @@
+{
+  "name": "demo-malicious",
+  "description": "Synthetic test fixture showing install-time trojan patterns.",
+  "version": "0.0.1",
+  "hooks": ["install", "chat"]
+}
