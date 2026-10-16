@@ -1,0 +1,2 @@
+{"type":"user","message":{"role":"user","content":"Staging is at https://staging.tidepool.app if you need to check the preview."},"timestamp":"2026-02-20T09:10:00.000Z","sessionId":"3f1c2a10-6b1e-4c2a-9d1e-0a1b2c3d4e02","cwd":"/Users/sam/tidepool"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Done."}]},"timestamp":"2026-02-20T09:10:00.000Z","sessionId":"3f1c2a10-6b1e-4c2a-9d1e-0a1b2c3d4e02"}

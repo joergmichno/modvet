@@ -1,0 +1,26 @@
+{
+  "name": "terminal-browser",
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r build",
+    "browser": "node scripts/dev.mjs",
+    "types": "scripts/plugin-types.sh",
+    "postinstall": "scripts/plugin-types.sh --if-missing",
+    "build:dist": "scripts/release.sh \"local-$(git rev-parse --short HEAD)\"",
+    "install:dist": "scripts/install-local.sh",
+    "dist": "pnpm build:dist && pnpm install:dist",
+    "release:patch": "scripts/tag-release.sh patch",
+    "release:minor": "scripts/tag-release.sh minor",
+    "release:major": "scripts/tag-release.sh major",
+    "monitor": "pnpm --filter terminal-browser-monitor start",
+    "pixel:build": "pnpm --filter @zenbu-labs/pixel build",
+    "pixel:build:native": "pnpm --filter @zenbu-labs/pixel build:native --",
+    "pixel:typecheck": "pnpm --filter './pixel/**' typecheck",
+    "pixel:test": "pnpm --filter './pixel/**' test"
+  },
+  "packageManager": "pnpm@10.13.1",
+  "devDependencies": {
+    "@electron/osx-sign": "^1.3.3",
+    "esbuild": "^0.25.0"
+  }
+}

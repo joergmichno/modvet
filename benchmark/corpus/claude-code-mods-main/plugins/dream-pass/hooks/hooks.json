@@ -1,0 +1,1 @@
+{ "description": "dream-pass", "modules": ["./register.js"] }

@@ -1,0 +1,4 @@
+{"type":"user","message":{"role":"user","content":"We moved staging to Fly last night. It's https://tidepool-staging.fly.dev now, the old staging.tidepool.app domain is gone. Same basic auth user, tidepool."},"timestamp":"2026-09-22T09:10:00.000Z","sessionId":"3f1c2a10-6b1e-4c2a-9d1e-0a1b2c3d4e03","cwd":"/Users/sam/tidepool"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Done."}]},"timestamp":"2026-09-22T09:10:00.000Z","sessionId":"3f1c2a10-6b1e-4c2a-9d1e-0a1b2c3d4e03"}
+{"type":"user","message":{"role":"user","content":"Can you update the Playwright base URL to the new staging?"},"timestamp":"2026-09-22T09:15:00.000Z","sessionId":"3f1c2a10-6b1e-4c2a-9d1e-0a1b2c3d4e03","cwd":"/Users/sam/tidepool"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Done."}]},"timestamp":"2026-09-22T09:15:00.000Z","sessionId":"3f1c2a10-6b1e-4c2a-9d1e-0a1b2c3d4e03"}

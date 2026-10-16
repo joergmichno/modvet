@@ -1,0 +1,74 @@
+[
+  {
+    "slug": "zenbu-labs__terminal-browser",
+    "owner": "zenbu-labs",
+    "repo": "terminal-browser",
+    "cached": false
+  },
+  {
+    "slug": "karanb192__cache-tax",
+    "owner": "karanb192",
+    "repo": "cache-tax",
+    "cached": false
+  },
+  {
+    "slug": "jarrodwatts__claude-image-view",
+    "owner": "jarrodwatts",
+    "repo": "claude-image-view",
+    "cached": false
+  },
+  {
+    "slug": "NahumLitvin__prismantis",
+    "owner": "NahumLitvin",
+    "repo": "prismantis",
+    "cached": false
+  },
+  {
+    "slug": "scasella__claude-flightdeck",
+    "owner": "scasella",
+    "repo": "claude-flightdeck",
+    "cached": false
+  },
+  {
+    "slug": "data-goblin__claude-code-filetree",
+    "owner": "data-goblin",
+    "repo": "claude-code-filetree",
+    "cached": false
+  },
+  {
+    "slug": "oikon48__prompt-rail",
+    "owner": "oikon48",
+    "repo": "prompt-rail",
+    "cached": false
+  },
+  {
+    "slug": "anthropics__claude-code",
+    "owner": "anthropics",
+    "repo": "claude-code",
+    "cached": false
+  },
+  {
+    "slug": "BeLazy167__claude-mods-skill",
+    "owner": "BeLazy167",
+    "repo": "claude-mods-skill",
+    "cached": false
+  },
+  {
+    "slug": "noeltock__mod-builder",
+    "owner": "noeltock",
+    "repo": "mod-builder",
+    "cached": false
+  },
+  {
+    "slug": "karanb192__claude-code-hooks",
+    "owner": "karanb192",
+    "repo": "claude-code-hooks",
+    "cached": false
+  },
+  {
+    "slug": "hesreallyhim__awesome-claude-code",
+    "owner": "hesreallyhim",
+    "repo": "awesome-claude-code",
+    "cached": false
+  }
+]

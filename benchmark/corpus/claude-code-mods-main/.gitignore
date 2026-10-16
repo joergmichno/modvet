@@ -1,0 +1,7 @@
+# Claude Code writes each mod's type declarations when it loads the mod,
+# and every release rewrites them. Never commit them.
+plugins/*/.claude-plugin/types/
+/types/
+
+node_modules/
+.DS_Store

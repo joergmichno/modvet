@@ -1,0 +1,319 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "claude-code-hooks",
+  "description": "Production-ready Claude Code hooks, each installable on its own as a plugin.",
+  "owner": {
+    "name": "Karan Bansal",
+    "url": "https://github.com/karanb192"
+  },
+  "plugins": [
+    {
+      "name": "context-hogs",
+      "source": "./plugins/context-hogs",
+      "description": "Per-file context-cost leaderboard: attributes every tool result's tokens to the files it loaded, so you know which files cost you the most.",
+      "category": "cost",
+      "tags": [
+        "cost",
+        "observability",
+        "context",
+        "hooks",
+        "posttooluse"
+      ]
+    },
+    {
+      "name": "cache-tax",
+      "source": "./plugins/cache-tax",
+      "description": "The comeback price of a cold prompt cache, shown before you pay it: a UserPromptSubmit guard that warns (or refuses once) when your next message re-writes a lapsed 1-hour cache at up to 80x the read rate, a SessionStart hook that prices a stale resume, and a one-line status line segment with minutes left and the cold-comeback cost.",
+      "category": "cost",
+      "tags": [
+        "cost",
+        "prompt-cache",
+        "observability",
+        "statusline",
+        "hooks",
+        "userpromptsubmit",
+        "sessionstart"
+      ]
+    },
+    {
+      "name": "nerf-receipts",
+      "source": "./plugins/nerf-receipts",
+      "description": "A personal flight recorder for Claude Code quality: records your own per-session failure rate, edit churn, and tokens/task by model version, and flags real shifts when a model changes.",
+      "category": "observability",
+      "tags": [
+        "quality",
+        "observability",
+        "model-drift",
+        "hooks",
+        "sessionend"
+      ]
+    },
+    {
+      "name": "dead-rules-audit",
+      "source": "./plugins/dead-rules-audit",
+      "description": "CLAUDE.md compliance scorecard: tallies which rules Claude actually follows vs ignores as you edit, and flags chronically-ignored rules to promote into a deterministic hook.",
+      "category": "observability",
+      "tags": [
+        "compliance",
+        "claude-md",
+        "observability",
+        "hooks",
+        "posttooluse",
+        "sessionstart",
+        "sessionend"
+      ]
+    },
+    {
+      "name": "pr-provenance-stamp",
+      "source": "./plugins/pr-provenance-stamp",
+      "description": "Stamps a provenance receipt (prompts, estimated spend, tests run with exit codes, and a truthful agent-authored line split) into your PR body on `gh pr create`.",
+      "category": "git",
+      "tags": [
+        "pr",
+        "provenance",
+        "github",
+        "hooks",
+        "pretooluse",
+        "posttooluse"
+      ]
+    },
+    {
+      "name": "standup-autopilot",
+      "source": "./plugins/standup-autopilot",
+      "description": "Writes your daily standup from what your agents actually did across repos: captures tasks, tests, PRs, and blockers from session transcripts and re-injects yesterday's open blockers next session.",
+      "category": "productivity",
+      "tags": [
+        "standup",
+        "productivity",
+        "sessionstart",
+        "sessionend",
+        "hooks",
+        "stop"
+      ]
+    },
+    {
+      "name": "dead-end-registry",
+      "source": "./plugins/dead-end-registry",
+      "description": "Remembers approaches you tried and reverted (with reason and estimated token cost) and warns before you retry them, via a prompt-submit card and an ask-before-edit guard.",
+      "category": "memory",
+      "tags": [
+        "memory",
+        "context",
+        "negative-knowledge",
+        "hooks",
+        "userpromptsubmit",
+        "pretooluse",
+        "stop",
+        "subagentstop",
+        "precompact"
+      ]
+    },
+    {
+      "name": "bounty-board",
+      "source": "./plugins/bounty-board",
+      "description": "Prices your repo's TODO/FIXME/HACK debt as aging XP bounties, injects the top 3 as opportunistic side quests, and verifies + pays out bounties you genuinely clear.",
+      "category": "productivity",
+      "tags": [
+        "tech-debt",
+        "todo",
+        "gamification",
+        "hooks",
+        "sessionstart",
+        "posttooluse"
+      ]
+    },
+    {
+      "name": "block-dangerous-commands",
+      "source": "./plugins/block-dangerous-commands",
+      "description": "PreToolUse guard for Bash: blocks dangerous shell commands (rm -rf ~, fork bombs, curl|sh, force push to main) before they run, with three safety levels and opt-in per-level ask mode.",
+      "category": "safety",
+      "tags": [
+        "safety",
+        "security",
+        "guardrails",
+        "bash",
+        "hooks",
+        "pretooluse"
+      ]
+    },
+    {
+      "name": "protect-secrets",
+      "source": "./plugins/protect-secrets",
+      "description": "Secrets firewall for tool calls: denies (or asks, per level) any Read/Edit/Write/Bash/Grep that would read, search, modify, or exfiltrate .env files, SSH keys, cloud credentials, or keystores, with tiered safety levels tunable via HOOK_SAFETY_LEVEL.",
+      "category": "security",
+      "tags": [
+        "security",
+        "secrets",
+        "guardrails",
+        "hooks",
+        "pretooluse"
+      ]
+    },
+    {
+      "name": "git-safety",
+      "source": "./plugins/git-safety",
+      "description": "Branch-aware git guardrails plus destructive gh CLI protection: denies pushes to main/master, protected-branch deletion, direct commit/merge/rebase/reset/push on a protected branch, and gh pr merge/close, issue close, release and repo delete.",
+      "category": "safety",
+      "tags": [
+        "git",
+        "github",
+        "safety",
+        "guardrails",
+        "hooks",
+        "pretooluse"
+      ]
+    },
+    {
+      "name": "protect-tests",
+      "source": "./plugins/protect-tests",
+      "description": "Stops \"fake green\" test-gaming: blocks the agent from deleting, renaming-away, or skip/xfail-disabling tests so it fixes the code instead, across pytest, jest, Go, JUnit, RSpec, and more.",
+      "category": "safety",
+      "tags": [
+        "safety",
+        "tests",
+        "guardrails",
+        "hooks",
+        "pretooluse"
+      ]
+    },
+    {
+      "name": "case-insensitive-guard",
+      "source": "./plugins/case-insensitive-guard",
+      "description": "Stops `rm -rf content` destroying `Content` on case-insensitive filesystems (APFS/exFAT/NTFS): resolves the real target of destructive commands through cd chains, quotes, and subshells, and denies provable case collisions.",
+      "category": "safety",
+      "tags": [
+        "safety",
+        "filesystem",
+        "data-loss",
+        "hooks",
+        "pretooluse"
+      ]
+    },
+    {
+      "name": "config-guard",
+      "source": "./plugins/config-guard",
+      "description": "Who guards the guards: blocks the agent from tampering with its own guardrail config (settings.json, hook scripts, hooks.json, .mcp.json, plugin manifests, claude CLI config writes); reads always pass.",
+      "category": "safety",
+      "tags": [
+        "security",
+        "guardrails",
+        "config",
+        "supply-chain",
+        "hooks",
+        "pretooluse"
+      ]
+    },
+    {
+      "name": "subagent-spawn-cap",
+      "source": "./plugins/subagent-spawn-cap",
+      "description": "Per-session subagent spawn budget: a PreToolUse guard on the Agent tool that counts every spawn (nested fan-outs included) in an append-only ledger, asks at SPAWN_CAP_ASK (default 20) and every SPAWN_CAP_ASK_STEP after it (default 10), and denies at SPAWN_CAP_DENY (default 60). The total cap Claude Code 2.1.224 removed, back under the user's control.",
+      "category": "safety",
+      "tags": [
+        "safety",
+        "cost",
+        "subagents",
+        "guardrails",
+        "hooks",
+        "pretooluse"
+      ]
+    },
+    {
+      "name": "config-watch",
+      "source": "./plugins/config-watch",
+      "description": "Tripwire for out-of-band config changes: warns on every mid-session settings/skills change (or blocks it with CONFIG_WATCH_BLOCK=true) to catch installer scripts and npm payloads rewriting settings behind Claude Code's back.",
+      "category": "safety",
+      "tags": [
+        "security",
+        "config",
+        "supply-chain",
+        "hooks",
+        "configchange"
+      ]
+    },
+    {
+      "name": "auto-stage",
+      "source": "./plugins/auto-stage",
+      "description": "Automatic git staging: runs `git add` on every file Claude edits or writes, so `git status` always shows exactly what Claude touched and pre-commit review needs no manual staging.",
+      "category": "git",
+      "tags": [
+        "git",
+        "automation",
+        "staging",
+        "hooks",
+        "posttooluse"
+      ]
+    },
+    {
+      "name": "format-code",
+      "source": "./plugins/format-code",
+      "description": "Auto-formats files the moment Claude writes them: ruff for Python, prettier for JS/TS/JSON/MD/YAML/HTML, with shell-injection-safe argv execution and silent skips for everything else.",
+      "category": "automation",
+      "tags": [
+        "formatting",
+        "prettier",
+        "ruff",
+        "automation",
+        "hooks",
+        "posttooluse"
+      ]
+    },
+    {
+      "name": "session-logger",
+      "source": "./plugins/session-logger",
+      "description": "Durable markdown log of every session (cwd, git repo, files touched, secret-redacted bash commands), appended async so logging never blocks Claude.",
+      "category": "observability",
+      "tags": [
+        "logging",
+        "sessions",
+        "observability",
+        "obsidian",
+        "hooks",
+        "sessionstart",
+        "posttooluse",
+        "sessionend"
+      ]
+    },
+    {
+      "name": "instructions-audit",
+      "source": "./plugins/instructions-audit",
+      "description": "Prompt-injection tripwire for CLAUDE.md and .claude/rules files: flags invisible-Unicode smuggling, secret read/exfil directives, curl|sh, decode-and-execute, and hook/settings tampering as instructions load, then locks the session (every prompt and tool call denied) until a human clears it.",
+      "category": "security",
+      "tags": [
+        "security",
+        "prompt-injection",
+        "claude-md",
+        "hooks",
+        "instructionsloaded",
+        "userpromptsubmit",
+        "pretooluse"
+      ]
+    },
+    {
+      "name": "notify-permission",
+      "source": "./plugins/notify-permission",
+      "description": "Slack alerts when Claude Code needs you: posts a rich card (project, session, and what needs approval) to your webhook on permission, idle, and choice prompts.",
+      "category": "notifications",
+      "tags": [
+        "notifications",
+        "slack",
+        "alerts",
+        "hooks",
+        "notification"
+      ]
+    },
+    {
+      "name": "guard-pack",
+      "source": "./plugins/guard-pack",
+      "description": "All seven guard hooks in one Node process: subagent-spawn-cap, config-guard, block-dangerous-commands, protect-secrets, protect-tests, git-safety, and case-insensitive-guard, first blocking verdict wins. One ~35 ms Node startup per tool call instead of seven. Do not install alongside the individual guard plugins.",
+      "category": "security",
+      "tags": [
+        "security",
+        "safety",
+        "guardrails",
+        "pretooluse",
+        "latency",
+        "subagents"
+      ]
+    }
+  ]
+}

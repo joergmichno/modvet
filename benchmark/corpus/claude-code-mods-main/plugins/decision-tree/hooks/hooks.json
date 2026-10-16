@@ -1,0 +1,4 @@
+{
+  "description": "The decision-tree hooks module",
+  "modules": ["./register.jsx"]
+}

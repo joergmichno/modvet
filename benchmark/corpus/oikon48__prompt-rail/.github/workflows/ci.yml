@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # The mods API still changes between Claude Code releases: a weekly run
+  # against the latest one catches a release that breaks the plugin before
+  # someone installing it does.
+  schedule:
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plugin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      # latest, not stable: the run is there to meet the newest release
+      # before the people who install it do; stable trails it by days.
+      - run: npm install -g @anthropic-ai/claude-code@latest
+      - run: claude --version
+      - name: Validate the marketplace
+        run: claude plugin validate .
+      - name: Validate the plugin
+        run: claude plugin validate plugins/prompt-rail
+      - name: Test the plugin
+        run: claude plugin test plugins/prompt-rail

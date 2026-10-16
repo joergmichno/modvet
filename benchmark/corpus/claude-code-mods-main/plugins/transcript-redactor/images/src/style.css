@@ -1,0 +1,58 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e1116; font-family: "SF Mono", Menlo, monospace; color: #d7dae0; padding: 40px 38px; width: 1000px; font-size: 14px; line-height: 1.6; }
+.win { background: #1f2125; border: 1px solid #33363c; border-radius: 12px; overflow: hidden; }
+.bar { height: 36px; background: #26282d; display: flex; align-items: center; padding: 0 14px; gap: 8px; position: relative; }
+.dot { width: 12px; height: 12px; border-radius: 50%; }
+.r { background: #ff5f57 } .y { background: #febc2e } .g { background: #28c840 }
+.title { position: absolute; left: 0; right: 0; text-align: center; color: #8b8f97; font-size: 13px; }
+.body { display: flex; min-height: 300px; }
+.left { flex: 1.2; min-width: 0; padding: 18px 20px; display: flex; flex-direction: column; }
+.right { flex: 1; min-width: 0; border-left: 1px solid #3a3d44; padding: 18px 20px; }
+.prompt { background: #2b2d32; padding: 5px 10px; margin-bottom: 10px; }
+.prompt b { color: #8b8f97; font-weight: normal; margin-right: 8px; }
+.msg { margin: 0 0 12px 0; padding-left: 16px; position: relative; }
+.msg:before { content: "●"; position: absolute; left: 0; color: #d7dae0; font-size: 11px; top: 2px; }
+.msg.log:before { color: #8b8f97; }
+.dim { color: #7d818a; } .cyan { color: #5fd4e0; } .pink { color: #e98ef0; } .green { color: #5fd38a; } .yellow { color: #f0c75e; } .red { color: #ef6b6b; } .orange { color: #f08a5d; }
+.bold { font-weight: 700; }
+.band { color: #8b8f97; margin-top: auto; padding: 4px 2px; white-space: nowrap; font-size: 11px; letter-spacing: -0.3px; overflow: hidden; }
+.band .btn { color: #d7dae0; }
+.input { border: 1px solid #4a4d55; border-radius: 6px; padding: 6px 10px; margin-top: 6px; }
+.cursor { display: inline-block; width: 9px; height: 17px; background: #d7dae0; vertical-align: -3px; }
+.mode { color: #7d818a; margin-top: 6px; font-size: 13px; }
+.mode span { color: #f0c75e; }
+.status { color: #f0c75e; font-size: 13px; margin-top: 4px; }
+.h { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.run { margin-bottom: 12px; }
+.run .row { padding-left: 16px; }
+.why { color: #7d818a; padding-left: 32px; font-size: 12.5px; line-height: 1.45; }
+.steps { display: flex; align-items: stretch; gap: 0; margin-top: 26px; }
+.step { flex: 1; border: 1px solid #33363c; border-radius: 8px; padding: 14px 14px; background: #171a1f; }
+.arrow { width: 30px; display: flex; align-items: center; justify-content: center; color: #7d818a; }
+.step .k { color: #f08a5d; letter-spacing: 1px; font-size: 12.5px; }
+.step .t { font-size: 15.5px; margin: 4px 0 6px; }
+.step .d { color: #8b8f97; font-size: 12.5px; line-height: 1.5; }
+.note { text-align: center; color: #8b8f97; margin-top: 16px; font-size: 13px; }
+/* secret-box additions */
+.tool { margin: 0 0 4px 0; padding-left: 16px; position: relative; }
+.tool:before { content: "●"; position: absolute; left: 0; color: #5fd38a; font-size: 11px; top: 2px; }
+.tool.err:before { color: #ef6b6b; }
+.res { padding-left: 34px; position: relative; margin-bottom: 12px; color: #a9adb5; }
+.res:before { content: "⎿"; position: absolute; left: 16px; color: #7d818a; }
+.res.err { color: #ef6b6b; }
+.spin { color: #f08a5d; margin: 6px 0 0; }
+.ask { font-size: 15px; margin-bottom: 4px; }
+.field { border: 1px solid #5fd4e0; border-radius: 6px; padding: 7px 10px; margin: 12px 0 8px; display: flex; justify-content: space-between; }
+.field .dots { color: #d7dae0; letter-spacing: 1.5px; }
+.toast { border: 1px solid #4a4d55; background: #26282d; border-radius: 6px; padding: 6px 10px; font-size: 12.5px; color: #d7dae0; margin-bottom: 8px; }
+.sh { color: #5fd38a; }
+.rule { padding-left: 18px; position: relative; margin-bottom: 3px; }
+.rule .m { position: absolute; left: 0; }
+/* transcript-redactor additions */
+.vrow { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 2px; }
+.lane { border: 1px solid #33363c; border-radius: 8px; background: #171a1f; padding: 12px 14px; flex: 1; }
+.lane .k { color: #f08a5d; letter-spacing: 1px; font-size: 12.5px; margin-bottom: 6px; }
+.flow { display: flex; align-items: stretch; }
+.cols { display: flex; gap: 18px; }
+.cols > div { flex: 1; }
+.chip { display: block; padding: 3px 0; }

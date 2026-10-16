@@ -1,0 +1,17 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="style.css"></head><body>
+<div class="flow">
+  <div class="lane"><div class="k">CLAUDE WRITES</div><div class="d">curl -H "Authorization:<br>Bearer <span class="cyan">[REDACTED-SECRET-5c1e9a7b]</span>"</div></div>
+  <div class="arrow">→</div>
+  <div class="lane"><div class="k">TOOL.CALL HOOK</div><div class="d"><span class="green">restore</span>: the placeholder<br>is swapped for the value<br>in the vault</div></div>
+  <div class="arrow">→</div>
+  <div class="lane"><div class="k">THE SHELL RUNS</div><div class="d">curl -H "Authorization:<br>Bearer <span class="yellow">re_8kQ2…</span>"<br><span class="dim">(the real key)</span></div></div>
+</div>
+<div class="flow" style="margin-top:14px">
+  <div class="lane"><div class="k">CLAUDE READS</div><div class="d">{"status":"verified",<br>"key":"<span class="cyan">[REDACTED-SECRET-5c1e9a7b]</span>"}</div></div>
+  <div class="arrow">←</div>
+  <div class="lane"><div class="k">TOOL.CALL HOOK</div><div class="d"><span class="orange">scrub</span>: every secret in<br>the result becomes its<br>placeholder again</div></div>
+  <div class="arrow">←</div>
+  <div class="lane"><div class="k">THE TOOL PRINTS</div><div class="d">{"status":"verified",<br>"key":"<span class="yellow">re_8kQ2…</span>"}<br><span class="dim">(echoed back by the API)</span></div></div>
+</div>
+<div class="note">One hook wraps every tool call: real values in, placeholders out.</div>
+</body></html>

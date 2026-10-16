@@ -1,0 +1,13 @@
+{
+  "name": "embedded-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/host.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0"
+  }
+}

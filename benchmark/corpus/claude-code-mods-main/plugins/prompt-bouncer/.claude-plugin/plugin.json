@@ -1,0 +1,35 @@
+{
+  "name": "prompt-bouncer",
+  "version": "0.1.0",
+  "description": "Bounces vague prompts before Claude sees them, and suggests the project's own term",
+  "author": {
+    "name": "Ray Amjad",
+    "url": "https://github.com/ray-amjad"
+  },
+  "repository": "https://github.com/ray-amjad/claude-code-mods/tree/main/plugins/prompt-bouncer",
+  "license": "MIT",
+  "userConfig": {
+    "mode": {
+      "type": "string",
+      "title": "Bouncer mode",
+      "description": "quick: instant rules, no model. project: a Haiku gate that checks the prompt against the project's docs.",
+      "options": [
+        "quick",
+        "project"
+      ],
+      "default": "quick"
+    },
+    "docs": {
+      "type": "string",
+      "title": "Project docs to read",
+      "description": "Comma-separated paths from the project root. A * matches file names inside one folder.",
+      "default": "CLAUDE.md,docs/glossary.md,docs/decisions/*.md,specs/*.md,docs/specs/*.md"
+    },
+    "maxDocChars": {
+      "type": "number",
+      "title": "Max characters of docs",
+      "description": "Docs past this size are cut, so the gate stays cheap.",
+      "default": 20000
+    }
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "description": "prompt-bouncer: drops vague prompts at prompt.submit",
+  "modules": ["./register.js"]
+}

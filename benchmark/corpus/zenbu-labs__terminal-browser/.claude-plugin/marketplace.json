@@ -1,0 +1,15 @@
+{
+  "name": "terminal-browser",
+  "owner": { "name": "zenbu-labs" },
+  "metadata": { "description": "terminal-browser plugins for Claude Code" },
+  "plugins": [
+    {
+      "name": "terminal-browser",
+      "source": "./claude-code-plugin",
+      "description": "A browser running directly inside claude code. Preview websites, view HTML documents, and let your agent control the built in browser.",
+      "homepage": "https://github.com/zenbu-labs/terminal-browser",
+      "repository": "https://github.com/zenbu-labs/terminal-browser",
+      "license": "MIT"
+    }
+  ]
+}

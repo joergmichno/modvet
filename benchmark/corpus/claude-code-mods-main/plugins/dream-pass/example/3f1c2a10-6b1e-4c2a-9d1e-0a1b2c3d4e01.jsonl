@@ -1,0 +1,4 @@
+{"type":"user","message":{"role":"user","content":"From now on use pnpm for everything in Tidepool, not npm."},"timestamp":"2026-02-12T09:10:00.000Z","sessionId":"3f1c2a10-6b1e-4c2a-9d1e-0a1b2c3d4e01","cwd":"/Users/sam/tidepool"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Done."}]},"timestamp":"2026-02-12T09:10:00.000Z","sessionId":"3f1c2a10-6b1e-4c2a-9d1e-0a1b2c3d4e01"}
+{"type":"user","message":{"role":"user","content":"Someone ran npm install and committed a package-lock.json next to pnpm-lock.yaml, CI broke again. Never npm or yarn, only pnpm."},"timestamp":"2026-02-12T09:15:00.000Z","sessionId":"3f1c2a10-6b1e-4c2a-9d1e-0a1b2c3d4e01","cwd":"/Users/sam/tidepool"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Done."}]},"timestamp":"2026-02-12T09:15:00.000Z","sessionId":"3f1c2a10-6b1e-4c2a-9d1e-0a1b2c3d4e01"}

@@ -1,0 +1,79 @@
+name: platforms
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['hooks/**', 'tests/**', 'types/**', '.claude-plugin/**', '.github/workflows/platforms.yml']
+  pull_request:
+    paths: ['hooks/**', 'tests/**', 'types/**', '.claude-plugin/**', '.github/workflows/platforms.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Claude Code 2.1.287
+        run: npm install -g @anthropic-ai/claude-code@2.1.287 && claude --version
+      - name: Validate the plugin and marketplace
+        run: claude plugin validate .claude-plugin/plugin.json && claude plugin validate .claude-plugin/marketplace.json
+      - name: Plugin tests on this OS
+        run: claude plugin test .
+      - name: Platform commands the mod runs
+        run: |
+          set -u
+          echo "OS=${OS:-unset} uname=$(uname -s)"
+          node -e '
+            const fs = require("fs"), cp = require("child_process"), os = require("os"), path = require("path")
+            const src = fs.readFileSync("hooks/register.tsx", "utf8").replace(/\r\n/g, "\n")
+            const block = src.match(/const FONT_SCRIPT =\n((?:\s*\x27.*?\x27\s*\+?\n)+)/)[1]
+            const font = [...block.matchAll(/\x27((?:[^\x27\\]|\\.)*)\x27/g)].map(m => m[1].replace(/\\(.)/g, "$1")).join("")
+            if (process.platform !== "win32") console.log("font probe:", cp.execFileSync("sh", ["-c", font, "sh", "f04eb"]).toString().trim())
+            const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ft-"))
+            fs.mkdirSync(path.join(dir, "sub/deep"), { recursive: true })
+            fs.writeFileSync(path.join(dir, "sub/old.txt"), "a")
+            if (process.platform === "darwin") {
+              const mark = path.join(os.tmpdir(), "filetree-ci.mark")
+              cp.execFileSync("touch", [mark])
+              cp.execFileSync("sleep", ["1.2"])
+              fs.writeFileSync(path.join(dir, "sub/deep/new.txt"), "b")
+              const out = cp.execFileSync("find", ["-H", dir, "-xdev", "(", "-name", ".git", "-o", "-name", "node_modules", ")", "-prune", "-o", "-newer", mark, "-print"]).toString()
+              console.log("find -newer:", out.trim().split("\n").map(p => path.relative(dir, p)))
+              if (!out.includes("new.txt") || out.includes("old.txt")) throw new Error("marker scan wrong")
+              let gnu = "accepted"
+              try { cp.execFileSync("find", [dir, "-newermt", "@1790000000.123", "-print"], { stdio: "pipe" }) } catch { gnu = "rejected" }
+              console.log("BSD find with GNU -newermt @epoch:", gnu)
+              for (const c of ["open", "stat", "date", "ps", "uname"]) console.log(c, cp.execFileSync("sh", ["-c", "command -v " + c]).toString().trim())
+            }
+            if (process.platform === "linux") {
+              cp.execFileSync("sleep", ["1.2"]); const since = (Date.now() - 600) / 1000
+              fs.writeFileSync(path.join(dir, "sub/deep/new.txt"), "b")
+              const out = cp.execFileSync("find", ["-H", dir, "-xdev", "-newermt", "@" + since.toFixed(3), "-print"]).toString()
+              console.log("GNU find -newermt:", out.trim().split("\n").map(p => path.relative(dir, p)))
+              if (!out.includes("new.txt")) throw new Error("GNU scan wrong")
+            }
+            if (process.platform === "win32") {
+              console.log("OS env:", process.env.OS, "USERPROFILE:", process.env.USERPROFILE)
+              console.log("find on PATH:", cp.execFileSync("where.exe", ["find"]).toString().trim().split("\n")[0])
+              const target = path.join(dir, "sub", "a&calc&%USERNAME%.txt")
+              fs.writeFileSync(target, "c")
+              const r = cp.spawnSync("powershell", ["-NoProfile", "-NonInteractive", "-Command", "Invoke-Item -LiteralPath $env:FILETREE_OPEN"], { timeout: 10000, env: { ...process.env, FILETREE_OPEN: target } })
+              console.log("powershell Invoke-Item exit:", r.status, String(r.stderr).trim())
+              if (r.status !== 0) throw new Error("opener failed")
+            }
+            const git = cp.execFileSync("git", ["--no-optional-locks", "-C", process.cwd(), "status", "--porcelain=v1", "-b", "-z", "--ignored=traditional", "--untracked-files=normal", "--", "."]).toString()
+            console.log("git status ok:", git.split("\0")[0])
+          '

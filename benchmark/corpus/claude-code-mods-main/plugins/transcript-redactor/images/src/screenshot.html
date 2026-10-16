@@ -1,0 +1,35 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="style.css"></head><body>
+<div class="win">
+  <div class="bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><div class="title">claude · ~/code/shop</div></div>
+  <div class="body">
+    <div class="left">
+      <div class="prompt"><b>&gt;</b>check our Resend domain, the key is <span class="cyan">[REDACTED-SECRET-5c1e9a7b]</span></div>
+      <div class="tool"><span class="bold">Bash</span>(curl -H "Authorization: Bearer <span class="cyan">[REDACTED-SECRET-5c1e9a7b]</span>" https://api.resend.com/domains)</div>
+      <div class="res">{"data":[{"name":"shop.dev","status":"verified"}]}</div>
+      <div class="tool"><span class="bold">Read</span>(config/prod.json)</div>
+      <div class="res">"dbUrl": "postgres://app:<span class="cyan">[REDACTED-SECRET-0b3d8f21]</span>@db.internal:5432/shop"</div>
+      <div class="msg">shop.dev is verified. The key works, and prod points at db.internal.</div>
+      <div class="toast">transcript-redactor&nbsp; hid 1 value(s) from the prompt</div>
+      <div class="input">&gt; <span class="cursor"></span></div>
+    </div>
+    <div class="right">
+      <div class="h"><span class="cyan bold">◆ THE VAULT</span><span class="dim">in memory</span></div>
+      <div class="cyan">[REDACTED-SECRET-5c1e9a7b]</div>
+      <div class="why" style="padding-left:16px">re_•••••••••••••• · pasted in your prompt</div>
+      <div class="cyan" style="margin-top:10px">[REDACTED-SECRET-0b3d8f21]</div>
+      <div class="why" style="padding-left:16px">•••••••••••• · read from config/prod.json</div>
+      <div class="dim" style="margin-top:22px">Claude only ever reads the left side.<br>Tools only ever get the right side.<br>Same value, same placeholder.<br>Gone when the session ends.</div>
+    </div>
+  </div>
+</div>
+<div class="steps">
+  <div class="step"><div class="k">1 · SCAN</div><div class="t">Everything Claude reads</div><div class="d">Your prompt, every tool result, CLAUDE.md</div></div>
+  <div class="arrow">→</div>
+  <div class="step"><div class="k">2 · SWAP</div><div class="t">Stable placeholders</div><div class="d">Each secret becomes <span class="cyan">[REDACTED-SECRET-…]</span>, the same one every time</div></div>
+  <div class="arrow">→</div>
+  <div class="step"><div class="k">3 · RESTORE</div><div class="t">Real value for tools</div><div class="d">A placeholder in a tool's input is the real key when it runs</div></div>
+  <div class="arrow">→</div>
+  <div class="step"><div class="k">4 · FORGET</div><div class="t">Memory only</div><div class="d">Nothing is written to disk. The vault dies with the session.</div></div>
+</div>
+<div class="note">Claude works with the key. The transcript never holds it.</div>
+</body></html>
