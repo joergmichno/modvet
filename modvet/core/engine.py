@@ -1772,6 +1772,18 @@ TOOL_MANIPULATION_PATTERNS = [
     ),
 ]
 
+ALL_PATTERNS_BY_CATEGORY: dict[str, list] = {
+    "Prompt Injection": PROMPT_INJECTION_PATTERNS,
+    "Dangerous Command": DANGEROUS_COMMAND_PATTERNS,
+    "Code Obfuscation": PYTHON_OBFUSCATION_PATTERNS,
+    # PII-Pattern tragen im Report die Kategorie "Data Exfiltration" → gleicher Kombi-Key
+    "Data Exfiltration": DATA_EXFILTRATION_PATTERNS + PII_DETECTION_PATTERNS,
+    "Social Engineering": SOCIAL_ENGINEERING_PATTERNS,
+    "Output Injection": OUTPUT_INJECTION_PATTERNS,
+    "Shell Injection": SHELL_INJECTION_PATTERNS,
+    "Tool Manipulation": TOOL_MANIPULATION_PATTERNS,
+}
+
 ALL_PATTERNS = (
     PROMPT_INJECTION_PATTERNS
     + DANGEROUS_COMMAND_PATTERNS
@@ -1789,6 +1801,27 @@ COMPILED_PATTERNS = [
     (name, re.compile(pattern), severity, category, recommendation)
     for name, pattern, severity, category, recommendation in ALL_PATTERNS
 ]
+
+# ─── Perf: Kategorie-Kombi-Vorfilter ──────────────────────────────────────────
+# Pro Kategorie EIN kombinierter Regex als Quick-Reject: matcht eine Zeile den
+# Kombi-Regex nicht, können alle Einzel-Pattern der Kategorie übersprungen werden
+# (statt 400 finditer-Aufrufen pro Zeile nur ~10 Kombi-Searches).
+# Zeilen > _COMBINED_MAX_LEN laufen den langsamen Einzel-Pfad (Backtracking-Schutz).
+_COMBINED_MAX_LEN = 500
+
+
+def _build_combined() -> dict[str, re.Pattern]:
+    out: dict[str, re.Pattern] = {}
+    for cat, pats in ALL_PATTERNS_BY_CATEGORY.items():
+        parts = [f"(?:{p})" for _, p, *_ in pats]
+        try:
+            out[cat] = re.compile("|".join(parts))
+        except re.error:
+            out[cat] = None  # Kategorie einzeln prüfen (Fallback)
+    return out
+
+
+_COMBINED_BY_CATEGORY = _build_combined()
 
 
 # ─── Preprocessor: Evasion Normalization ─────────────────────────────────────
@@ -1912,6 +1945,13 @@ def _collapse_spaces(text: str) -> str:
 
 # ─── Scanner Engine ──────────────────────────────────────────────────────────
 
+# Perf-Gates: teure Normalisierungen nur auf Kandidaten-Zeilen anwenden
+_BASE64_CANDIDATE_RE = re.compile(r"[A-Za-z0-9+/]{12,}={0,2}")
+_HAS_FULLWIDTH_RE = re.compile(r"[\uff01-\uff5e]")
+_HAS_NULLFREE_RE = re.compile(r"[\x00\x08\xad\ufeff\u2060-\u2069]")
+_HAS_MARKUP_RE = re.compile(r"\*{1,3}|~{2}|`")
+
+
 def scan_text(text: str, source: str = "stdin") -> ScanReport:
     """Scan a block of text against all security patterns."""
     lines = text.splitlines()
@@ -1956,36 +1996,52 @@ def scan_text(text: str, source: str = "stdin") -> ScanReport:
         leet_then_collapsed = _collapse_spaces(normalized)
         if leet_then_collapsed not in line_variants:
             line_variants.append(leet_then_collapsed)
-        # Base64 decode attempt
-        decoded = _decode_base64_fragments(line)
-        if decoded != line and decoded not in line_variants:
-            line_variants.append(decoded)
-        # Fullwidth Unicode normalization
-        fullwidth = _normalize_fullwidth(line)
-        if fullwidth != line and fullwidth not in line_variants:
-            line_variants.append(fullwidth)
-        # Null-byte / control-char stripping
-        nullfree = _strip_null_bytes(line)
-        if nullfree != line and nullfree not in line_variants:
-            line_variants.append(nullfree)
-        # Markdown formatting stripping (ig**no**re → ignore)
-        md_stripped = _strip_markdown(line)
-        if md_stripped != line and md_stripped not in line_variants:
-            line_variants.append(md_stripped)
-        # Chained: leet THEN markdown (catches 1g**n0**r3 → ig**no**re → ignore)
-        leet_then_md = _strip_markdown(normalized)
-        if leet_then_md not in line_variants:
-            line_variants.append(leet_then_md)
-        # Chained: markdown THEN leet (catches ig**n0**re → ign0re → ignore)
-        md_then_leet = _normalize_leet(md_stripped)
-        if md_then_leet not in line_variants:
-            line_variants.append(md_then_leet)
-        # Reversed text detection (snoitcurtsni suoiverp lla erongi → instructions previous all ignore)
-        reversed_text = _reverse_text(line)
-        if reversed_text != line and reversed_text not in line_variants:
-            line_variants.append(reversed_text)
+        # Base64 decode attempt — only for lines that LOOK like base64 (perf gate)
+        if _BASE64_CANDIDATE_RE.search(line):
+            decoded = _decode_base64_fragments(line)
+            if decoded != line and decoded not in line_variants:
+                line_variants.append(decoded)
+        # Fullwidth Unicode normalization — only if fullwidth chars present (perf gate)
+        if _HAS_FULLWIDTH_RE.search(line):
+            fullwidth = _normalize_fullwidth(line)
+            if fullwidth != line and fullwidth not in line_variants:
+                line_variants.append(fullwidth)
+        # Null-byte / control-char stripping — only if present (perf gate)
+        if _HAS_NULLFREE_RE.search(line):
+            nullfree = _strip_null_bytes(line)
+            if nullfree != line and nullfree not in line_variants:
+                line_variants.append(nullfree)
+        # Markdown formatting stripping (ig**no**re → ignore) — only if markup present (perf gate)
+        has_markup = _HAS_MARKUP_RE.search(line)
+        if has_markup:
+            md_stripped = _strip_markdown(line)
+            if md_stripped != line and md_stripped not in line_variants:
+                line_variants.append(md_stripped)
+            # Chained: leet THEN markdown (catches 1g**n0**r3 → ig**no**re → ignore)
+            leet_then_md = _strip_markdown(normalized)
+            if leet_then_md not in line_variants:
+                line_variants.append(leet_then_md)
+            # Chained: markdown THEN leet (catches ig**n0**re → ign0re → ignore)
+            md_then_leet = _normalize_leet(md_stripped)
+            if md_then_leet not in line_variants:
+                line_variants.append(md_then_leet)
+        # Reversed text detection — only for lines long enough to hide a word (perf gate)
+        if len(line) >= 6:
+            reversed_text = _reverse_text(line)
+            if reversed_text != line and reversed_text not in line_variants:
+                line_variants.append(reversed_text)
 
-        for name, compiled, severity, category, recommendation in COMPILED_PATTERNS:
+        # Quick-Reject: pro Kategorie EIN Kombi-Search über alle Varianten; nur
+        # Kategorien mit Treffer laufen die Einzel-Pattern (statt 400 finditer/Zeile).
+        if len(line) <= _COMBINED_MAX_LEN:
+            blob = "\n".join(line_variants)
+            active_cats = {cat for cat, rx in _COMBINED_BY_CATEGORY.items() if rx is not None and rx.search(blob)}
+            active_cats.update(cat for cat, rx in _COMBINED_BY_CATEGORY.items() if rx is None)
+            active_patterns = [p for p in COMPILED_PATTERNS if p[3] in active_cats]
+        else:
+            active_patterns = COMPILED_PATTERNS
+
+        for name, compiled, severity, category, recommendation in active_patterns:
             matched_any = False
             for variant in line_variants:
                 if matched_any:

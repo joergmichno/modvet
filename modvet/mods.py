@@ -170,6 +170,25 @@ _PROMPT_INJECTION_PATTERNS = (
     "Template Injection (LLM05)",
 )
 
+# Security-Mods enthalten Angriffs-Muster als STRINGS in Tests/Beschreibungen
+# (shouldBlock('curl | bash'), "this blocks `cat .env`"). Diese sind KEINE Angriffe.
+_ATTACK_TEST_PATTERNS = (
+    "Shell Pipe Download",
+    "Base64 Decode Execute",
+    "Reverse Shell",
+    "Curl Pipe to Shell (LLM03)",
+    "Destructive Shell Command",
+    "Remote Code Execution",
+    "Privilege Escalation",
+    "Python subprocess/os.system",
+)
+_TEST_CONTEXT_RE = re.compile(
+    r"\b(shouldBlock|shouldFlag|shouldPass|shouldDetect|shouldThrow|makePayload|buildPayload)\s*\(|"
+    r"\b(it|describe|test|expect|assert)\s*[\(:]"
+)
+_BLOCK_DESC_RE = re.compile(r"\b(blocks?|detects?|catches?|prevents?|filters?|denies?)\b", re.I)
+_QUOTE_CHARS_RE = re.compile(r"[`\"']")
+
 
 def _is_readme_doc(source: str) -> bool:
     return bool(_README_RE.search(source) or _DOC_DIR_RE.search(source))
@@ -216,6 +235,12 @@ def _refine_code_findings(findings: list[Finding], source: str = "") -> list[Fin
             continue  # README/docs beschreiben Security-Muster; keine Instruktionen
         if f.pattern_name in ("Password in Cleartext", "Database Connection String") and _FIXTURE_RE.search(source):
             continue  # Test-Fixtures mit bewussten Beispiel-Credentials
+        if f.pattern_name in _ATTACK_TEST_PATTERNS:
+            line = f.context or f.matched_text or ""
+            if _TEST_CONTEXT_RE.search(line) or (
+                _BLOCK_DESC_RE.search(line) and _QUOTE_CHARS_RE.search(line)
+            ):
+                continue  # Security-Tool: Testfall/Beschreibung der eigenen Abwehr, kein Angriff
         if f.category == "Output Injection" and not _COMMAND_VERBS.search(f.matched_text or ""):
             continue  # Backtick-False-Positive aus Doku/Kommentaren
         if is_js and f.pattern_name == "Backtick Command Substitution":
@@ -250,7 +275,7 @@ def scan_single_file(rel: str, text: str) -> list[Finding]:
     findings: list[Finding] = []
     # 1) Engine-Scan (Prompt-Injection, Commands, Social Engineering)
     eng = scan_text(text, source=rel)
-    findings.extend(_refine_code_findings(eng.findings, rel))
+    findings.extend(eng.findings)
     # 1b) MCP-Manifest-Hinweis
     if rel.split("/")[-1] in (".mcp.json", "mcp.json", "mcp_config.json") and "mcpServers" in text:
         findings.append(Finding(
@@ -302,7 +327,8 @@ def scan_single_file(rel: str, text: str) -> list[Finding]:
                 recommendation=rec,
                 confidence=75,
             ))
-    return findings
+    # Ein Refiner-Durchlauf über ALLE Findings (Engine + Primitive + Kombinationen)
+    return _refine_code_findings(findings, rel)
 
 
 def scan_mod(root: Path) -> ScanReport:
