@@ -1,8 +1,8 @@
 {
   "corpus_size": 12,
-  "total_findings": 271,
-  "avg_findings_per_repo": 22.6,
-  "avg_ms": 13494.1,
+  "total_findings": 272,
+  "avg_findings_per_repo": 22.7,
+  "avg_ms": 13101.7,
   "category_totals": {
     "Prompt Injection": 80,
     "Code Obfuscation": 45,
@@ -13,7 +13,7 @@
     "Social Engineering": 7,
     "Mod Capability": 5,
     "Output Injection": 4,
-    "Supply Chain": 1,
+    "Supply Chain": 2,
     "Tool Manipulation": 1
   },
   "rows": [
@@ -22,7 +22,7 @@
       "files": 66,
       "findings": 1,
       "risk": "CRITICAL",
-      "ms": 1281.6,
+      "ms": 1315.6,
       "top_categories": {
         "Dangerous Command": 1
       }
@@ -32,7 +32,7 @@
       "files": 197,
       "findings": 46,
       "risk": "CRITICAL",
-      "ms": 13813.7,
+      "ms": 13398.1,
       "top_categories": {
         "Prompt Injection": 24,
         "Data Exfiltration": 17,
@@ -44,7 +44,7 @@
       "files": 34,
       "findings": 6,
       "risk": "HIGH",
-      "ms": 2446.0,
+      "ms": 2435.7,
       "top_categories": {
         "Shell Injection": 3,
         "Agentic Security": 1,
@@ -56,7 +56,7 @@
       "files": 68,
       "findings": 42,
       "risk": "HIGH",
-      "ms": 35610.4,
+      "ms": 33666.5,
       "top_categories": {
         "Code Obfuscation": 19,
         "Dangerous Command": 7,
@@ -68,7 +68,7 @@
       "files": 16,
       "findings": 6,
       "risk": "HIGH",
-      "ms": 1319.4,
+      "ms": 1298.5,
       "top_categories": {
         "Prompt Injection": 6
       }
@@ -78,7 +78,7 @@
       "files": 40,
       "findings": 4,
       "risk": "HIGH",
-      "ms": 4640.5,
+      "ms": 4002.1,
       "top_categories": {
         "Prompt Injection": 3,
         "Code Obfuscation": 1
@@ -89,7 +89,7 @@
       "files": 279,
       "findings": 86,
       "risk": "CRITICAL",
-      "ms": 38049.7,
+      "ms": 37700.6,
       "top_categories": {
         "Shell Injection": 27,
         "Prompt Injection": 22,
@@ -101,7 +101,7 @@
       "files": 168,
       "findings": 19,
       "risk": "HIGH",
-      "ms": 24226.7,
+      "ms": 23785.8,
       "top_categories": {
         "Code Obfuscation": 5,
         "Agentic Security": 4,
@@ -113,7 +113,7 @@
       "files": 19,
       "findings": 5,
       "risk": "HIGH",
-      "ms": 1249.3,
+      "ms": 1162.8,
       "top_categories": {
         "Prompt Injection": 5
       }
@@ -123,7 +123,7 @@
       "files": 26,
       "findings": 3,
       "risk": "HIGH",
-      "ms": 631.0,
+      "ms": 607.9,
       "top_categories": {
         "Prompt Injection": 2,
         "Dangerous Command": 1
@@ -134,15 +134,15 @@
       "files": 27,
       "findings": 0,
       "risk": "CLEAN",
-      "ms": 2108.8,
+      "ms": 1989.0,
       "top_categories": {}
     },
     {
       "slug": "zenbu-labs__terminal-browser",
       "files": 528,
-      "findings": 53,
+      "findings": 54,
       "risk": "CRITICAL",
-      "ms": 36551.9,
+      "ms": 35858.0,
       "top_categories": {
         "Dangerous Command": 19,
         "Prompt Injection": 11,

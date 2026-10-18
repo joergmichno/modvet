@@ -333,6 +333,32 @@ def scan_single_file(rel: str, text: str) -> list[Finding]:
             recommendation="Prüfe jede mcpServers-Quelle (URL/Command) auf Vertrauenswürdigkeit.",
             confidence=90,
         ))
+    # 1c) Committed Secrets (MCP08): .env-Dateien gehören nie in ein Mod
+    if rel.split("/")[-1].endswith(".env") or ".env." in rel.split("/")[-1]:
+        findings.append(Finding(
+            severity=Severity.HIGH,
+            category="MCP Config",
+            pattern_name="Committed Env File",
+            matched_text=rel.split("/")[-1],
+            line_number=1,
+            context=f"{rel}: .env-Datei im Mod — enthält evtl. echte Secrets",
+            recommendation=".env nie committen; prüfen, ob die Datei echte Credentials enthält und aus dem Mod entfernen.",
+            confidence=80,
+        ))
+    # 1d) Supply-Chain (MCP07): gefährliche package.json-Lifecycle-Skripte
+    if rel.split("/")[-1] == "package.json" and "scripts" in text:
+        for line_no, line in enumerate(text.splitlines(), 1):
+            if re.search(r"\"(preinstall|install|postinstall|prepublish)\"\s*:\s*\"[^\"]*(curl|wget|sh\s|bash\s|rm\s+-rf|eval|base64)", line):
+                findings.append(Finding(
+                    severity=Severity.HIGH,
+                    category="Supply Chain",
+                    pattern_name="Dangerous npm Lifecycle Script",
+                    matched_text=line.strip()[:160],
+                    line_number=line_no,
+                    context=f"{rel}: Lifecycle-Skript führt Shell-Befehle aus",
+                    recommendation="pre/postinstall-Skripte laufen ungefragt bei Installation — genau prüfen, was sie tun.",
+                    confidence=85,
+                ))
     # 2) Angriffsprimitive: zeilenweise, feuern einzeln
     for line_no, line in enumerate(text.splitlines(), 1):
         for name, rx, sev, rec in ATTACK_PRIMITIVES:

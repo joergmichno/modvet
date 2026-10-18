@@ -34,9 +34,32 @@ def cmd_scan(args: argparse.Namespace) -> int:
         print(f"error: not a directory: {root}", file=sys.stderr)
         return 2
     report = scan_mod(root)
-    print(format_json(report) if args.json else format_human(report))
+    if getattr(args, "format", "human") == "sarif":
+        from .sarif import format_sarif
+        print(json.dumps(format_sarif(report), indent=2, ensure_ascii=False))
+    elif args.json:
+        print(format_json(report))
+    else:
+        print(format_human(report))
     threshold = Severity[args.fail_on.upper()].score()
     return 1 if any(f.severity.score() >= threshold for f in report.findings) else 0
+
+
+def cmd_badge(args: argparse.Namespace) -> int:
+    from .badge import badge_svg
+    src = Path(args.input)
+    try:
+        rep = json.loads(src.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"error: report unreadable: {e}", file=sys.stderr)
+        return 2
+    level = rep.get("risk_level", "UNKNOWN")
+    findings = int(rep.get("total_findings", 0))
+    svg = badge_svg(level, findings)
+    out = Path(args.out) if args.out else Path("badge.svg")
+    out.write_text(svg, encoding="utf-8")
+    print(f"badge: {level} ({findings} findings) -> {out}")
+    return 0
 
 
 def cmd_snapshot(args: argparse.Namespace) -> int:
@@ -108,8 +131,14 @@ def main(argv: list[str] | None = None) -> int:
     p_scan = sub.add_parser("scan", help="Scan a mod directory")
     p_scan.add_argument("path")
     p_scan.add_argument("--json", action="store_true", help="JSON output")
+    p_scan.add_argument("--format", choices=["human", "sarif"], default="human", help="Output format (SARIF 2.1.0 for GitHub Code Scanning)")
     p_scan.add_argument("--fail-on", default="HIGH", choices=["LOW", "MEDIUM", "HIGH", "CRITICAL"])
     p_scan.set_defaults(fn=cmd_scan)
+
+    p_badge = sub.add_parser("badge", help="Generate a status badge SVG from a scan report")
+    p_badge.add_argument("--input", required=True, help="modvet scan --json report file")
+    p_badge.add_argument("--out", help="output .svg path (default: badge.svg)")
+    p_badge.set_defaults(fn=cmd_badge)
 
     p_snap = sub.add_parser("snapshot", help="Baseline a clean mod install")
     p_snap.add_argument("path")
