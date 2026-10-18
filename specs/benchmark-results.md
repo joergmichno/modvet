@@ -2,6 +2,24 @@
 
 > `tools/benchmark.py` + Corpus `benchmark/corpus/` (awesome-claude-code-mods-Katalog). Stand VOR der Optimierung.
 
+## Phase-1-Ergebnis (18.10., Commit 1c6f720)
+
+| Metrik | Phase 0 | Phase 1 | Delta |
+|---|---|---|---|
+| Findings gesamt | 1.815 | **461** | **−75 %** |
+| Ø Findings/Repo | 151 | **38,4** | −75 % |
+| Ø Laufzeit/Repo | 15,5 s | ~15,0 s | ~gleich (Perf-Phase offen) |
+| CRITICAL-Repos | 12/12 | 8/12 | 4 Repos nun HIGH |
+
+Umgesetzt: Capability-Kombinationslogik + Nähe-Kriterium (≤3 Zeilen), Risk-Level aus
+höchster Severity, Refiner-Kaskade (Doku/Code, README≠Instruktion, JS-Template-Literals,
+Standard-Bash, Fixtures, Zitat-Filter), Severity-Rekalibrierung. 5/5 Tests grün.
+
+**Offen (Phase 1b):** verbleibende CRITICAL-Treiber je Repo prüfen — karanb-hooks
+(Shell-Pipe×29: echte Install-Skripte vs. Doku?), claude-code-mods-main (Prompt-Injection×24
+im Security-Test-Repo), zenbu terminal-browser (Curl-Pipe×9). Danach Phase 2/3 (Detektor-Redesign,
+OWASP-Mapping, SARIF, Badge, Build).
+
 ## Ergebnis
 
 | Metrik | Wert |
