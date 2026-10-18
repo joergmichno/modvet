@@ -1742,9 +1742,9 @@ SHELL_INJECTION_PATTERNS = [
     (
         "Node.js child_process",
         r"(?:child_process\s*\.\s*(?:exec|execSync|spawn|spawnSync|execFile|execFileSync|fork)\s*\(|require\s*\(\s*['\"]child_process['\"]\s*\))",
-        Severity.CRITICAL,
+        Severity.MEDIUM,
         "Shell Injection",
-        "CRITICAL: Node.js child_process execution detected.",
+        "Node.js child_process execution — normal für CLI-Mods; nur bei unkontrollierter Eingabe gefährlich. (v0.2-Phase-1: CRITICAL→MEDIUM)",
     ),
 ]
 

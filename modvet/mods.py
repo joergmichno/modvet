@@ -183,11 +183,14 @@ _ATTACK_TEST_PATTERNS = (
     "Python subprocess/os.system",
 )
 _TEST_CONTEXT_RE = re.compile(
-    r"\b(shouldBlock|shouldFlag|shouldPass|shouldDetect|shouldThrow|makePayload|buildPayload)\s*\(|"
+    r"\b(shouldBlock|shouldFlag|shouldPass|shouldDetect|shouldThrow|shouldAllow|makePayload|buildPayload|bashBlocked|analyzeCommand|bracketedPaste)\s*\(|"
     r"\b(it|describe|test|expect|assert)\s*[\(:]"
 )
-_BLOCK_DESC_RE = re.compile(r"\b(blocks?|detects?|catches?|prevents?|filters?|denies?)\b", re.I)
+_BLOCK_DESC_RE = re.compile(r"\b(blocks?|detects?|catches?|prevents?|filters?|denies?|guards?|trips?wire|audits?)\b", re.I)
 _QUOTE_CHARS_RE = re.compile(r"[`\"']")
+
+# Instruktionsdateien: hier bleibt der volle Schutz aktiv (das ist der Mod-Vektor)
+_INSTRUCTION_FILE_RE = re.compile(r"(^|/)(SKILL\.md|CLAUDE\.md|AGENTS\.md|.*\.prompt)$", re.I)
 
 
 def _is_readme_doc(source: str) -> bool:
@@ -208,10 +211,19 @@ def _refine_code_findings(findings: list[Finding], source: str = "") -> list[Fin
     - Output-Injection ohne Kommando-Verb (Backtick-Doku) fällt überall raus.
     """
     is_doc = source.endswith((".md", ".txt"))
+    is_instruction = bool(_INSTRUCTION_FILE_RE.search(source))
     is_js = source.endswith(_JS_EXTS)
     is_sh = source.endswith((".sh", ".bash"))
+    # Doku (keine Instruktionsdateien): Beschreibungen von Security-Verhalten sind FP
+    plain_doc = is_doc and not is_instruction
     out = []
     for f in findings:
+        if plain_doc and f.pattern_name in _ATTACK_TEST_PATTERNS:
+            continue  # Install-/Beispiel-Zeilen in Doku (curl|sh, rm -rf)
+        if plain_doc and f.category in ("Dangerous Command", "Agentic Security"):
+            continue  # Doku beschreibt Security-Verhalten, weist nichts an
+        if plain_doc and f.pattern_name == "Sensitive File Access Request":
+            continue  # Doku-Beschreibung, keine Anweisung
         if is_doc and f.category in ("Shell Injection", "Output Injection"):
             continue  # Code-Beispiele in Doku sind keine Findings
         if is_doc and f.pattern_name in (
@@ -241,6 +253,10 @@ def _refine_code_findings(findings: list[Finding], source: str = "") -> list[Fin
                 _BLOCK_DESC_RE.search(line) and _QUOTE_CHARS_RE.search(line)
             ):
                 continue  # Security-Tool: Testfall/Beschreibung der eigenen Abwehr, kein Angriff
+        if f.pattern_name == "Sensitive File Access Request" and not is_instruction:
+            line = f.context or f.matched_text or ""
+            if line.lstrip().startswith(("//", "#", "--")):
+                continue  # Code-Kommentar, keine Anweisung
         if f.category == "Output Injection" and not _COMMAND_VERBS.search(f.matched_text or ""):
             continue  # Backtick-False-Positive aus Doku/Kommentaren
         if is_js and f.pattern_name == "Backtick Command Substitution":
