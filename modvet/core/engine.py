@@ -51,6 +51,24 @@ class Finding:
     context: str
     recommendation: str
     confidence: int = 0
+    owasp_mcp: str = ""  # OWASP MCP Top 10 Referenz (MCP01–MCP10), A5
+
+
+# Kategorie → OWASP MCP Top 10 (2025) Mapping (A5)
+CATEGORY_OWASP_MCP = {
+    "Prompt Injection": "MCP01",
+    "Data Exfiltration": "MCP02",
+    "Agentic Security": "MCP03",
+    "Mod Capability": "MCP03",
+    "Tool Manipulation": "MCP04",
+    "Shell Injection": "MCP05",
+    "Dangerous Command": "MCP05",
+    "Output Injection": "MCP05",
+    "Code Obfuscation": "MCP05",
+    "Social Engineering": "MCP01",
+    "Supply Chain": "MCP07",
+    "MCP Config": "MCP08",
+}
 
 
 @dataclass
@@ -2062,6 +2080,7 @@ def scan_text(text: str, source: str = "stdin") -> ScanReport:
                         line_number=line_num,
                         context=context.strip(),
                         recommendation=recommendation,
+                        owasp_mcp=CATEGORY_OWASP_MCP.get(category, ""),
                     ))
 
     # Deduplicate findings (same pattern on the same line)
@@ -2157,7 +2176,7 @@ def format_human(report: ScanReport) -> str:
         for i, f in enumerate(report.findings, start=1):
             sev_icon = SEVERITY_ICONS.get(f.severity.value, "❓")
             lines.append(f"\n  [{i}] {sev_icon} {f.severity.value} ({f.confidence}%) – {f.pattern_name}")
-            lines.append(f"      Category : {f.category}")
+            lines.append(f"      Category : {f.category}" + (f"  ·  OWASP MCP: {f.owasp_mcp}" if f.owasp_mcp else ""))
             lines.append(f"      Line     : {f.line_number}")
             lines.append(f"      Match    : \"{f.matched_text}\"")
             lines.append(f"      Context  : {f.context}")
@@ -2200,6 +2219,7 @@ def format_json(report: ScanReport) -> str:
                 "context": f.context,
                 "recommendation": f.recommendation,
                 "confidence": f.confidence,
+                "owasp_mcp": f.owasp_mcp,
             }
             for f in report.findings
         ],

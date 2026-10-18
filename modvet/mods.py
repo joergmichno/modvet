@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 import re
 
-from .core.engine import Finding, ScanReport, Severity, scan_text
+from .core.engine import CATEGORY_OWASP_MCP, Finding, ScanReport, Severity, scan_text
 
 MOD_EXTENSIONS = {
     ".ts", ".js", ".mjs", ".cjs", ".json", ".md", ".txt",
@@ -257,6 +257,25 @@ def _refine_code_findings(findings: list[Finding], source: str = "") -> list[Fin
                 continue  # kein MCP-Kontext (z.B. PrismJS-Sprachdefinitionen mit SELECT/SCHEMA)
         if f.pattern_name == "Destructive Shell Command" and "/tmp" in (f.matched_text or ""):
             f = replace(f, severity=Severity.MEDIUM)  # /tmp-Aufräumen ist präzise und harmlos
+        if f.pattern_name == "Python Dangerous File I/O":
+            line = f.matched_text or ""
+            if re.search(r"\/(etc|var|home)\/", line) or re.search(r"\b(credentials|passwd|shadow|ssh|\.env)\b", line):
+                pass  # echter sensibler Pfad → CRITICAL bleibt
+            else:
+                f = replace(f, severity=Severity.MEDIUM)  # open(..., "w") ist normales Python
+        if f.pattern_name in ("Remote Code Execution", "Shell Pipe Download", "Curl Pipe to Shell (LLM03)"):
+            src_low = source.lower()
+            if src_low.endswith((".yml", ".yaml", ".toml")):
+                continue  # CI/Release-Doku (echo "curl ... | bash" in Publish-Steps)
+            line = f.context or f.matched_text or ""
+            if _QUOTE_CHARS_RE.search(line) and re.search(r"\b(evil|example|test|localhost|127\.0\.0\.1)\b", line, re.I):
+                continue  # Teststring in Quotes (Paste-Protection-Tests)
+        if f.pattern_name == "Toxic Flow - Data Exfiltration Chain" and "|" in (f.context or ""):
+            continue  # Markdown-Tabellen-Zeile (Doku), keine Anweisung
+        if f.pattern_name in ("Direct Override (EN/LLM01)", "Broad Ignore Instructions (EN)") and not is_doc:
+            line = f.context or ""
+            if line.lstrip().startswith(("//", "#", "--")):
+                continue  # Code-Kommentar, kein Prompt
         if f.pattern_name in _ATTACK_TEST_PATTERNS:
             line = f.context or f.matched_text or ""
             if _TEST_CONTEXT_RE.search(line) or (
@@ -354,7 +373,11 @@ def scan_single_file(rel: str, text: str) -> list[Finding]:
                 confidence=75,
             ))
     # Ein Refiner-Durchlauf über ALLE Findings (Engine + Primitive + Kombinationen)
-    return _refine_code_findings(findings, rel)
+    refined = _refine_code_findings(findings, rel)
+    for f in refined:
+        if not f.owasp_mcp:
+            f.owasp_mcp = CATEGORY_OWASP_MCP.get(f.category, "")  # A5: OWASP-Mapping
+    return refined
 
 
 def scan_mod(root: Path) -> ScanReport:
