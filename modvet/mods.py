@@ -12,7 +12,7 @@ Deterministisch, offline, kein LLM.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
 from pathlib import Path
 import re
@@ -247,6 +247,16 @@ def _refine_code_findings(findings: list[Finding], source: str = "") -> list[Fin
             continue  # README/docs beschreiben Security-Muster; keine Instruktionen
         if f.pattern_name in ("Password in Cleartext", "Database Connection String") and _FIXTURE_RE.search(source):
             continue  # Test-Fixtures mit bewussten Beispiel-Credentials
+        if f.pattern_name in ("Hardcoded Secret", "Secret Assignment") and _FIXTURE_RE.search(source):
+            continue  # Fake-Test-Keys (sk-abc... in Testausgaben)
+        if is_js and f.pattern_name.startswith("Python "):
+            continue  # Python-Muster in JS-Code (RegExp.exec ist kein Python-eval)
+        if f.pattern_name == "MCP Rug Pull Detection":
+            line = f.context or f.matched_text or ""
+            if not re.search(r"\b(mcp|server(?:Name|Config)?)\b", line, re.I):
+                continue  # kein MCP-Kontext (z.B. PrismJS-Sprachdefinitionen mit SELECT/SCHEMA)
+        if f.pattern_name == "Destructive Shell Command" and "/tmp" in (f.matched_text or ""):
+            f = replace(f, severity=Severity.MEDIUM)  # /tmp-Aufräumen ist präzise und harmlos
         if f.pattern_name in _ATTACK_TEST_PATTERNS:
             line = f.context or f.matched_text or ""
             if _TEST_CONTEXT_RE.search(line) or (

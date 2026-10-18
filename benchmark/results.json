@@ -1,51 +1,50 @@
 {
   "corpus_size": 12,
-  "total_findings": 380,
-  "avg_findings_per_repo": 31.7,
-  "avg_ms": 13167.3,
+  "total_findings": 287,
+  "avg_findings_per_repo": 23.9,
+  "avg_ms": 13188.0,
   "category_totals": {
-    "Code Obfuscation": 125,
     "Prompt Injection": 80,
+    "Code Obfuscation": 45,
     "Dangerous Command": 44,
     "Shell Injection": 43,
     "Data Exfiltration": 39,
-    "Mod Capability": 16,
+    "Mod Capability": 11,
     "Agentic Security": 10,
-    "Tool Manipulation": 9,
     "Social Engineering": 7,
     "Output Injection": 4,
-    "Supply Chain": 3
+    "Supply Chain": 3,
+    "Tool Manipulation": 1
   },
   "rows": [
     {
       "slug": "BeLazy167__claude-mods-skill",
       "files": 66,
-      "findings": 2,
+      "findings": 1,
       "risk": "CRITICAL",
-      "ms": 1283.3,
+      "ms": 1286.0,
       "top_categories": {
-        "Dangerous Command": 1,
-        "Mod Capability": 1
+        "Dangerous Command": 1
       }
     },
     {
       "slug": "claude-code-mods-main",
       "files": 197,
-      "findings": 51,
+      "findings": 46,
       "risk": "CRITICAL",
-      "ms": 13426.6,
+      "ms": 13285.8,
       "top_categories": {
         "Prompt Injection": 24,
         "Data Exfiltration": 17,
-        "Code Obfuscation": 7
+        "Code Obfuscation": 3
       }
     },
     {
       "slug": "data-goblin__claude-code-filetree",
       "files": 34,
-      "findings": 7,
+      "findings": 6,
       "risk": "HIGH",
-      "ms": 2478.3,
+      "ms": 2438.0,
       "top_categories": {
         "Shell Injection": 3,
         "Agentic Security": 1,
@@ -55,9 +54,9 @@
     {
       "slug": "hesreallyhim__awesome-claude-code",
       "files": 68,
-      "findings": 44,
+      "findings": 42,
       "risk": "CRITICAL",
-      "ms": 33647.2,
+      "ms": 33821.5,
       "top_categories": {
         "Code Obfuscation": 19,
         "Dangerous Command": 7,
@@ -69,7 +68,7 @@
       "files": 16,
       "findings": 6,
       "risk": "HIGH",
-      "ms": 1306.1,
+      "ms": 1325.4,
       "top_categories": {
         "Prompt Injection": 6
       }
@@ -77,34 +76,34 @@
     {
       "slug": "karanb192__cache-tax",
       "files": 40,
-      "findings": 5,
+      "findings": 4,
       "risk": "HIGH",
-      "ms": 4061.6,
+      "ms": 4048.8,
       "top_categories": {
         "Prompt Injection": 3,
-        "Code Obfuscation": 2
+        "Code Obfuscation": 1
       }
     },
     {
       "slug": "karanb192__claude-code-hooks",
       "files": 279,
-      "findings": 105,
+      "findings": 90,
       "risk": "CRITICAL",
-      "ms": 37852.3,
+      "ms": 38092.9,
       "top_categories": {
         "Shell Injection": 27,
         "Prompt Injection": 22,
-        "Code Obfuscation": 20
+        "Data Exfiltration": 14
       }
     },
     {
       "slug": "NahumLitvin__prismantis",
       "files": 168,
-      "findings": 52,
-      "risk": "CRITICAL",
-      "ms": 24018.9,
+      "findings": 19,
+      "risk": "HIGH",
+      "ms": 23944.3,
       "top_categories": {
-        "Code Obfuscation": 36,
+        "Code Obfuscation": 5,
         "Agentic Security": 4,
         "Prompt Injection": 4
       }
@@ -114,7 +113,7 @@
       "files": 19,
       "findings": 5,
       "risk": "HIGH",
-      "ms": 1170.6,
+      "ms": 1186.2,
       "top_categories": {
         "Prompt Injection": 5
       }
@@ -124,7 +123,7 @@
       "files": 26,
       "findings": 3,
       "risk": "HIGH",
-      "ms": 615.7,
+      "ms": 615.6,
       "top_categories": {
         "Prompt Injection": 2,
         "Dangerous Command": 1
@@ -133,23 +132,21 @@
     {
       "slug": "scasella__claude-flightdeck",
       "files": 27,
-      "findings": 5,
-      "risk": "MEDIUM",
-      "ms": 1991.0,
-      "top_categories": {
-        "Code Obfuscation": 5
-      }
+      "findings": 0,
+      "risk": "CLEAN",
+      "ms": 1999.7,
+      "top_categories": {}
     },
     {
       "slug": "zenbu-labs__terminal-browser",
       "files": 528,
-      "findings": 95,
+      "findings": 65,
       "risk": "CRITICAL",
-      "ms": 36155.5,
+      "ms": 36211.9,
       "top_categories": {
-        "Code Obfuscation": 35,
         "Dangerous Command": 24,
-        "Prompt Injection": 11
+        "Prompt Injection": 11,
+        "Data Exfiltration": 8
       }
     }
   ]
