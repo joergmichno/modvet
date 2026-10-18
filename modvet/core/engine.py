@@ -933,9 +933,9 @@ PYTHON_OBFUSCATION_PATTERNS = [
     (
         "Python eval/exec",
         r"(?:(?:eval|exec|(?<!re\.)compile)\s*\(\s*(?:['\"]|[a-zA-Z_]))",
-        Severity.CRITICAL,
+        Severity.MEDIUM,
         "Code Obfuscation",
-        "CRITICAL: Dynamic code execution via eval()/exec()/compile(). This can execute arbitrary obfuscated payloads.",
+        "Dynamic code execution via eval()/exec()/compile() — normal in Tools/Parsern; CRITICAL nur wenn LLM-Output unkontrolliert hineinfließt. (v0.2-Phase-1: CRITICAL→MEDIUM)",
     ),
     (
         "Python __import__",
@@ -961,16 +961,16 @@ PYTHON_OBFUSCATION_PATTERNS = [
     (
         "Python subprocess/os.system",
         r"(?:(?:subprocess|os)\s*\.\s*(?:system|popen|call|run|Popen|exec[lv]?[pe]?)\s*\(|(?:subprocess|os)\s*\[\s*['\"](?:system|popen|call|run)['\"])",
-        Severity.CRITICAL,
+        Severity.MEDIUM,
         "Code Obfuscation",
-        "CRITICAL: Direct OS command execution via Python subprocess/os module.",
+        "OS-Kommandoausführung via Python subprocess/os — normal für CLI-Tools; prüfen, ob Eingaben unkontrolliert in den Befehl fließen. (v0.2-Phase-1: CRITICAL→MEDIUM)",
     ),
     (
         "Python Socket Connection",
         r"(?:socket\.(?:socket|create_connection|connect)\s*\(|from\s+socket\s+import)",
-        Severity.HIGH,
+        Severity.MEDIUM,
         "Code Obfuscation",
-        "Network socket creation detected. Could be used for reverse shells or data exfiltration.",
+        "Network socket creation — normal für Netzwerk-Tools; in Kombination mit Reverse-Shell-Mustern hochstufen. (v0.2-Phase-1: HIGH→MEDIUM)",
     ),
     # --- v0.3.0: Ghost Exploit Defense ---
     (
@@ -1668,9 +1668,9 @@ PII_DETECTION_PATTERNS = [
     (
         "German Phone Number (LLM06)",
         r"(?:(?:\+49|0049|0)\s?(?:\(?\d{2,5}\)?\s?)[\d\s/\-]{6,12}\d)",
-        Severity.MEDIUM,
+        Severity.LOW,
         "Data Exfiltration",
-        "German phone number detected. OWASP LLM06: Sensitive Information Disclosure.",
+        "German phone number detected. In Mod-Readmes normal (Kontakt). (v0.2-Phase-1: MEDIUM→LOW)",
     ),
 
     ('EU IBAN (LLM06)',
@@ -1680,9 +1680,9 @@ PII_DETECTION_PATTERNS = [
      'EU IBAN detected. OWASP LLM06: Sensitive Information Disclosure. DSGVO Art. 9 — financial data.'),
     ('Email Address (LLM06)',
      '\\b[A-Za-z0-9._%+\\-]+@[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}\\b',
-     Severity.MEDIUM,
+     Severity.LOW,
      'Data Exfiltration',
-     'Email address detected. OWASP LLM06: Sensitive Information Disclosure. DSGVO — personal identifier.'),
+     'Email address detected. In Mod-Readmes normal (Kontakt); nur auffällig in Kombination mit Exfil-Mustern. (v0.2-Phase-1: MEDIUM→LOW)'),
     ('German Sozialversicherungsnummer (LLM06)',
      '\\b\\d{2}\\s?\\d{6}\\s?[A-Z]\\s?\\d{3}\\b',
      Severity.CRITICAL,
@@ -1714,16 +1714,16 @@ SHELL_INJECTION_PATTERNS = [
     (
         "Bash Command Substitution $(...)",
         r"\$\(\s*(?:cat|curl|wget|ls|id|whoami|uname|env|printenv|nc|ncat|bash|sh|python|perl|ruby|php|node|echo|head|tail|grep|find|awk|sed|chmod|chown|rm|dd|mkfs|passwd|ssh|scp|nmap|dig|host|ping|kill|ps|ifconfig|ip)\b",
-        Severity.CRITICAL,
+        Severity.MEDIUM,
         "Shell Injection",
-        "CRITICAL: Bash command substitution $() detected with a shell command.",
+        "Bash command substitution $() — normal in Shell-Skripten; prüfen, ob die Eingabe unkontrolliert in die Substitution fließt. (v0.2-Phase-1: CRITICAL→MEDIUM, da $() Standard-Bash ist)",
     ),
     (
         "Backtick Command Substitution",
         r"`\s*(?:cat|curl|wget|ls|id|whoami|uname|env|printenv|nc|ncat|bash|sh|python|perl|ruby|php|node|echo|head|tail|grep|find|awk|sed|chmod|chown|rm|dd|mkfs|passwd|ssh|scp|nmap|dig|host|ping|kill|ps|ifconfig|ip)\b[^`]*`",
-        Severity.CRITICAL,
+        Severity.MEDIUM,
         "Shell Injection",
-        "CRITICAL: Backtick command substitution detected with a shell command.",
+        "Backtick command substitution — normal in Shell-Skripten/Doku; nur bei unkontrollierter Eingabe gefährlich. (v0.2-Phase-1: CRITICAL→MEDIUM)",
     ),
     (
         "PHP/Ruby system() Call",

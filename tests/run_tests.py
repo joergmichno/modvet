@@ -37,8 +37,7 @@ def test_malicious_mod():
     assert "Direct Override (EN/LLM01)" in names, names
     assert "Shell Pipe Download" in names, names
     assert "Base64 Decode Execute" in names, names
-    assert "Network POST (Exfil-Pfad)" in names, names
-    assert "Env Read" in names, names
+    assert "Env-Read + POST (Exfil-Pfad)" in names, names
     assert "Hardcoded Secret" in names, names
     assert "MCP Manifest" in names, names
     print(f"PASS malicious-mod ({rep['total_findings']} findings, level={rep['risk_level']})")
@@ -71,7 +70,7 @@ def test_snapshot_diff():
         )
         r = run(["diff", str(mod), "--against", str(snap)])
         assert r.returncode == 1, f"trojanized update must fail: {r.stdout}"
-        assert "CHANGED" in r.stdout and "Network POST" in r.stdout
+        assert "CHANGED" in r.stdout and "Exfil-Pfad" in r.stdout
         print("PASS snapshot/diff (trojanized update detected)")
 
 

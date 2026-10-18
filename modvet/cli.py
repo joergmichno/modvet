@@ -96,24 +96,9 @@ def cmd_diff(args: argparse.Namespace) -> int:
 
 
 def scan_mod_report_on_single_file(rel: str, text: str):
-    """Engine-Scan + Capability-Scan für genau eine Datei (Delta-Pfad)."""
-    from .core.engine import Finding, scan_text
-    import re
-    from .mods import CAPABILITY_PATTERNS
-
-    findings = list(scan_text(text, source=rel).findings)
-    from .mods import _refine_code_findings
-    findings = _refine_code_findings(findings)
-    for line_no, line in enumerate(text.splitlines(), 1):
-        for name, rx, sev, rec in CAPABILITY_PATTERNS:
-            m = re.search(rx, line)
-            if m:
-                findings.append(Finding(
-                    severity=sev, category="Mod Capability", pattern_name=name,
-                    matched_text=m.group(0)[:160], line_number=line_no,
-                    context=line.strip()[:200], recommendation=rec, confidence=95,
-                ))
-    return findings
+    """Engine-Scan + Capability-Kombinationslogik für genau eine Datei (Delta-Pfad)."""
+    from .mods import scan_single_file
+    return scan_single_file(rel, text)
 
 
 def main(argv: list[str] | None = None) -> int:
