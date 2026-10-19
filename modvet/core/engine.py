@@ -1836,6 +1836,15 @@ def _build_combined() -> dict[str, re.Pattern]:
             out[cat] = re.compile("|".join(parts))
         except re.error:
             out[cat] = None  # Kategorie einzeln prüfen (Fallback)
+    # v0.2-Phase-2 (19.10.): Diese Kategorien haben eigene Muster, steckten aber
+    # nicht in ALL_PATTERNS_BY_CATEGORY -> ihr Quick-Reject fehlte und die Muster
+    # liefen bei kurzen Zeilen NIE (False Negative, z. B. "except Exception: pass").
+    out["Agentic Security"] = re.compile(
+        r"(?i)(except|catch|retry|fallback|timeout|circuit|swallow|discard|indefinitely|forever|unbounded|infinite\s+loop|on\s*error)",
+    )
+    out["Inter-Agent Security"] = re.compile(
+        r"(?i)(forward|relay|propagate|downstream|inter-agent|other\s+agent|unvalidated\s+agent|agent\s+communication)",
+    )
     return out
 
 
@@ -1935,6 +1944,23 @@ def _strip_markdown(text: str) -> str:
     # Remove inline code backticks used for splitting (single backticks around short fragments)
     result = _re.sub(r'`([^`]{1,3})`', r'\1', result)
     return result
+
+
+# v0.2-Phase-2 (19.10.): PII-/Daten-Muster laufen NICHT auf der Reverse-Variante.
+# Der Reverse-Scan dient der Evasion-Erkennung von ANWEISUNGEN; rückwärts
+# versteckte PII ist kein Vektor und erzeugt Geister-Findings
+# (Dezimalzahl 0.7680… → rückwärts 4xxx… = "Kreditkarte").
+_NO_REVERSE_PATTERNS = frozenset({
+    "Credit Card Number (LLM06)",
+    "German IBAN (LLM06)",
+    "German Phone Number (LLM06)",
+    "Email Address (LLM06)",
+    "IP Address in Sensitive Context (LLM06)",
+    "Password in Cleartext",
+    "Database Connection String",
+    "Hardcoded Secret",
+    "Secret Assignment",
+})
 
 
 def _reverse_text(text: str) -> str:
@@ -2044,44 +2070,88 @@ def scan_text(text: str, source: str = "stdin") -> ScanReport:
             if md_then_leet not in line_variants:
                 line_variants.append(md_then_leet)
         # Reversed text detection — only for lines long enough to hide a word (perf gate)
-        if len(line) >= 6:
-            reversed_text = _reverse_text(line)
-            if reversed_text != line and reversed_text not in line_variants:
-                line_variants.append(reversed_text)
+        reversed_text = _reverse_text(line) if len(line) >= 6 else ""
+        if reversed_text and reversed_text != line and reversed_text not in line_variants:
+            line_variants.append(reversed_text)
 
-        # Quick-Reject: pro Kategorie EIN Kombi-Search über alle Varianten; nur
-        # Kategorien mit Treffer laufen die Einzel-Pattern (statt 400 finditer/Zeile).
+        # Quick-Reject + Match: Kombi-Regex-Quick-Reject JE VARIANTE statt über
+        # den Blob aller Varianten. Die Reverse-Variante matcht bei normalem Code
+        # keine Kategorie -> ihre finditer entfallen komplett (statt 1 finditer
+        # pro Pattern auf Müll-Text). Sound: ein Pattern matcht Variante V nur,
+        # wenn der Kategorie-Kombi-Regex V matcht. `fired` erhält die
+        # „erste passende Variante gewinnt"-Semantik des Original-Loops.
         if len(line) <= _COMBINED_MAX_LEN:
-            blob = "\n".join(line_variants)
-            active_cats = {cat for cat, rx in _COMBINED_BY_CATEGORY.items() if rx is not None and rx.search(blob)}
-            active_cats.update(cat for cat, rx in _COMBINED_BY_CATEGORY.items() if rx is None)
-            active_patterns = [p for p in COMPILED_PATTERNS if p[3] in active_cats]
-        else:
-            active_patterns = COMPILED_PATTERNS
-
-        for name, compiled, severity, category, recommendation in active_patterns:
-            matched_any = False
+            fired: set = set()
             for variant in line_variants:
-                if matched_any:
-                    break
-                for match in compiled.finditer(variant):
-                    matched_any = True
-                    matched = match.group(0)
-                    # Build context: show a snippet around the match (use original line)
-                    start = max(0, match.start() - 30)
-                    end = min(len(line), match.end() + 30)
-                    context = ("..." if start > 0 else "") + line[start:end] + ("..." if end < len(line) else "")
-
-                    report.findings.append(Finding(
-                        severity=severity,
-                        category=category,
-                        pattern_name=name,
-                        matched_text=matched[:120],
-                        line_number=line_num,
-                        context=context.strip(),
-                        recommendation=recommendation,
-                        owasp_mcp=CATEGORY_OWASP_MCP.get(category, ""),
-                    ))
+                is_rev = variant is reversed_text
+                active_cats = {cat for cat, rx in _COMBINED_BY_CATEGORY.items() if rx is not None and rx.search(variant)}
+                active_cats.update(cat for cat, rx in _COMBINED_BY_CATEGORY.items() if rx is None)
+                for name, compiled, severity, category, recommendation in COMPILED_PATTERNS:
+                    if name in fired:
+                        continue
+                    if category not in active_cats:
+                        continue
+                    # PII-Muster laufen NICHT auf der Reverse-Variante: rückwärts
+                    # versteckte Kreditkarten-/IBAN-Nummern sind kein Vektor, und
+                    # harmlose Dezimalzahlen (0.7680... → 4xxx rückwärts) werden
+                    # sonst zu Geister-Findings (v0.2-Phase-2, 19.10.).
+                    if is_rev and name in _NO_REVERSE_PATTERNS:
+                        continue
+                    matched_here = False
+                    for match in compiled.finditer(variant):
+                        matched_here = True
+                        matched = match.group(0)
+                        if is_rev:
+                            # Treffer aus der Reverse-Variante: Text zurückdrehen
+                            # und Offsets auf das Original abbilden.
+                            matched = matched[::-1]
+                            start = max(0, len(line) - match.end() - 30)
+                            end = min(len(line), len(line) - match.start() + 30)
+                        else:
+                            start = max(0, match.start() - 30)
+                            end = min(len(line), match.end() + 30)
+                        context = ("..." if start > 0 else "") + line[start:end] + ("..." if end < len(line) else "")
+                        report.findings.append(Finding(
+                            severity=severity,
+                            category=category,
+                            pattern_name=name,
+                            matched_text=matched[:120],
+                            line_number=line_num,
+                            context=context.strip(),
+                            recommendation=recommendation,
+                            owasp_mcp=CATEGORY_OWASP_MCP.get(category, ""),
+                        ))
+                    if matched_here:
+                        fired.add(name)
+        else:
+            for name, compiled, severity, category, recommendation in COMPILED_PATTERNS:
+                matched_any = False
+                for variant in line_variants:
+                    if matched_any:
+                        break
+                    if variant is reversed_text and name in _NO_REVERSE_PATTERNS:
+                        continue
+                    for match in compiled.finditer(variant):
+                        matched_any = True
+                        matched = match.group(0)
+                        if variant is reversed_text:
+                            matched = matched[::-1]
+                            start = max(0, len(line) - match.end() - 30)
+                            end = min(len(line), len(line) - match.start() + 30)
+                        else:
+                            start = max(0, match.start() - 30)
+                            end = min(len(line), match.end() + 30)
+                        context = ("..." if start > 0 else "") + line[start:end] + ("..." if end < len(line) else "")
+                        report.findings.append(Finding(
+                            severity=severity,
+                            category=category,
+                            pattern_name=name,
+                            matched_text=matched[:120],
+                            line_number=line_num,
+                            context=context.strip(),
+                            recommendation=recommendation,
+                            owasp_mcp=CATEGORY_OWASP_MCP.get(category, ""),
+                        ))
 
     # Deduplicate findings (same pattern on the same line)
     seen = set()

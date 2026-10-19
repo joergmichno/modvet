@@ -186,7 +186,7 @@ _JS_EXTS = (".js", ".ts", ".mjs", ".cjs", ".jsx", ".tsx")
 # Security-Mustern ("this blocks `cat .env`", "encoded in base64") sind FP.
 # Instruktionsdateien (SKILL.md, *.prompt, CLAUDE.md, AGENTS.md) bleiben AKTIV.
 _README_RE = re.compile(r"(^|/)(readme[^/]*|LICENSE|CHANGELOG[^/]*)\.(md|txt)$", re.I)
-_DOC_DIR_RE = re.compile(r"(^|/)(docs?|examples?)/", re.I)
+_DOC_DIR_RE = re.compile(r"(^|/)([^/]*docs?[^/]*|examples?)/", re.I)
 
 # Test-/Beispiel-Fixtures enthalten bewusst Klartext-Credentials.
 _FIXTURE_RE = re.compile(r"(test|fixture|example|demo|sample)", re.I)
@@ -211,6 +211,19 @@ _ATTACK_TEST_PATTERNS = (
     "Remote Code Execution",
     "Privilege Escalation",
     "Python subprocess/os.system",
+)
+
+# v0.2-Phase-2: Extraktions-/Reset-Muster feuern in Doku (.md/.txt außerhalb
+# Instruktionsdateien) fast immer als BESCHREIBUNG ("You can print additional
+# context...", "MCP servers can expose prompts...") — echter Vektor nur dort,
+# wo der Text als Anweisung in den Agent-Kontext lädt (SKILL.md/*.prompt/...).
+_PROMPT_DOC_FP_PATTERNS = (
+    "System Prompt Extraction",
+    "Print/Spellcheck Prompt Extraction",
+    "Indirect Prompt Extraction",
+    "Indirect Instruction Reset",
+    "Forget/Reset Override",
+    "Verification Bypass (ASI09)",
 )
 _TEST_CONTEXT_RE = re.compile(
     r"\b(shouldBlock|shouldFlag|shouldPass|shouldDetect|shouldThrow|shouldAllow|makePayload|buildPayload|bashBlocked|analyzeCommand|bracketedPaste)\s*\(|"
@@ -342,6 +355,50 @@ def _refine_code_findings(findings: list[Finding], source: str = "") -> list[Fin
             and (_QUOTED_ENV_CMD.search(f.context or "") or _QUOTED_ENV_CMD.search(f.matched_text or ""))
         ):
             continue  # Zitat-Beispiel in Doku, keine Anweisung
+        # --- v0.2-Phase-2: FP-Klassen der 10 neuen Corpus-Repos (19.10.) ---
+        if f.pattern_name == "Suspicious open() in Agent Input":
+            if not is_instruction:
+                continue  # open() ist nur als ANWEISUNG in Instruktionsdateien ein Vektor; Code-IO und Doku-Codebeispiele sind normal
+        if f.pattern_name == "Instruction Header Injection" and not is_instruction:
+            continue  # "## Important Rules" in Doku/Output-Styles = Formatierung; nur Instruktionsdateien sind der Vektor
+        if plain_doc and f.pattern_name in _PROMPT_DOC_FP_PATTERNS:
+            continue  # Doku BESCHREIBT Extraktions-/Reset-Muster ("You can print...", "starts a new session") — echter Vektor nur in Instruktionsdateien
+        if not is_doc and f.pattern_name == "Verification Bypass (ASI09)":
+            continue  # "Skip confirmation prompt" als Feature-String in Code ist keine Injektion
+        if not is_doc and f.pattern_name == "Approval Bypass (LLM08)":
+            continue  # "auto-approve file reads" als Feature-/Beispielbeschreibung in Code; Vektor nur als Prompt-Anweisung
+        if f.pattern_name in _ATTACK_TEST_PATTERNS and (f.context or "").lstrip().startswith(("#", "//", "--")):
+            continue  # Kommentar beschreibt das eigene Muster ("# Example: ('rm -rf /', ..."), führt nichts aus
+        if f.category == "Prompt Injection" and not is_doc and (f.context or "").lstrip().startswith(("#", "//", "--")):
+            continue  # Prompt-Muster im Code-Kommentar = kein Injektionspfad
+        if f.pattern_name == "Sensitive File Access Request" and re.search(r"#[^'\"]*(cat|source|read)\s+\.env", f.context or ""):
+            continue  # Kommentar im eigenen Muster-Code ("# cat .env" im Sicherheits-Regex)
+        if f.pattern_name == "Password in Cleartext" and re.search(r"\b(grep|rg|scan|search|find)\b.*password", f.context or "", re.I):
+            continue  # Secret-Scanner-Skript sucht NACH Passwörtern (eigener Regex), enthält keins
+        if f.pattern_name == "Secret Assignment" and re.search(r"PLACEHOLDER|__[A-Z_]+__", f.context or ""):
+            continue  # Template-Platzhalter ("__PLACEHOLDER_THEME__"), kein Secret
+        if f.pattern_name == "Package / Dependency Install" and not is_doc:
+            f = replace(f, severity=Severity.LOW)  # pip/brew/yum in Setup-Skripten = Funktion; bösartige Installation läuft über URL-/Pipe-Muster (bleiben CRITICAL)
+        if f.pattern_name == "IP Address in Sensitive Context (LLM06)":
+            m = re.search(r"\b(0\.0\.0\.0|127\.\d+\.\d+\.\d+|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|::1|localhost)\b", f.matched_text or f.context or "")
+            if m or plain_doc:
+                continue  # private/loopback-Adressen und Doku-Erwähnungen sind keine sensiblen Funde
+        if f.pattern_name == "Internal Network Probe" and plain_doc:
+            continue  # Doku beschreibt Diagnose-Kommandos (ping/curl), führt sie nicht aus
+        if f.pattern_name == "Exception Swallowing (ASI08)":
+            line = (f.matched_text or "") + " " + (f.context or "")
+            m = re.search(r"(?:except|catch)\s*(\([^)]*\)|[A-Za-z_.]+)", line)
+            clause = m.group(1) if m else ""
+            if clause and re.search(r"\b[A-Za-z_][\w.]*(Error|Expired|Warning)\b", clause) \
+                    and not re.search(r"^\s*(Exception|BaseException)\s*$", clause):
+                continue  # gezieltes Handling spezifischer Fehlertypen (optionale Dependencies) = Idiom, kein Swallowing
+        if f.pattern_name == "Python subprocess/os.system":
+            line = (f.matched_text or "") + " " + (f.context or "")
+            dyn = bool(re.search(r"\{[^}]*[a-zA-Z_][^}]*\}|%\s*\(|%\s*[a-zA-Z_]|\+\s*(str\(|f['\"]|[a-zA-Z_])", line))
+            if not dyn:
+                f = replace(f, severity=Severity.LOW)  # statischer Aufruf (Liste oder fester String) = Tool-Alltag
+            elif "os.system" not in (f.matched_text or "") and not re.search(r"shell\s*=\s*True", line):
+                f = replace(f, severity=Severity.LOW)  # subprocess-Liste mit Variable: kein Shell-Interpreter
         out.append(f)
     return out
 
