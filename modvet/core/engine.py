@@ -17,6 +17,8 @@ Exit Codes:
 (c) 2026 Jörg Michno
 """
 
+from modvet import __version__
+
 import re
 import sys
 import json
@@ -2230,7 +2232,7 @@ def format_human(report: ScanReport) -> str:
     lines = [
         "",
         "═" * 64,
-        f"  🛡️  ModVet v0.1.0 – Mod Security Scan Report",
+        f"  🛡️  ModVet v{__version__} – Mod Security Scan Report",
         "═" * 64,
         f"  Timestamp : {report.timestamp}",
         f"  Source    : {report.source}",
@@ -2311,7 +2313,7 @@ def main():
     parser.add_argument("file", nargs="?", help="Text file to scan")
     parser.add_argument("--stdin", action="store_true", help="Read from standard input")
     parser.add_argument("--json", action="store_true", help="Output report as JSON (for automation)")
-    parser.add_argument("--version", action="version", version="ModVet v0.1.0 (engine: ClawGuard 0.5.0 port)")
+    parser.add_argument("--version", action="version", version=f"ModVet v{__version__} (engine: ClawGuard 0.5.0 port)")
 
     args = parser.parse_args()
 
