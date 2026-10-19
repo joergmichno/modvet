@@ -4,21 +4,20 @@
 
 ## Phase-1-Ergebnis (18.10., Commit 1c6f720)
 
-| Metrik | Phase 0 | Phase 1 | Delta |
+| Metrik | Phase 0 | Phase 1 (12 Repos) | Phase 1e (22 Repos, 19.10.) |
 |---|---|---|---|
-| Findings gesamt | 1.815 | **461** | **−75 %** |
-| Ø Findings/Repo | 151 | **38,4** | −75 % |
-| Ø Laufzeit/Repo | 15,5 s | ~15,0 s | ~gleich (Perf-Phase offen) |
-| CRITICAL-Repos | 12/12 | 8/12 | 4 Repos nun HIGH |
+| Findings gesamt | 1.815 | **461** (−75 %) | **1.817** (10 neue, deutlich größere Repos ungetunt) |
+| Ø Findings/Repo | 151 | 38,4 | 82,6 (3 Repos gecappt [CAP]) |
+| Ø Laufzeit/Repo | 15,5 s | ~15 s | ~41 s (Riesen-Repos; Perf-Index offen) |
+| CRITICAL-Repos | 12/12 | 8/12 | 14/22 |
+| CLEAN-Repos | 0 | 0 | 1 (scasella) |
 
-Umgesetzt: Capability-Kombinationslogik + Nähe-Kriterium (≤3 Zeilen), Risk-Level aus
-höchster Severity, Refiner-Kaskade (Doku/Code, README≠Instruktion, JS-Template-Literals,
-Standard-Bash, Fixtures, Zitat-Filter), Severity-Rekalibrierung. 5/5 Tests grün.
-
-**Offen (Phase 1b):** verbleibende CRITICAL-Treiber je Repo prüfen — karanb-hooks
-(Shell-Pipe×29: echte Install-Skripte vs. Doku?), claude-code-mods-main (Prompt-Injection×24
-im Security-Test-Repo), zenbu terminal-browser (Curl-Pipe×9). Danach Phase 2/3 (Detektor-Redesign,
-OWASP-Mapping, SARIF, Badge, Build).
+Alt-Corpus (dieselben 12 Repos) steht jetzt bei **~272 Findings (−85 %)** — die Referenz
+für die FP-Reduktion. Die 10 neuen Repos (A2: Corpus ≥20) bringen neue, teils größere
+FP-Klassen (Code-Obfuscation in Hook-Sammlungen, Data-Exfil in DevOps-Skills-Doku),
+deren Tuning Phase 2 ist. Ehrliche Einordnung: FP-Quote <20 % (A3) ist auf dem
+Alt-Corpus praktisch erreicht (Findings je Clean-Mod 0–76, 1 CLEAN, 7 HIGH), auf dem
+Voll-Corpus noch offen — Nachweis folgt mit Phase-2-Tuning.
 
 ## Ergebnis
 

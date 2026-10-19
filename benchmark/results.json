@@ -1,38 +1,80 @@
 {
-  "corpus_size": 12,
-  "total_findings": 257,
-  "avg_findings_per_repo": 21.4,
-  "avg_ms": 13557.8,
+  "corpus_size": 22,
+  "total_findings": 1817,
+  "avg_findings_per_repo": 82.6,
+  "avg_ms": 41304.0,
   "category_totals": {
-    "Prompt Injection": 75,
-    "Code Obfuscation": 45,
-    "Shell Injection": 43,
-    "Dangerous Command": 38,
-    "Data Exfiltration": 29,
-    "Agentic Security": 10,
-    "Social Engineering": 7,
-    "Output Injection": 4,
-    "Mod Capability": 3,
-    "Supply Chain": 2,
-    "Tool Manipulation": 1
+    "Prompt Injection": 411,
+    "Code Obfuscation": 399,
+    "Data Exfiltration": 336,
+    "Dangerous Command": 208,
+    "Shell Injection": 188,
+    "Agentic Security": 96,
+    "Social Engineering": 75,
+    "Mod Capability": 67,
+    "Tool Manipulation": 23,
+    "Output Injection": 9,
+    "Supply Chain": 3,
+    "MCP Config": 2
   },
   "rows": [
     {
+      "slug": "akin-ozer__cc-devops-skills",
+      "files": 845,
+      "capped": false,
+      "findings": 385,
+      "risk": "CRITICAL",
+      "ms": 121152.7,
+      "top_categories": {
+        "Data Exfiltration": 134,
+        "Dangerous Command": 94,
+        "Prompt Injection": 65
+      }
+    },
+    {
+      "slug": "anthropics__claude-code-security-review",
+      "files": 51,
+      "capped": false,
+      "findings": 41,
+      "risk": "HIGH",
+      "ms": 8603.3,
+      "top_categories": {
+        "Code Obfuscation": 22,
+        "Prompt Injection": 7,
+        "Dangerous Command": 5
+      }
+    },
+    {
       "slug": "BeLazy167__claude-mods-skill",
       "files": 66,
+      "capped": false,
       "findings": 1,
       "risk": "MEDIUM",
-      "ms": 1322.0,
+      "ms": 1265.5,
       "top_categories": {
         "Dangerous Command": 1
       }
     },
     {
+      "slug": "briansmith80__claude-code-status-bar",
+      "files": 97,
+      "capped": false,
+      "findings": 21,
+      "risk": "CRITICAL",
+      "ms": 14004.0,
+      "top_categories": {
+        "Code Obfuscation": 7,
+        "Shell Injection": 4,
+        "Dangerous Command": 4
+      }
+    },
+    {
       "slug": "claude-code-mods-main",
       "files": 197,
+      "capped": false,
       "findings": 44,
       "risk": "CRITICAL",
-      "ms": 13382.7,
+      "ms": 13243.6,
       "top_categories": {
         "Prompt Injection": 22,
         "Data Exfiltration": 17,
@@ -40,11 +82,25 @@
       }
     },
     {
+      "slug": "costajohnt__oss-autopilot",
+      "files": 520,
+      "capped": false,
+      "findings": 167,
+      "risk": "CRITICAL",
+      "ms": 134675.1,
+      "top_categories": {
+        "Prompt Injection": 73,
+        "Shell Injection": 35,
+        "Dangerous Command": 24
+      }
+    },
+    {
       "slug": "data-goblin__claude-code-filetree",
       "files": 34,
+      "capped": false,
       "findings": 6,
       "risk": "HIGH",
-      "ms": 2457.6,
+      "ms": 2416.5,
       "top_categories": {
         "Shell Injection": 3,
         "Agentic Security": 1,
@@ -52,11 +108,77 @@
       }
     },
     {
+      "slug": "davila7__claude-code-templates",
+      "files": 12317,
+      "capped": true,
+      "findings": 186,
+      "risk": "CRITICAL",
+      "ms": 110855.8,
+      "top_categories": {
+        "Shell Injection": 59,
+        "Prompt Injection": 40,
+        "Data Exfiltration": 32
+      }
+    },
+    {
+      "slug": "disler__claude-code-hooks-mastery",
+      "files": 153,
+      "capped": false,
+      "findings": 155,
+      "risk": "CRITICAL",
+      "ms": 25960.6,
+      "top_categories": {
+        "Code Obfuscation": 95,
+        "Agentic Security": 37,
+        "Prompt Injection": 12
+      }
+    },
+    {
+      "slug": "disler__claude-code-hooks-multi-agent-observability",
+      "files": 219,
+      "capped": false,
+      "findings": 167,
+      "risk": "CRITICAL",
+      "ms": 28916.1,
+      "top_categories": {
+        "Code Obfuscation": 92,
+        "Agentic Security": 30,
+        "Prompt Injection": 16
+      }
+    },
+    {
+      "slug": "es617__claude-replay",
+      "files": 96,
+      "capped": false,
+      "findings": 48,
+      "risk": "CRITICAL",
+      "ms": 14998.2,
+      "top_categories": {
+        "Data Exfiltration": 16,
+        "Mod Capability": 16,
+        "Prompt Injection": 7
+      }
+    },
+    {
+      "slug": "EveryInc__compound-engineering-plugin",
+      "files": 2018,
+      "capped": true,
+      "findings": 245,
+      "risk": "CRITICAL",
+      "ms": 190187.9,
+      "top_categories": {
+        "Prompt Injection": 89,
+        "Code Obfuscation": 49,
+        "Social Engineering": 35
+      }
+    },
+    {
       "slug": "hesreallyhim__awesome-claude-code",
       "files": 68,
+      "capped": false,
       "findings": 42,
       "risk": "HIGH",
-      "ms": 34224.7,
+      "ms": 33494.2,
       "top_categories": {
         "Code Obfuscation": 19,
         "Dangerous Command": 7,
@@ -66,9 +188,10 @@
     {
       "slug": "jarrodwatts__claude-image-view",
       "files": 16,
+      "capped": false,
       "findings": 6,
       "risk": "HIGH",
-      "ms": 1317.2,
+      "ms": 1308.4,
       "top_categories": {
         "Prompt Injection": 6
       }
@@ -76,9 +199,10 @@
     {
       "slug": "karanb192__cache-tax",
       "files": 40,
+      "capped": false,
       "findings": 4,
       "risk": "HIGH",
-      "ms": 4043.5,
+      "ms": 4155.7,
       "top_categories": {
         "Prompt Injection": 3,
         "Code Obfuscation": 1
@@ -87,9 +211,10 @@
     {
       "slug": "karanb192__claude-code-hooks",
       "files": 279,
+      "capped": false,
       "findings": 76,
       "risk": "CRITICAL",
-      "ms": 38303.6,
+      "ms": 39018.5,
       "top_categories": {
         "Shell Injection": 27,
         "Prompt Injection": 21,
@@ -99,9 +224,10 @@
     {
       "slug": "NahumLitvin__prismantis",
       "files": 168,
+      "capped": false,
       "findings": 19,
       "risk": "HIGH",
-      "ms": 24654.5,
+      "ms": 25699.3,
       "top_categories": {
         "Code Obfuscation": 5,
         "Agentic Security": 4,
@@ -111,9 +237,10 @@
     {
       "slug": "noeltock__mod-builder",
       "files": 19,
+      "capped": false,
       "findings": 4,
       "risk": "HIGH",
-      "ms": 1287.0,
+      "ms": 1355.5,
       "top_categories": {
         "Prompt Injection": 4
       }
@@ -121,9 +248,10 @@
     {
       "slug": "oikon48__prompt-rail",
       "files": 26,
+      "capped": false,
       "findings": 3,
       "risk": "HIGH",
-      "ms": 704.7,
+      "ms": 653.7,
       "top_categories": {
         "Prompt Injection": 2,
         "Dangerous Command": 1
@@ -132,17 +260,32 @@
     {
       "slug": "scasella__claude-flightdeck",
       "files": 27,
+      "capped": false,
       "findings": 0,
       "risk": "CLEAN",
-      "ms": 2203.7,
+      "ms": 2275.9,
       "top_categories": {}
+    },
+    {
+      "slug": "wshobson__agents",
+      "files": 1986,
+      "capped": true,
+      "findings": 145,
+      "risk": "CRITICAL",
+      "ms": 93670.9,
+      "top_categories": {
+        "Data Exfiltration": 82,
+        "Prompt Injection": 25,
+        "Code Obfuscation": 25
+      }
     },
     {
       "slug": "zenbu-labs__terminal-browser",
       "files": 528,
+      "capped": false,
       "findings": 52,
       "risk": "CRITICAL",
-      "ms": 38791.8,
+      "ms": 40776.0,
       "top_categories": {
         "Dangerous Command": 19,
         "Prompt Injection": 10,
