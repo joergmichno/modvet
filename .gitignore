@@ -5,3 +5,4 @@ work-*.txt
 __pycache__/
 *.pyc
 .venv/
+demo-mods/
