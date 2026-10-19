@@ -1,0 +1,181 @@
+import { afterEach, describe, expect, test } from "bun:test"
+import { promises as fs } from "fs"
+import path from "path"
+import os from "os"
+import { detectInstalledTools } from "../src/utils/detect-tools"
+
+describe("detectInstalledTools", () => {
+  test("detects tools when config directories exist", async () => {
+    const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "detect-tools-"))
+    const tempCwd = await fs.mkdtemp(path.join(os.tmpdir(), "detect-tools-cwd-"))
+
+    // Create directories for some tools
+    await fs.mkdir(path.join(tempHome, ".codex"), { recursive: true })
+    await fs.mkdir(path.join(tempHome, ".gemini", "antigravity-cli"), { recursive: true })
+    await fs.mkdir(path.join(tempHome, ".copilot"), { recursive: true })
+    delete process.env.OPENCODE_CONFIG_DIR
+
+    const results = await detectInstalledTools(tempHome, tempCwd)
+
+    const codex = results.find((t) => t.name === "codex")
+    expect(codex?.detected).toBe(true)
+    expect(codex?.reason).toContain(".codex")
+
+    const antigravity = results.find((t) => t.name === "antigravity")
+    expect(antigravity?.detected).toBe(true)
+    expect(antigravity?.reason).toContain("antigravity-cli")
+
+    const copilot = results.find((t) => t.name === "copilot")
+    expect(copilot?.detected).toBe(true)
+    expect(copilot?.reason).toContain(".copilot")
+
+    // Tools without directories should not be detected
+    const opencode = results.find((t) => t.name === "opencode")
+    expect(opencode?.detected).toBe(false)
+
+    const droid = results.find((t) => t.name === "droid")
+    expect(droid?.detected).toBe(false)
+
+    const pi = results.find((t) => t.name === "pi")
+    expect(pi?.detected).toBe(false)
+  })
+
+  test("returns all tools with detected=false when no directories exist", async () => {
+    const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "detect-empty-"))
+    const tempCwd = await fs.mkdtemp(path.join(os.tmpdir(), "detect-empty-cwd-"))
+    delete process.env.OPENCODE_CONFIG_DIR
+
+    const results = await detectInstalledTools(tempHome, tempCwd)
+
+    expect(results.length).toBe(8)
+    for (const tool of results) {
+      expect(tool.detected).toBe(false)
+      expect(tool.reason).toBe("not found")
+    }
+  })
+
+  test("detects home-based tools", async () => {
+    const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "detect-home-"))
+    const tempCwd = await fs.mkdtemp(path.join(os.tmpdir(), "detect-home-cwd-"))
+
+    await fs.mkdir(path.join(tempHome, ".config", "opencode"), { recursive: true })
+    await fs.mkdir(path.join(tempHome, ".factory"), { recursive: true })
+    await fs.mkdir(path.join(tempHome, ".pi"), { recursive: true })
+    await fs.mkdir(path.join(tempHome, ".omp"), { recursive: true })
+
+    const results = await detectInstalledTools(tempHome, tempCwd)
+
+    expect(results.find((t) => t.name === "opencode")?.detected).toBe(true)
+    expect(results.find((t) => t.name === "droid")?.detected).toBe(true)
+    expect(results.find((t) => t.name === "pi")?.detected).toBe(true)
+    expect(results.find((t) => t.name === "omp")?.detected).toBe(true)
+  })
+
+  test("detects antigravity at ~/.gemini/antigravity-cli", async () => {
+    const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "detect-agy-home-"))
+    const tempCwd = await fs.mkdtemp(path.join(os.tmpdir(), "detect-agy-cwd-"))
+    await fs.mkdir(path.join(tempHome, ".gemini", "antigravity-cli"), { recursive: true })
+
+    const results = await detectInstalledTools(tempHome, tempCwd)
+    expect(results.find((t) => t.name === "antigravity")?.detected).toBe(true)
+  })
+
+  test("detects antigravity at workspace .agy", async () => {
+    const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "detect-agy-home2-"))
+    const tempCwd = await fs.mkdtemp(path.join(os.tmpdir(), "detect-agy-cwd2-"))
+    await fs.mkdir(path.join(tempCwd, ".agy"), { recursive: true })
+
+    const results = await detectInstalledTools(tempHome, tempCwd)
+    expect(results.find((t) => t.name === "antigravity")?.detected).toBe(true)
+  })
+
+  describe("opencode OPENCODE_CONFIG_DIR", () => {
+    const originalEnv = process.env.OPENCODE_CONFIG_DIR
+
+    afterEach(() => {
+      if (originalEnv === undefined) {
+        delete process.env.OPENCODE_CONFIG_DIR
+      } else {
+        process.env.OPENCODE_CONFIG_DIR = originalEnv
+      }
+    })
+
+    test("detects opencode at OPENCODE_CONFIG_DIR when set, even if ~/.config/opencode is absent", async () => {
+      const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "detect-opencode-env-home-"))
+      const tempCwd = await fs.mkdtemp(path.join(os.tmpdir(), "detect-opencode-env-cwd-"))
+      const customRoot = await fs.mkdtemp(path.join(os.tmpdir(), "detect-opencode-env-root-"))
+
+      // Ensure no ~/.config/opencode exists under the sandbox home.
+      process.env.OPENCODE_CONFIG_DIR = customRoot
+
+      const results = await detectInstalledTools(tempHome, tempCwd)
+      const opencode = results.find((t) => t.name === "opencode")
+      expect(opencode?.detected).toBe(true)
+      expect(opencode?.reason).toContain(customRoot)
+    })
+
+    test("opencode is not detected when OPENCODE_CONFIG_DIR points at a missing directory", async () => {
+      const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "detect-opencode-missing-home-"))
+      const tempCwd = await fs.mkdtemp(path.join(os.tmpdir(), "detect-opencode-missing-cwd-"))
+      const missingRoot = path.join(os.tmpdir(), `detect-opencode-missing-${Date.now()}-${Math.random()}`)
+
+      process.env.OPENCODE_CONFIG_DIR = missingRoot
+
+      const results = await detectInstalledTools(tempHome, tempCwd)
+      expect(results.find((t) => t.name === "opencode")?.detected).toBe(false)
+    })
+  })
+
+  describe("codex CODEX_HOME", () => {
+    const originalEnv = process.env.CODEX_HOME
+
+    afterEach(() => {
+      if (originalEnv === undefined) {
+        delete process.env.CODEX_HOME
+      } else {
+        process.env.CODEX_HOME = originalEnv
+      }
+    })
+
+    test("detects codex at CODEX_HOME for default real-user detection", async () => {
+      const tempCwd = await fs.mkdtemp(path.join(os.tmpdir(), "detect-codex-env-cwd-"))
+      const customRoot = await fs.mkdtemp(path.join(os.tmpdir(), "detect-codex-env-root-"))
+
+      process.env.CODEX_HOME = customRoot
+
+      const results = await detectInstalledTools(undefined, tempCwd)
+      const codex = results.find((t) => t.name === "codex")
+      expect(codex?.detected).toBe(true)
+      expect(codex?.reason).toContain(customRoot)
+    })
+
+    test("ignores ambient CODEX_HOME when caller provides an explicit home", async () => {
+      const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "detect-codex-explicit-home-"))
+      const tempCwd = await fs.mkdtemp(path.join(os.tmpdir(), "detect-codex-explicit-cwd-"))
+      const customRoot = await fs.mkdtemp(path.join(os.tmpdir(), "detect-codex-explicit-root-"))
+
+      process.env.CODEX_HOME = customRoot
+
+      const results = await detectInstalledTools(tempHome, tempCwd)
+      const codex = results.find((t) => t.name === "codex")
+      expect(codex?.detected).toBe(false)
+      expect(codex?.reason).toBe("not found")
+    })
+  })
+
+  test("detects copilot from project-specific skills without generic .github false positives", async () => {
+    const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "detect-copilot-home-"))
+    const tempCwd = await fs.mkdtemp(path.join(os.tmpdir(), "detect-copilot-cwd-"))
+
+    await fs.mkdir(path.join(tempCwd, ".github"), { recursive: true })
+
+    let results = await detectInstalledTools(tempHome, tempCwd)
+    expect(results.find((t) => t.name === "copilot")?.detected).toBe(false)
+
+    await fs.mkdir(path.join(tempCwd, ".github", "skills"), { recursive: true })
+
+    results = await detectInstalledTools(tempHome, tempCwd)
+    expect(results.find((t) => t.name === "copilot")?.detected).toBe(true)
+    expect(results.find((t) => t.name === "copilot")?.reason).toContain(".github/skills")
+  })
+})

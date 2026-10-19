@@ -1,0 +1,75 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  linux:
+    name: BATS (ubuntu-latest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify SHA256SUMS is in sync
+        # The self-updater verifies staged files against SHA256SUMS before
+        # installing (security finding G1). Fail if the committed manifest has
+        # drifted from the runtime files — run scripts/update-sha256sums.sh.
+        run: sha256sum -c SHA256SUMS
+      - name: Install BATS
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y bats
+      - name: Run tests
+        run: bats tests/
+
+  macos:
+    name: BATS (macos-latest)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install BATS
+        run: brew install bats-core
+      - name: Run tests
+        run: bats tests/
+
+  windows:
+    name: BATS (windows-latest, MSYS2)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MSYS
+          update: true
+          install: >-
+            git
+            coreutils
+            sed
+            grep
+      - name: Install BATS
+        # The MSYS2 pacman repo no longer ships a bats package; bats-core is
+        # pure bash, so run it straight from a pinned clone instead.
+        run: git clone --depth 1 --branch v1.13.0 https://github.com/bats-core/bats-core.git "$HOME/bats-core"
+      - name: Run tests
+        # The runner's preinstalled node lives outside the MSYS PATH; expose
+        # it so the helper/subagent tests run instead of silently skipping
+        run: 'PATH="$PATH:/c/Program Files/nodejs" "$HOME/bats-core/bin/bats" tests/'
+      - name: Validate install.ps1
+        shell: pwsh
+        run: |
+          $tokens = $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile("$PWD/install.ps1", [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) { $errors | ForEach-Object { Write-Error $_.Message }; exit 1 }
+          $t = Join-Path $env:RUNNER_TEMP 'sl-ps-test'
+          ./install.ps1 -SourceDir "$PWD" -TargetDir $t
+          if (-not (Test-Path "$t/statusline-command.sh")) { throw 'statusline-command.sh missing' }
+          $s = Get-Content "$t/settings.json" -Raw | ConvertFrom-Json
+          if (-not $s.statusLine.command) { throw 'statusLine not wired' }
+          ./install.ps1 -SourceDir "$PWD" -TargetDir $t
+          Write-Host 'install.ps1 OK (fresh install + idempotent re-run)'

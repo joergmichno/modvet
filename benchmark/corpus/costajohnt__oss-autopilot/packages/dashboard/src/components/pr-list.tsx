@@ -1,0 +1,147 @@
+import type { AttentionBucket, FetchedPR, FetchedPRStatus } from '../types';
+import { truncate, statusColor, stripBrackets, pillColorClass, attentionBucketOf } from '../utils';
+
+interface PRListProps {
+  prs: FetchedPR[];
+  selectedUrl: string | null;
+  onSelect: (url: string) => void;
+  shelvedUrls: Set<string>;
+  shelvedOpen: boolean;
+  onShelvedToggle: () => void;
+}
+
+/**
+ * Section order for the unified attention taxonomy (#1352). Buckets are
+ * stamped server-side by the shared core classifier; `attentionBucketOf`
+ * falls back to the coarse status split for older payloads.
+ */
+const SECTION_ORDER: Array<{ bucket: AttentionBucket; id: string; title: string; dotClass: string }> = [
+  { bucket: 'needs_attention', id: 'action', title: 'Need Attention', dotClass: 'red' },
+  { bucket: 'stuck_ci', id: 'stuck', title: 'Stuck CI', dotClass: 'amber' },
+  { bucket: 'dormant_followup', id: 'dormant', title: 'Dormant Follow-up', dotClass: 'amber' },
+  { bucket: 'waiting', id: 'waiting', title: 'Waiting on Others', dotClass: 'blue' },
+];
+
+interface SectionDef {
+  id: string;
+  title: string;
+  dotClass: string;
+  prs: FetchedPR[];
+}
+
+/** Maps PR status to a CSS class for status-aware hover borders. */
+export function statusClass(status: FetchedPRStatus): string {
+  switch (status) {
+    case 'needs_addressing': {
+      return 'pr-row--need-attention';
+    }
+    case 'waiting_on_maintainer': {
+      return 'pr-row--waiting';
+    }
+    default: {
+      const _exhaustive: never = status;
+      void _exhaustive;
+      return '';
+    }
+  }
+}
+
+function PRRow({ pr, selected, onSelect }: { pr: FetchedPR; selected: boolean; onSelect: (url: string) => void }) {
+  return (
+    <div
+      class={`pr-row ${statusClass(pr.status)} ${selected ? 'pr-row--selected' : ''}`}
+      onClick={() => onSelect(pr.url)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect(pr.url);
+        }
+      }}
+      role="button"
+      tabIndex={0}
+    >
+      <span class="pr-row-dot" style={{ background: statusColor(pr.status) }} />
+      <a class="pr-row-id" href={pr.url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+        {pr.repo}#{pr.number}
+      </a>
+      <span class="pr-row-title">{truncate(pr.title, 50)}</span>
+      {pr.displayLabel && (
+        <span class={`pill ${pillColorClass(pr.displayLabel)}`}>{stripBrackets(pr.displayLabel)}</span>
+      )}
+      <span class="pr-row-age">{pr.daysSinceActivity}d ago</span>
+    </div>
+  );
+}
+
+function Section({
+  section,
+  selectedUrl,
+  onSelect,
+}: {
+  section: SectionDef;
+  selectedUrl: string | null;
+  onSelect: (url: string) => void;
+}) {
+  return (
+    <div class="pr-section" id={`section-${section.id}`}>
+      <div class="pr-section-header">
+        <span class={`pr-section-dot ${section.dotClass}`} />
+        <span class="pr-section-title">{section.title}</span>
+        <span class="pr-section-count">{section.prs.length}</span>
+      </div>
+      {section.prs.map((pr) => (
+        <PRRow key={pr.url} pr={pr} selected={pr.url === selectedUrl} onSelect={onSelect} />
+      ))}
+    </div>
+  );
+}
+
+export function PRList({ prs, selectedUrl, onSelect, shelvedUrls, shelvedOpen, onShelvedToggle }: PRListProps) {
+  const activePRs = prs.filter((pr) => !shelvedUrls.has(pr.url));
+  const shelvedPRs = prs.filter((pr) => shelvedUrls.has(pr.url));
+
+  const sections: SectionDef[] = SECTION_ORDER.map(({ bucket, id, title, dotClass }) => ({
+    id,
+    title,
+    dotClass,
+    prs: activePRs.filter((pr) => attentionBucketOf(pr) === bucket),
+  })).filter((s) => s.prs.length > 0);
+
+  return (
+    <div class="pr-list">
+      {sections.length === 0 && shelvedPRs.length === 0 && <p class="pr-list-empty">No PRs to display</p>}
+      {sections.map((section) => (
+        <Section key={section.id} section={section} selectedUrl={selectedUrl} onSelect={onSelect} />
+      ))}
+      {shelvedPRs.length > 0 && (
+        <div class="pr-section pr-section--shelved" id="section-shelved">
+          <div
+            class="pr-section-header pr-section-header--collapsible"
+            onClick={onShelvedToggle}
+            aria-expanded={shelvedOpen}
+            aria-controls="shelved-pr-list"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onShelvedToggle();
+              }
+            }}
+          >
+            <span class="pr-section-dot muted" />
+            <span class="pr-section-title">Shelved</span>
+            <span class="pr-section-count">{shelvedPRs.length}</span>
+            <span class={`pr-section-chevron ${shelvedOpen ? 'pr-section-chevron--open' : ''}`}>&#9656;</span>
+          </div>
+          <div id="shelved-pr-list">
+            {shelvedOpen &&
+              shelvedPRs.map((pr) => (
+                <PRRow key={pr.url} pr={pr} selected={pr.url === selectedUrl} onSelect={onSelect} />
+              ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

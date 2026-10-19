@@ -1,0 +1,68 @@
+import { describe, expect, test } from "bun:test"
+import { readFileSync } from "node:fs"
+import path from "node:path"
+
+const repoRoot = path.join(__dirname, "../..")
+const read = (p: string) => readFileSync(path.join(repoRoot, p), "utf8")
+
+// `cross_model_review_mode: off` is a checkout-local egress gate for the review
+// skills' automatic cross-model pass. It must be evaluated before peer
+// resolution or any dispatch, in both consumers, and be documented wherever
+// ordinary CE config keys are documented.
+describe("cross_model_review_mode egress gate", () => {
+  const references = [
+    "skills/ce-code-review/references/cross-model-review.md",
+    "skills/ce-doc-review/references/cross-model-review.md",
+  ]
+
+  for (const ref of references) {
+    test(`${ref} gates the automatic pass on cross_model_review_mode before peer resolution`, () => {
+      const content = read(ref)
+      const gate = content.indexOf("cross_model_review_mode")
+      const resolution = content.indexOf("Resolve the preference in this order")
+      expect(gate).toBeGreaterThan(-1)
+      expect(resolution).toBeGreaterThan(-1)
+      expect(gate).toBeLessThan(resolution)
+      // Only these two values are valid; the default keeps today's behavior.
+      expect(content).toMatch(/`auto` \(default\)/)
+      // The skip is a distinct, named reason -- not folded into "unavailable" --
+      // both at the gate and where the fold-in step writes Coverage.
+      expect(content).toContain("disabled by checkout config")
+      expect(content).toContain('"cross-model pass: disabled by checkout config"')
+      // A live conversation opt-in still overrides the checkout default.
+      expect(content).toMatch(/explicitly ask(s|ed) for a cross-model peer/)
+    })
+  }
+
+  test("both SKILL.md files wire the gate into their cross-model step", () => {
+    for (const p of ["skills/ce-code-review/SKILL.md", "skills/ce-doc-review/SKILL.md"]) {
+      expect(read(p)).toContain("cross_model_review_mode")
+    }
+  })
+
+  // The peer-keys sentence moved from the body into the cross-model reference's
+  // checkout-policy paragraph (plan 2026-09-15-1322, U3) to keep the body under
+  // the Codex bound; the reference is a required read before any route binds.
+  test("ce-code-review cross-model reference treats missing peer keys as the default auto route", () => {
+    const body = read("skills/ce-code-review/references/cross-model-review.md")
+    expect(body).toContain("skip and target-selection keys")
+    expect(body).toContain("default auto route")
+    expect(body).toContain("Another skill's engine preference is not this gate")
+    expect(body).toContain("Model and effort overrides stay with the bound target")
+  })
+
+  test("config template, example, and configuration reference document the key", () => {
+    for (const p of [
+      "skills/ce-setup/references/config-template.yaml",
+      ".compound-engineering/config.example.yaml",
+      "docs/guides/configuration.md",
+      "docs/guides/ce-code-review.md",
+      "docs/guides/ce-doc-review.md",
+    ]) {
+      expect(read(p)).toContain("cross_model_review_mode")
+    }
+    expect(read("skills/ce-setup/references/config-template.yaml")).toMatch(
+      /# cross_model_review_mode: off\s+# auto \| off \(default: auto\)/,
+    )
+  })
+})

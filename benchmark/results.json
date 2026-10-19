@@ -1,18 +1,18 @@
 {
   "corpus_size": 12,
-  "total_findings": 272,
-  "avg_findings_per_repo": 22.7,
-  "avg_ms": 13101.7,
+  "total_findings": 257,
+  "avg_findings_per_repo": 21.4,
+  "avg_ms": 13557.8,
   "category_totals": {
-    "Prompt Injection": 80,
+    "Prompt Injection": 75,
     "Code Obfuscation": 45,
     "Shell Injection": 43,
     "Dangerous Command": 38,
-    "Data Exfiltration": 37,
+    "Data Exfiltration": 29,
     "Agentic Security": 10,
     "Social Engineering": 7,
-    "Mod Capability": 5,
     "Output Injection": 4,
+    "Mod Capability": 3,
     "Supply Chain": 2,
     "Tool Manipulation": 1
   },
@@ -21,8 +21,8 @@
       "slug": "BeLazy167__claude-mods-skill",
       "files": 66,
       "findings": 1,
-      "risk": "CRITICAL",
-      "ms": 1315.6,
+      "risk": "MEDIUM",
+      "ms": 1322.0,
       "top_categories": {
         "Dangerous Command": 1
       }
@@ -30,11 +30,11 @@
     {
       "slug": "claude-code-mods-main",
       "files": 197,
-      "findings": 46,
+      "findings": 44,
       "risk": "CRITICAL",
-      "ms": 13398.1,
+      "ms": 13382.7,
       "top_categories": {
-        "Prompt Injection": 24,
+        "Prompt Injection": 22,
         "Data Exfiltration": 17,
         "Code Obfuscation": 3
       }
@@ -44,7 +44,7 @@
       "files": 34,
       "findings": 6,
       "risk": "HIGH",
-      "ms": 2435.7,
+      "ms": 2457.6,
       "top_categories": {
         "Shell Injection": 3,
         "Agentic Security": 1,
@@ -56,7 +56,7 @@
       "files": 68,
       "findings": 42,
       "risk": "HIGH",
-      "ms": 33666.5,
+      "ms": 34224.7,
       "top_categories": {
         "Code Obfuscation": 19,
         "Dangerous Command": 7,
@@ -68,7 +68,7 @@
       "files": 16,
       "findings": 6,
       "risk": "HIGH",
-      "ms": 1298.5,
+      "ms": 1317.2,
       "top_categories": {
         "Prompt Injection": 6
       }
@@ -78,7 +78,7 @@
       "files": 40,
       "findings": 4,
       "risk": "HIGH",
-      "ms": 4002.1,
+      "ms": 4043.5,
       "top_categories": {
         "Prompt Injection": 3,
         "Code Obfuscation": 1
@@ -87,12 +87,12 @@
     {
       "slug": "karanb192__claude-code-hooks",
       "files": 279,
-      "findings": 86,
+      "findings": 76,
       "risk": "CRITICAL",
-      "ms": 37700.6,
+      "ms": 38303.6,
       "top_categories": {
         "Shell Injection": 27,
-        "Prompt Injection": 22,
+        "Prompt Injection": 21,
         "Code Obfuscation": 12
       }
     },
@@ -101,7 +101,7 @@
       "files": 168,
       "findings": 19,
       "risk": "HIGH",
-      "ms": 23785.8,
+      "ms": 24654.5,
       "top_categories": {
         "Code Obfuscation": 5,
         "Agentic Security": 4,
@@ -111,11 +111,11 @@
     {
       "slug": "noeltock__mod-builder",
       "files": 19,
-      "findings": 5,
+      "findings": 4,
       "risk": "HIGH",
-      "ms": 1162.8,
+      "ms": 1287.0,
       "top_categories": {
-        "Prompt Injection": 5
+        "Prompt Injection": 4
       }
     },
     {
@@ -123,7 +123,7 @@
       "files": 26,
       "findings": 3,
       "risk": "HIGH",
-      "ms": 607.9,
+      "ms": 704.7,
       "top_categories": {
         "Prompt Injection": 2,
         "Dangerous Command": 1
@@ -134,18 +134,18 @@
       "files": 27,
       "findings": 0,
       "risk": "CLEAN",
-      "ms": 1989.0,
+      "ms": 2203.7,
       "top_categories": {}
     },
     {
       "slug": "zenbu-labs__terminal-browser",
       "files": 528,
-      "findings": 54,
+      "findings": 52,
       "risk": "CRITICAL",
-      "ms": 35858.0,
+      "ms": 38791.8,
       "top_categories": {
         "Dangerous Command": 19,
-        "Prompt Injection": 11,
+        "Prompt Injection": 10,
         "Data Exfiltration": 8
       }
     }

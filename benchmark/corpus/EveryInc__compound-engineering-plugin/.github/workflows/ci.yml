@@ -1,0 +1,343 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pr-title:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+
+    steps:
+      - name: Validate PR title
+        uses: amannn/action-semantic-pull-request@v6.1.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          requireScope: false
+          types: |
+            feat
+            fix
+            docs
+            refactor
+            chore
+            test
+            ci
+            build
+            perf
+            revert
+
+  docs-audit:
+    # compound-cli's `compound audit` over docs/solutions/: schema and parser-safety
+    # errors fail the job; findability warnings are printed only (non-strict).
+    # Its own job, not part of `bun run test` or `release:validate`: the local test
+    # lane and the plugin must never need compound-cli or network access, and no
+    # skill depends on compound-cli.
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # Pinned to the compound-cli commit that shipped `compound audit` (PR #21).
+      # Switch to `bunx compound-cli@<version> audit` once the package is published
+      # to npm. `--bun` runs the TypeScript source, since a git checkout has no build.
+      - name: Audit docs/solutions frontmatter
+        run: bunx --bun github:kieranklaassen/compound-cli#36becb90361d656e5f52360949aa9dab39346943 audit
+
+  test:
+    runs-on: ubuntu-latest
+    # A wedged bun --parallel worker (oven-sh/bun#34069) can sit with no output
+    # forever; green runs take about 4 minutes and a timeout-stack run with the
+    # serial re-run about 15. Fail well before GitHub's 6-hour default so the
+    # babysit loop can see it and rerun.
+    timeout-minutes: 30
+
+    env:
+      # Single source of truth for the pinned `claude plugin validate` version:
+      # both the install and its cache key read this, so a bump cannot bump one
+      # and leave the other serving a stale cached binary.
+      CLAUDE_CODE_VERSION: 2.1.220
+
+    steps:
+      - uses: actions/checkout@v6
+        # Full history so release:validate can read the base-branch (origin/main)
+        # release-please manifest when checking release-as pins for staleness.
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Validate release metadata
+        run: bun run release:validate
+
+      # Canonical schema check: runs `claude plugin validate --strict` against
+      # the marketplace catalog and the plugin manifest. The CLI must be
+      # installed via npm, not bun: `bun x` cannot run this package (bun blocks
+      # its required postinstall and cannot resolve its `claude` bin name), and
+      # `bun run` rewrites `npx` in package.json scripts to the broken `bun x`,
+      # so the script invokes a `claude` already on PATH instead.
+      #
+      # The validator version is pinned deliberately for reproducible CI: a
+      # floating @latest would track new upstream validation rules
+      # automatically but could break CI without any repo change. Bump the
+      # pin intentionally to adopt new `claude plugin validate` rules.
+      #
+      # plugin:validate must hit .claude-plugin/plugin.json — `validate .` only
+      # checks the marketplace. Root CLAUDE.md is a symlink to AGENTS.md so
+      # --strict stays green; see AGENTS.md "CI and Quality Gates".
+      #
+      # The install is cached because the npm package is a 165KB wrapper whose
+      # postinstall pulls a platform binary (`@anthropic-ai/claude-code-linux-x64`,
+      # ~275MB unpacked). Registry throughput for that payload is the whole cost
+      # of this step — validation itself is under a second. Observed range on
+      # ubuntu-latest: 3-10s typical, 5m worst case. Caching buys predictability,
+      # not average speed: it caps the tail rather than beating the fast path.
+      # Keying on the pinned version means a hit on every run between bumps.
+      - name: Cache claude-code validator
+        id: cache-claude-code
+        uses: actions/cache@v6
+        with:
+          path: ~/.npm-global
+          key: claude-code-${{ runner.os }}-${{ env.CLAUDE_CODE_VERSION }}
+
+      - name: Install claude-code validator
+        if: steps.cache-claude-code.outputs.cache-hit != 'true'
+        run: npm install -g --prefix ~/.npm-global @anthropic-ai/claude-code@${{ env.CLAUDE_CODE_VERSION }}
+
+      - name: Validate plugin schema (claude plugin validate)
+        run: |
+          export PATH="$HOME/.npm-global/bin:$PATH"
+          claude --version
+          bun run plugin:validate
+
+      # Runs the package `test` script so the flags CI uses and the flags a
+      # contributor gets from `bun run test` cannot drift apart.
+      - name: Run tests
+        run: bun run test
+
+      - name: Typecheck
+        if: ${{ !cancelled() }}
+        run: bun run typecheck
+
+  # Runs the pinned acpx from the npm registry against the stub ACP agent. Kept out
+  # of `bun run test` because it needs network access to fetch acpx.
+  acpx-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      # acpx requires Node >= 22.13.
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: acpx contract suite
+        run: bun run test:acpx-contract
+
+  # Focused Windows gate for the skill scripts that reach for POSIX process and
+  # file primitives: peer-job-runner (#1243) and ce-babysit-pr's pr-snapshot
+  # (#1280). Not a full-suite matrix — POSIX lifecycle tests (fork/killpg/ps)
+  # stay on ubuntu-latest. This job runs the cross-platform fixtures under real
+  # win32, which is the only way to execute the msvcrt/ctypes branches at all:
+  # they are imported solely under sys.platform == "win32", so no amount of
+  # patching reaches them from Linux or Mac.
+  windows-native:
+    runs-on: windows-latest
+    # Green runs finish in about 90 seconds. The Windows smoke step has hung
+    # (2026-09-14, PR #1711 run 34909130752: 25+ minutes stuck, unresponsive to
+    # cancel and force-cancel; #1794). Fail well before GitHub's 6-hour default
+    # so the babysit loop can see it and rerun. The smoke step's own 6-minute
+    # deadline must fire before this cap kills the job and loses the log, so the
+    # cap leaves room for the setup steps ahead of it as well.
+    timeout-minutes: 15
+
+    steps:
+      # Keep LF in the working tree so newline-anchored parity regexes match.
+      # Default Windows runners often have core.autocrlf=true (see
+      # docs/solutions/developer-experience/windows-crlf-checkout-breaks-newline-anchored-tests.md).
+      - name: Disable autocrlf for LF checkout
+        run: git config --global core.autocrlf false
+
+      - uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          # Match the verified Windows smoke environment for #1243.
+          python-version: "3.11"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Peer-job-runner unit fixture
+        # Use `python`, never `python3` — on Windows the latter is often the
+        # Microsoft Store stub (see docs/solutions/conventions/resolve-python-interpreter-not-python3.md).
+        run: python tests/fixtures/peer-job-runner-unit.py
+
+      - name: Peer-job-runner Windows smoke
+        # Hosted windows-latest Python intermittently fails `import ctypes`
+        # mid-suite (DLL init on _ctypes) after earlier tests already passed.
+        # Product code cannot recover. Retries are signature-gated: only
+        # `DLL load failed while importing _ctypes` is retried; any other
+        # nonzero exit fails this step immediately. A retried attempt's log is
+        # suppressed so a green step never shows failure dumps; the full log
+        # prints on success and on the terminal failure.
+        #
+        # A 6-minute step deadline, under the job cap, makes a hang end the step
+        # with its log, Python stacks, and leftover processes instead of a killed
+        # job with no log (#1794). Output goes to files, not a pipe, so a
+        # leftover process holding an inherited handle cannot stall this shell.
+        shell: pwsh
+        run: |
+          $max = 3
+          $stepStart = Get-Date
+          $deadline = $stepStart.AddMinutes(6)
+          function Stop-StepProcesses {
+            # Descendants of this shell, plus orphans whose parent already exited
+            # (detached supervisors) running an executable the smoke launches; a
+            # start-time match alone also catches services.
+            $smokeExes = 'python.exe', 'bash.exe', 'sh.exe', 'env.exe'
+            $all = @(Get-CimInstance Win32_Process)
+            $alive = @{}
+            foreach ($proc in $all) { $alive[$proc.ProcessId] = $true }
+            $recent = @($all | Where-Object { $_.CreationDate -ge $stepStart -and $_.ProcessId -ne $PID })
+            $ours = @{}
+            do {
+              $added = 0
+              foreach ($proc in $recent) {
+                $parent = $proc.ParentProcessId
+                if (-not $ours[$proc.ProcessId] -and ($parent -eq $PID -or $ours[$parent] -or (-not $alive[$parent] -and $smokeExes -contains $proc.Name))) {
+                  $ours[$proc.ProcessId] = $true
+                  $added++
+                }
+              }
+            } while ($added -gt 0)
+            $procs = @($recent | Where-Object { $ours[$_.ProcessId] })
+            if ($procs.Count -eq 0) { Write-Host "No processes started by this step are still running."; return }
+            Write-Host "Processes started by this step that are still running:"
+            $procs | Format-Table ProcessId, ParentProcessId, CreationDate, Name, CommandLine -AutoSize -Wrap | Out-String -Width 400 | Write-Host
+            $procs | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+          }
+          for ($i = 1; $i -le $max; $i++) {
+            $out = Join-Path $env:TEMP "peer-job-runner-windows-smoke-$i.out.log"
+            $err = Join-Path $env:TEMP "peer-job-runner-windows-smoke-$i.err.log"
+            $remaining = [int][math]::Floor(($deadline - (Get-Date)).TotalSeconds)
+            $env:PEER_SMOKE_DEADLINE_SECS = [math]::Max($remaining - 30, 10)
+            $p = Start-Process python -ArgumentList 'tests/fixtures/peer-job-runner-windows-smoke.py' `
+              -NoNewWindow -PassThru -RedirectStandardOutput $out -RedirectStandardError $err
+            # Start-Process leaves ExitCode empty unless the handle is opened while the process runs.
+            $null = $p.Handle
+            $finished = $p.WaitForExit([math]::Max($remaining, 1) * 1000)
+            $text = (@($err, $out) | ForEach-Object { Get-Content -Raw -ErrorAction SilentlyContinue $_ }) -join "`n"
+            if (-not $finished) {
+              if ($text) { Write-Host $text }
+              Write-Host "::error::Windows smoke attempt $i was still running at the step's 6-minute deadline (#1794)"
+              Stop-StepProcesses
+              exit 1
+            }
+            $code = $p.ExitCode
+            if (($code -eq 0) -or ($text -notmatch 'DLL load failed while importing _ctypes') -or ($i -eq $max)) {
+              if ($text) { Write-Host $text }
+              if ($code -ne 0) { Stop-StepProcesses }
+              exit $code
+            }
+            Write-Host "Windows smoke hit known _ctypes flake (attempt $i/$max, exit $code); output suppressed, retrying"
+            Start-Sleep -Seconds 15
+          }
+
+      - name: Peer-job-runner parity
+        run: bun test tests/peer-job-runner-parity.test.ts
+
+      - name: pr-snapshot platform primitives
+        run: python tests/fixtures/pr-snapshot-platform.py
+
+      # Runs the scratch-root preamble exactly as the skills ship it, under Git Bash. The
+      # POSIX suite cannot cover this: `install -d -m 700` works there and fails only here
+      # (#1285), so a shape assertion stayed green while every skill's scratch setup aborted
+      # on Windows. Shell out via bun so the same file also runs in the ubuntu suite.
+      - name: Scratch-root preamble executes under Git Bash
+        run: bun test tests/scratch-root-preamble-executes.test.ts
+
+      # acpx needs Node >= 22.13; the runner image's default Node may be older.
+      - name: Setup Node for the acpx worker smoke
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      # Runs a cross-model worker through peer-job-runner.py under Git Bash with a
+      # stub npx: a published result, an idle reap with no surviving process (Git
+      # Bash's ps has no -o), and opencode reported unavailable on native Windows.
+      - name: acpx worker smoke under Git Bash
+        shell: bash
+        timeout-minutes: 4
+        run: bash tests/windows/acpx-worker-smoke.sh
+
+  # The cross-model workers' skip-evidence helper once stalled for minutes on macOS
+  # /bin/bash 3.2 (#1785). Ubuntu's bash 5 cannot reproduce that, so this job runs the
+  # guard under the real 3.2 and fails if the image stops shipping it.
+  macos-bash32:
+    runs-on: macos-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v6
+
+      # Call /bin/bash explicitly: the runner's PATH bash is Homebrew bash 5.
+      - name: Require bash 3.x at /bin/bash
+        run: |
+          /bin/bash -c 'echo "/bin/bash is $BASH_VERSION"; case "$BASH_VERSION" in 3.*) ;; *) echo "::error::/bin/bash is not bash 3.x, so this job cannot observe the bash 3.2 regression"; exit 1 ;; esac'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      # bun exits 0 when the named test is skipped, so the summary must show it ran.
+      # An explicit `shell: bash` adds pipefail, so bun's exit status survives `| tee`.
+      - name: Failure-evidence guard under bash 3.2
+        shell: bash
+        run: |
+          log="$RUNNER_TEMP/guard.log"
+          bun test tests/skills/cross-model-peer-budget.test.ts -t "cross-model failure evidence" 2>&1 | tee "$log"
+          grep -Eq '^ *[1-9][0-9]* pass$' "$log" || { echo "::error::the failure-evidence guard did not run"; exit 1; }
+          if grep -Eq '^ *[1-9][0-9]* (skip|todo)$' "$log"; then echo "::error::the failure-evidence guard was skipped"; exit 1; fi

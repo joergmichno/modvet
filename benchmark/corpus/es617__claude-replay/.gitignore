@@ -1,0 +1,5 @@
+node_modules/
+*.tgz
+template/player.min.html
+.DS_Store
+test-results/

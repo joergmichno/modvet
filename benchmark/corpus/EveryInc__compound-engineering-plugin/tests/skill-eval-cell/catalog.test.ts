@@ -1,0 +1,425 @@
+import { describe, expect, test } from "bun:test"
+import { spawnSync } from "node:child_process"
+import fs from "node:fs"
+import os from "node:os"
+import path from "node:path"
+import {
+  ISSUE_1482_BASE_REF,
+  POST_SWEEP_REF,
+  PRE_SWEEP_REF,
+  SCENARIOS,
+  WAVE1,
+  scenarioById,
+  scenarioHasDecisionGrade,
+} from "./catalog"
+import { REPO_ROOT, WORKTREE_REF } from "./extract"
+import { gradeHost } from "./grade"
+
+const skillsDir = path.join(REPO_ROOT, "skills")
+
+function shippedSkills(): string[] {
+  return fs
+    .readdirSync(skillsDir)
+    .filter((name) => fs.existsSync(path.join(skillsDir, name, "SKILL.md")))
+    .sort()
+}
+
+function gitPathExists(ref: string, gitPath: string): boolean {
+  if (ref === WORKTREE_REF) return fs.existsSync(path.join(REPO_ROOT, gitPath))
+  return spawnSync("git", ["cat-file", "-e", `${ref}:${gitPath}`], { cwd: REPO_ROOT }).status === 0
+}
+
+const skillAtRef = new Map<string, boolean>()
+function gitShowExists(ref: string, skill: string): boolean {
+  const key = `${ref}:${skill}`
+  const cached = skillAtRef.get(key)
+  if (cached !== undefined) return cached
+  const exists = gitPathExists(ref, `skills/${skill}/SKILL.md`)
+  skillAtRef.set(key, exists)
+  return exists
+}
+
+describe("skill-eval-cell catalog", () => {
+  test("every scenario grades a decision or an artifact", () => {
+    expect(SCENARIOS.filter((s) => !scenarioHasDecisionGrade(s)).map((s) => s.id)).toEqual([])
+  })
+
+  test("catalog skills are a subset of shipped skills", () => {
+    const shipped = new Set(shippedSkills())
+    expect(SCENARIOS.map((s) => s.skill).filter((name) => !shipped.has(name))).toEqual([])
+  })
+
+  test("scenario ids are unique", () => {
+    const ids = SCENARIOS.map((s) => s.id)
+    expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  test("issue #1482 scenarios use the exact pre-change baseline", () => {
+    const issue1482 = new Set([
+      "ce-plan/no-implement",
+      "ce-work/requirements-only-stops",
+      "ce-work/return-to-caller-no-pr",
+      "lfg/plan-first",
+    ])
+
+    expect(
+      SCENARIOS.filter((scenario) => issue1482.has(scenario.id)).map((scenario) => [
+        scenario.id,
+        scenario.baseline_ref,
+      ]),
+    ).toEqual(
+      [...issue1482].map((id) => [id, ISSUE_1482_BASE_REF]),
+    )
+    expect(SCENARIOS.find((scenario) => scenario.id === "ce-code-review/report-only-default")?.baseline_ref).toBeUndefined()
+  })
+
+  test("WAVE1 ids exist in the catalog", () => {
+    const ids = new Set(SCENARIOS.map((s) => s.id))
+    expect(WAVE1.filter((id) => !ids.has(id))).toEqual([])
+  })
+
+  test("every scenario skill exists at its runnable arm refs", () => {
+    const missing: string[] = []
+    for (const scenario of SCENARIOS) {
+      // A post-only row for a skill that did not exist at the sweep baseline has no pre arm to resolve.
+      const preRef = scenario.baseline_ref ?? PRE_SWEEP_REF
+      if (!scenario.post_only && !gitShowExists(preRef, scenario.skill)) {
+        missing.push(`${scenario.skill} missing at ${preRef}`)
+      }
+      if (!gitShowExists(POST_SWEEP_REF, scenario.skill)) {
+        missing.push(`${scenario.skill} missing at ${POST_SWEEP_REF}`)
+      }
+    }
+    expect(missing).toEqual([])
+  })
+
+  test("fixture paths exist and tasks are non-empty", () => {
+    const bad: string[] = []
+    for (const s of SCENARIOS) {
+      if (!s.task.trim()) bad.push(`${s.id}: empty task`)
+      if (s.fixture && !fs.existsSync(path.join(REPO_ROOT, s.fixture))) {
+        bad.push(`${s.id}: missing fixture ${s.fixture}`)
+      }
+    }
+    expect(bad).toEqual([])
+  })
+
+  test("workspace_read paths exist in the scenario fixture", () => {
+    const missing: string[] = []
+    for (const s of SCENARIOS) {
+      if (!s.grade.workspace_read?.length) continue
+      if (!s.fixture) {
+        missing.push(`${s.id}: workspace_read without a fixture`)
+        continue
+      }
+      for (const rel of s.grade.workspace_read) {
+        if (!fs.existsSync(path.join(REPO_ROOT, s.fixture, rel))) {
+          missing.push(`${s.id}: ${rel} missing under ${s.fixture}`)
+        }
+      }
+    }
+    expect(missing).toEqual([])
+  })
+
+  test("files_read_post pointers exist on the arm that grades them", () => {
+    const missing: string[] = []
+    for (const s of SCENARIOS) {
+      for (const rel of s.grade.files_read_post ?? []) {
+        const refs = [POST_SWEEP_REF, ...(s.preview_ref ? [s.preview_ref] : [])]
+        for (const ref of refs) {
+          if (!gitPathExists(ref, `skills/${s.skill}/${rel}`)) {
+            missing.push(`${s.id}: ${rel} missing at ${ref}`)
+          }
+        }
+      }
+    }
+    expect(missing).toEqual([])
+  })
+
+  test("required-read files are only the load-bearing ones", () => {
+    const listed = SCENARIOS.flatMap((s) =>
+      (s.grade.files_read_post ?? []).map((rel) => `${s.id}:${rel}`),
+    ).sort()
+    expect(listed).toEqual(
+      [
+        "ce-babysit-pr/check-only-answer-reactivates-source:references/tick.md",
+        "ce-babysit-pr/behind-reads-branch-currency:references/branch-currency.md",
+        "ce-babysit-pr/pipeline-returns-canonical-human-decision:references/pipeline.md",
+        "ce-brainstorm/lightweight-ends-in-chat:references/phase-0.md",
+        "ce-brainstorm/lookup-not-ask:references/interaction-rules.md",
+        "ce-brainstorm/requested-bakeoff-confirmation:references/approaches.md",
+        "ce-brainstorm/requested-bakeoff-confirmation:references/bakeoff.md",
+        "ce-brainstorm/standard-scope-routes-to-file:references/phase-0.md",
+        "ce-brainstorm/verdict-routes-to-pov:references/phase-0.md",
+        "ce-brainstorm/verdict-routes-to-pov:references/verdict-routing.md",
+        "ce-brainstorm/write-plan-reads-plan-write:references/plan-write.md",
+        "ce-code-review/artifact-quote-before-filter:references/finish-review.md",
+        "ce-code-review/depth-gate-ci-focused:references/modes-and-output.md",
+        "ce-code-review/cross-model-fold-in-folded:references/cross-model-review.md",
+        "ce-code-review/cross-model-fold-in-recovery:references/cross-model-recovery.md",
+        "ce-code-review/depth-gate-auth-full:references/modes-and-output.md",
+        "ce-code-review/depth-gate-focused:references/modes-and-output.md",
+        "ce-code-review/depth-gate-lite-procedure:references/depth-paths.md",
+        "ce-code-review/depth-gate-lite-procedure:references/modes-and-output.md",
+        "ce-code-review/depth-gate-loud-lite:references/modes-and-output.md",
+        "ce-code-review/depth-gate-prose-only:references/modes-and-output.md",
+        "ce-code-review/depth-gate-plan-lite:references/depth-paths.md",
+        "ce-code-review/depth-gate-plan-lite:references/intent-and-plan.md",
+        "ce-code-review/depth-gate-plan-lite:references/modes-and-output.md",
+        "ce-code-review/depth-gate-standards-clean:references/depth-paths.md",
+        "ce-code-review/depth-gate-standards-clean:references/modes-and-output.md",
+        "ce-code-review/depth-gate-standards-violation:references/depth-paths.md",
+        "ce-code-review/depth-gate-standards-violation:references/modes-and-output.md",
+        "ce-code-review/depth-gate-unlisted-language:references/modes-and-output.md",
+        "ce-code-review/depth-gate-yaml-lite:references/modes-and-output.md",
+        "ce-commit-push-pr/description-only-no-commit:references/pr-description-writing.md",
+        "ce-compound-refresh/confirmed-worth-lens-deletes-only-with-quoted-artifact:references/worth-audit.md",
+        "ce-commit-push-pr/babysit-off-preserves-human-decision:references/apply-and-handoff.md",
+        "ce-debug/pipeline-convergent-fix:references/pipeline-mode.md",
+        "ce-doc-review/routine-fix-no-product-lens:references/persona-selection.md",
+        "ce-doc-review/settled-origin-no-product-lens:references/persona-selection.md",
+        "ce-doc-review/staked-position-keeps-product-lens:references/persona-selection.md",
+        "ce-doc-review/strategic-weight-keeps-product-lens:references/persona-selection.md",
+        "ce-debug/pipeline-divergent-defer:references/pipeline-mode.md",
+        "ce-handoff/resume-asks-does-not-act:references/resume.md",
+        "ce-ideate/unidentified-subject-reads-scope-gates:references/scope-gates.md",
+        "ce-optimize/cost-attribution-before-search:references/loop.md",
+        "ce-optimize/legacy-qualitative-report:references/wrap-up.md",
+        "ce-optimize/opportunity-estimates:references/loop.md",
+        "ce-optimize/result-accounting:references/wrap-up.md",
+        "ce-optimize/variant-search-without-profile:references/loop.md",
+        "ce-plan/chat-brief-small-no-file:references/output-contracts.md",
+        "ce-plan/config-model-reaches-authoring-gate:references/reasoning-elevation.md",
+        "ce-plan/auto-bakeoff-cheap-reversal-continues:references/research.md",
+        "ce-plan/auto-bakeoff-concrete-alternatives-continue:references/research.md",
+        "ce-plan/auto-bakeoff-eligible:references/research.md",
+        "ce-plan/auto-bakeoff-eligible:references/bakeoff.md",
+        "ce-plan/auto-bakeoff-interface-boundary-eligible:references/research.md",
+        "ce-plan/auto-bakeoff-interface-boundary-eligible:references/bakeoff.md",
+        "ce-plan/auto-bakeoff-settled-how-continues:references/research.md",
+        "ce-plan/auto-bakeoff-user-said-pick-one-continues:references/research.md",
+        "ce-plan/requested-bakeoff-boundary:references/research.md",
+        "ce-plan/trace-degrades-to-single-pass:references/research.md",
+        "ce-plan/trace-lightweight-own-reads:references/research.md",
+        "ce-plan/trace-skipped-rationale-established:references/research.md",
+        "ce-plan/trace-standard-behavior-dependent:references/research.md",
+        "ce-plan/requested-bakeoff-boundary:references/bakeoff.md",
+        "ce-plan/direct-trivial-stays-in-chat:references/output-contracts.md",
+        "ce-plan/no-implement:references/output-mode.md",
+        "ce-plan/no-implement:references/resume.md",
+        "ce-plan/objective-above-the-changed-component:references/plan-sections.md",
+        "ce-plan/objective-holdable-without-the-rest-of-the-plan:references/plan-sections.md",
+      "ce-polish/https-server-uses-actual-url:references/run.md",
+        "ce-polish/start-server-reads-run:references/run.md",
+        "ce-pov/oracle-dispatches-peers:references/cross-model-panel.md",
+        "ce-pov/peer-named-by-requested-model:references/cross-model-panel.md",
+        "ce-pov/stay-read-only:references/method.md",
+        "ce-prototype/batch-conflict-asks:references/annotation-loop.md",
+        "ce-prototype/clear-batch-applies-in-place:references/annotation-loop.md",
+        "ce-prototype/question-stays-in-chat:references/annotation-loop.md",
+        "ce-prototype/symptom-only-note-asks:references/annotation-loop.md",
+        "ce-prototype/wait-blocks-without-wake-up:references/annotation-loop.md",
+        "ce-prototype/wait-is-not-polled:references/annotation-loop.md",
+        "ce-prototype/rejected-avenue-does-not-converge:references/annotation-loop.md",
+        "ce-riffrec-feedback-analysis/quick-notes:references/analyzer.md",
+        "ce-riffrec-feedback-analysis/quick-notes:references/quick-bug-report.md",
+        "ce-riffrec-feedback-analysis/setup-before-recording:references/install-riffrec.md",
+        "ce-resolve-pr-feedback/bounded-failure-gets-no-more-code:references/evaluation-rubric.md",
+        "ce-resolve-pr-feedback/caller-publication-route:references/return-to-caller.md",
+      "ce-resolve-pr-feedback/judgment-bound-adjudicates:references/evaluation-rubric.md",
+        "ce-resolve-pr-feedback/pipeline-no-merge:references/pipeline-mode.md",
+        "ce-resolve-pr-feedback/pipeline-returns-complete-human-decision:references/evaluation-rubric.md",
+        "ce-resolve-pr-feedback/pipeline-returns-complete-human-decision:references/pipeline-mode.md",
+        "ce-resolve-pr-feedback/pipeline-root-adjudicates-first:references/evaluation-rubric.md",
+        "ce-resolve-pr-feedback/pipeline-root-adjudicates-first:references/pipeline-mode.md",
+        "ce-resolve-pr-feedback/saved-batch-route:references/resume.md",
+        "ce-plan/handoff-offers-ce-work-only:references/plan-handoff.md",
+        "ce-retune/selected-streak-claim:references/noise-floor.md",
+        "ce-retune/fixed-null-confirmation:references/noise-floor.md",
+        "ce-retune/fresh-operational-confirmation:references/noise-floor.md",
+        "ce-retune/behavioral-failure-stops-attempt:references/noise-floor.md",
+        "ce-test-xcode/missing-mcp-stops:references/setup-and-build.md",
+        "ce-test-xcode/swiftui-inline-link-fallback:references/test-and-report.md",
+        "ce-work/behavior-fix-routes-to-review:references/input-triage.md",
+        "ce-work/chained-units-run-inline:references/execution-strategy.md",
+        "ce-work/independent-units-run-as-wave:references/execution-strategy.md",
+        "ce-work/mixed-plan-wave-then-inline:references/execution-strategy.md",
+        "ce-work/incremental-message-fallback:references/implementation-loop.md",
+        "ce-work/incremental-message-literal-message:references/implementation-loop.md",
+        "ce-work/incremental-message-project:references/implementation-loop.md",
+        "ce-work/incremental-message-recent-log:references/implementation-loop.md",
+        "ce-work/incremental-message-required-attribution:references/implementation-loop.md",
+        "ce-work/incremental-message-user-override:references/implementation-loop.md",
+        "ce-work/requirements-only-stops:references/input-triage.md",
+        "ce-work/return-to-caller-no-pr:references/input-triage.md",
+        "ce-work/return-to-caller-no-pr:references/return-to-caller.md",
+        "ce-code-review/antigravity-last-automatic-target:references/cross-model-review.md",
+        "ce-code-review/composer-not-auto-selected:references/cross-model-review.md",
+        "ce-code-review/gemini-request-binds-antigravity:references/cross-model-review.md",
+        "ce-doc-review/antigravity-last-automatic-target:references/cross-model-review.md",
+        "ce-pov/oracle-default-order-reaches-antigravity:references/cross-model-panel.md",
+        "ce-work/antigravity-default-candidates:references/cross-model-execution.md",
+        "lfg/plan-first:references/plan-brief.md",
+      ].sort(),
+    )
+  })
+
+  test.each([
+    ["BODY: - Correct widget limit", "git commit -F /tmp/message.txt -- widget.ts", true],
+    ["BODY: - Correct widget limit", 'git commit -F "/tmp/message.txt" -- widget.ts', true],
+    ["BODY: - Correct widget limit", "git commit -F '/tmp/message.txt' -- widget.ts", true],
+    ["BODY: - Correct widget limit", "git commit -F message.txt -- widget.ts", false],
+    ["", "git commit -F /tmp/message.txt -- widget.ts", false],
+    ["BODY: none", "git commit -F /tmp/message.txt -- widget.ts", false],
+    ["BODY: - Correct widget limit", 'git commit -m "Correct widget limit" -- widget.ts', false],
+  ])("incremental project message grades body %s and transport %s", (body, command, accepted) => {
+    const scenario = scenarioById("ce-work/incremental-message-project")!
+    const hostDir = fs.mkdtempSync(path.join(os.tmpdir(), "ce-message-grade-"))
+    try {
+      fs.writeFileSync(path.join(hostDir, "stdout.txt"), [
+        "SUBJECT: Correct widget limit", body, "FOOTER: none", `COMMAND: ${command}`,
+        "FILES_READ: references/implementation-loop.md", "ACTIONS: none", "DELEGATES_DISPATCHED: none",
+      ].join("\n"))
+      expect(gradeHost({ host: "claude", hostDir, arm: "post", grade: scenario.grade }).ok).toBe(accepted)
+    } finally {
+      fs.rmSync(hostDir, { recursive: true, force: true })
+    }
+  })
+
+  test("the 8KB sweep has no in-progress skills left", () => {
+    expect(SCENARIOS.filter((s) => s.cohort === "in-progress").map((s) => s.id)).toEqual([])
+  })
+
+  test("feature-only decision rows are explicitly post-only", () => {
+    expect(SCENARIOS.filter((s) => s.post_only).map((s) => s.id).sort()).toEqual([
+      "ce-babysit-pr/announced-review-that-finished-reads-ready",
+      "ce-babysit-pr/announced-review-with-nothing-to-show-waits",
+      "ce-babysit-pr/check-only-answer-reactivates-source",
+      "ce-babysit-pr/moved-evidence-restores-the-ordinary-window",
+      "ce-babysit-pr/pipeline-returns-canonical-human-decision",
+      "ce-babysit-pr/silent-reviewer-of-an-earlier-head-still-waits",
+      "ce-babysit-pr/timed-out-review-is-finished-not-approved",
+      "ce-babysit-pr/unrelated-terminal-work-is-not-the-review",
+      "ce-bakeoff/default-pov-judge",
+      "ce-bakeoff/final-synthesis-correctness",
+      "ce-bakeoff/nondecisive-unknown-allows-selection",
+      "ce-bakeoff/progress-communication",
+      "ce-bakeoff/settled-decision-restraint",
+      "ce-bakeoff/shared-brief-preserves-unknowns",
+      "ce-bakeoff/timing-evidence",
+      "ce-bakeoff/unavailable-independence",
+      "ce-bakeoff/unverified-guarantee-blocks-selection",
+      "ce-brainstorm/requested-bakeoff-confirmation",
+      "ce-code-review/cross-model-fold-in-folded",
+      "ce-code-review/cross-model-fold-in-recovery",
+      "ce-code-review/depth-gate-auth-full",
+      "ce-code-review/depth-gate-ci-focused",
+      "ce-code-review/depth-gate-focused",
+      "ce-code-review/depth-gate-lite-procedure",
+      "ce-code-review/depth-gate-loud-lite",
+      "ce-code-review/depth-gate-plan-lite",
+      "ce-code-review/depth-gate-prose-only",
+      "ce-code-review/depth-gate-standards-clean",
+      "ce-code-review/depth-gate-standards-violation",
+      "ce-code-review/depth-gate-unlisted-language",
+      "ce-code-review/depth-gate-yaml-lite",
+      "ce-code-review/validator-veto-routes-protected-rejections",
+      "ce-commit-push-pr/babysit-off-preserves-human-decision",
+      "ce-commit-push-pr/project-publishing-gate",
+      "ce-compound-refresh/confirmed-worth-lens-deletes-only-with-quoted-artifact",
+      "ce-compound-refresh/guidance-survives-implementation-conflict",
+      "ce-compound-refresh/plain-refresh-keeps-redundant-accurate-doc",
+      "ce-compound-refresh/worth-lens-intent-confirms-before-loading",
+      "ce-debug/pipeline-divergent-defer",
+      "ce-doc-review/approval-versus-judgment-summary",
+      "ce-doc-review/peer-outcome-disabled-by-config",
+      "ce-doc-review/peer-outcome-folded",
+      "ce-doc-review/peer-outcome-started-failed",
+      "ce-doc-review/peer-outcome-started-no-artifact",
+      "ce-noslop/dense-paragraph-keeps-every-claim",
+      "ce-noslop/detect-names-patterns-without-rewrite",
+      "ce-noslop/facts-survive-the-edit",
+      "ce-noslop/fixes-leave-full-sentences",
+      "ce-noslop/non-english-runs-tests-only",
+      "ce-noslop/protected-spans-stay-byte-identical",
+      "ce-noslop/two-devices-stay-unchanged",
+      "ce-noslop/workflow-jargon-keeps-technical-detail",
+      "ce-plan/auto-bakeoff-chat-brief-continues",
+      "ce-plan/auto-bakeoff-concrete-alternatives-continue",
+      "ce-plan/auto-bakeoff-eligible",
+      "ce-plan/auto-bakeoff-interface-boundary-eligible",
+      "ce-plan/auto-bakeoff-user-said-pick-one-continues",
+      "ce-plan/config-model-reaches-authoring-gate",
+      "ce-plan/requested-bakeoff-boundary",
+      "ce-plan/trace-degrades-to-single-pass",
+      "ce-plan/trace-lightweight-own-reads",
+      "ce-plan/trace-skipped-rationale-established",
+      "ce-pov/peer-named-by-requested-model",
+      "ce-pov/rough-options-need-development",
+      "ce-prototype/batch-conflict-asks",
+      "ce-prototype/clear-batch-applies-in-place",
+      "ce-prototype/question-stays-in-chat",
+      "ce-prototype/rejected-avenue-does-not-converge",
+      "ce-resolve-pr-feedback/pipeline-returns-complete-human-decision",
+      "ce-setup/instruction-file-covered-offers-nothing",
+      "ce-setup/instruction-file-gap-offers-store-and-directive",
+    ])
+  })
+
+  test("the post arm resolves the working tree, not a commit", () => {
+    expect(POST_SWEEP_REF).toBe(WORKTREE_REF)
+  })
+
+  test("a read-only restraint row also carries a positive probe", () => {
+    // Under read_only the forbidden mutation is impossible, so must_exclude alone
+    // can never fail. Something that observes the stated decision has to be present.
+    const vacuous = SCENARIOS.filter((s) => {
+      if (!s.read_only || !s.grade.must_exclude?.length) return false
+      return (
+        !s.grade.must_include?.length &&
+        !s.grade.must_include_any?.length &&
+        !Object.keys(s.grade.declared ?? {}).length &&
+        !s.grade.files_read_post?.length &&
+        !s.grade.workspace_read?.length
+      )
+    }).map((s) => s.id)
+    expect(vacuous).toEqual([])
+  })
+
+  test("preview refs are only on in-progress skills and resolve when set", () => {
+    const bad: string[] = []
+    const resolved = new Map<string, boolean>()
+    for (const s of SCENARIOS) {
+      if (s.preview_ref && s.cohort !== "in-progress") bad.push(`${s.id}: preview_ref on ${s.cohort}`)
+      if (!s.preview_ref) continue
+      let ok = resolved.get(s.preview_ref)
+      if (ok === undefined) {
+        const r = spawnSync("git", ["rev-parse", "--verify", s.preview_ref], { cwd: REPO_ROOT })
+        ok = r.status === 0
+        resolved.set(s.preview_ref, ok)
+      }
+      if (!ok) bad.push(`${s.id}: preview_ref ${s.preview_ref} does not resolve`)
+    }
+    expect(bad).toEqual([])
+  })
+
+  test("ce-optimize eval needles are not satisfied by parroting the task or refusing the path", () => {
+    const accounting = SCENARIOS.find((s) => s.id === "ce-optimize/result-accounting")
+    expect(accounting?.grade.must_include).toContain("50 ms")
+    expect(accounting?.grade.must_include).toContain("integrated")
+    expect(accounting?.task.toLowerCase().includes("50 ms")).toBe(false)
+    expect(accounting?.task.toLowerCase().includes("integrated")).toBe(false)
+
+    // The single NEXT line is graded exactly, so a run that declares the other option
+    // and later names the expected one as the rejected path cannot pass; the task
+    // states both options and must not open with the answer.
+    const attribution = SCENARIOS.find((s) => s.id === "ce-optimize/cost-attribution-before-search")
+    expect(attribution?.grade.declared).toEqual({ NEXT: "measure" })
+    expect(attribution?.task.startsWith("NEXT:")).toBe(false)
+
+    const variants = SCENARIOS.find((s) => s.id === "ce-optimize/variant-search-without-profile")
+    expect(variants?.grade.declared).toEqual({ NEXT: "implement" })
+    expect(variants?.task.startsWith("NEXT:")).toBe(false)
+    expect(variants?.grade.must_include).toEqual(["HDBSCAN", "boilerplate"])
+  })
+})

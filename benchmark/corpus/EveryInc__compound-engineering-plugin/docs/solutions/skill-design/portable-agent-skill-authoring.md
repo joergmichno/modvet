@@ -1,0 +1,514 @@
+---
+title: Portable agent skill authoring across models and harnesses
+date: 2026-07-11
+category: skill-design
+module: compound-engineering
+problem_type: best_practice
+component: development_workflow
+severity: high
+applies_when:
+  - Creating or materially revising a skill that is distributed to multiple agent models or harnesses
+  - Reviewing skill prose for cross-model behavior, harness portability, authority, or over-prompting
+  - Choosing deterministic checks and targeted behavior evals for a skill change
+tags:
+  - skill-design
+  - cross-model
+  - cross-harness
+  - prompting-guidance
+  - protocol
+  - judgment
+  - skill-eval
+last_updated: 2026-09-11
+---
+
+# Portable Agent Skill Authoring
+
+Use this guide when creating or materially revising a skill that must work across models and agent harnesses.
+
+The governing idea is simple:
+
+> Start with the outcome and intent. Add only the smallest protocol needed to protect that outcome across runtimes.
+
+You are always authoring from inside one model and one harness. Treat that runtime as one data point, not as the definition of how agents behave.
+
+This guide is not a template whose every section must appear in every skill. A small skill may need only an outcome, a completion condition, and one boundary. Add the rest only when the skill's risk, observed behavior, or downstream contract justifies it.
+
+## Author in this order
+
+| Layer | What belongs there | When to include it |
+|---|---|---|
+| Outcome spine | Result or decision, next consumer, done condition, and non-obvious intent | Always first; a small skill may express it in one sentence |
+| Hard protocol | Falsifiable scope, gates, state, evidence, coverage, authority, and failure behavior | Only when omission can produce a wrong path or unsafe action |
+| Load-bearing workflow | Sequence whose order materially changes correctness | Only for invariant ordering |
+| Useful context | Domain facts, schemas, examples, specialist payloads, and late routes | Conditionally, when it can change judgment |
+| Adapters and techniques | Harness capability detection, verified tool adapters, path mechanics, and optional methods | As defaults or heuristics, never as the portable core |
+
+The minimal form is the outcome spine plus only the protocol this skill needs, ending in completion or an explicit blocker.
+
+Prefer small units of weaker-model insurance. Put one threshold, enum, count, quantifier, or gate beside the action it protects. Do not add a paragraph of defensive workflow when one falsifiable rule closes the observed gap.
+
+If a capable model's output becomes worse after adding prose, remove judgment guidance and non-load-bearing steps first. Do not respond to lost judgment quality by stacking more protocol.
+
+### Every instruction must earn its cost
+
+Always-loaded prose compounds across the workflow. Keep an instruction when it adds falsifiable protocol, counters a demonstrated model or harness tendency, or supplies domain knowledge that can materially change a decision. Vague effort or quality language does not earn that cost by itself.
+
+Prefer an observable rule over a qualitative exhortation:
+
+| Instead of | State what the instruction must change |
+|---|---|
+| "Be thorough." | "Check every changed execution path and report any path you could not verify." |
+| "Produce high-quality work." | "The handoff must name the decision, supporting evidence, unresolved risk, and next owner." |
+| "Be concise." | "For a short CLI-wrapper report, include command, exit status, output path/size, and stderr or blocker; omit secondary detail first." |
+
+This reflects current vendor guidance, not a preference for terseness. [OpenAI's GPT-5.6 guidance](https://developers.openai.com/api/docs/guides/prompt-guidance-gpt-5p6) says leaner prompts can improve task performance and token efficiency, to state each instruction once, and to keep examples only when they encode a product requirement or measured gap. [Fable 5 guidance](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5) says brief instructions can replace behavior-by-behavior enumeration and warns that skills tuned for earlier models may be too prescriptive. [Anthropic's skill best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices) says to match degrees of freedom to task fragility.
+
+For Compound Engineering's multi-model skills, portable means Sol-first and Fable-acceptable. When Fable guidance to strip procedure or add a brevity block conflicts with Sol guidance to preserve a known-good command, required report content, or no blanket brevity slogan, keep the Sol form. Fable's strong instruction following tolerates a slightly thicker skill; Sol undershoots when Sol-critical determinism is omitted.
+
+For portable Sol/Fable skills, control output length by naming what shortened output must preserve. Do not paste a Fable-only brevity block or ship a blanket "be concise" / "keep it short" slogan into a cross-model skill; GPT-5.6 Sol can undershoot when broad brevity instructions stack on top of its default concision. Numeric word or bullet caps are not a length control either: when user-facing output runs long, tighten the rule that decides what goes in, such as what the reader needs to judge the result, effects rather than mechanisms, and no replay of what the user said (`confirmations-filter-by-salience-not-length-caps.md`).
+
+Write instructions in the language the agent should use with the reader. Name who acts, what they do, and why it matters when that information is needed. Replace invented labels and internal workflow jargon with the action or consequence they mean. Keep necessary technical terms and exact identifiers, explaining unfamiliar terms where the reader needs them. Clarity must preserve evidence, qualifications, and required detail; shorter text is not the goal.
+
+Gloss-and-keep is not compliance. Defining a plugin-internal noun once and then repeating it in later sentences still leaves the later sentences unreadable without the glossary. After that one definition, later sentences name the actor, the action, and the stop condition in ordinary words. Repeating the old word so the reader learns it is the failure the definition was meant to end. A leftover occurrence is a pinned token, status, invocation, field name, filename, test-pinned sentence, or true domain English.
+
+This is not a ban on targeted steering. A phrase that counters a documented runtime behavior can stay as a model-behavior adapter: name the condition it addresses and verify the effect rather than promoting it to a universal quality slogan.
+
+Verification instructions should elicit an observable check of the final artifact at its requested fidelity, including changes made after review. Test whether the agent chooses and performs that check from the ordinary workflow request; success when a separate prompt names the check establishes capability, not reliable workflow behavior.
+
+This is an admission principle, not a mandate to delete unfamiliar detail. A line that feels redundant may be targeted insurance for a more literal model or a different harness. Test that possibility before removing it.
+
+## The portability problem
+
+A portable skill operates across two execution axes under one authority overlay:
+
+1. **Model behavior:** how literally the model follows scope, how much structure it invents, and how it handles ambiguity, effort, and delegation.
+2. **Harness mechanics:** which tools, paths, permissions, delegation primitives, and loading behavior are available.
+3. **Authority context:** system, harness, user, organization, and project instructions that constrain both axes.
+
+Author against all three. Do not mistake behavior supplied by the current model or harness for behavior guaranteed by the skill.
+
+## Your model is not a neutral author
+
+Before changing a skill, state which model or capability tier and harness you are using. Then ask what that runtime may mask or exaggerate.
+
+| Authoring reaction | Possible bias | Portability check |
+|---|---|---|
+| "This rule is redundant." | Your model supplies the behavior without prompting. | Does a more literal model still preserve the contract? |
+| "This needs more steps." | Your model or harness needs scaffolding another runtime does not. | Is the step protocol, or compensation for this runtime? |
+| "It worked in my test." | The harness supplied a tool, path, permission, or context. | What happens when that capability is absent? |
+| "This mechanic is broken." | You were asked to find changes and recognized a familiar failure pattern. | Can you reproduce it, or does the implementation already handle it? |
+| "This skill is missing X." | Review prompts bias agents toward additive recommendations. | What observable failure, unmet consumer contract, or material risk does X address? |
+
+Use this decentering procedure:
+
+1. State the current runtime.
+2. Name likely masking and compensation effects.
+3. Inspect the executed artifact, including referenced scripts, launchers, engines, and harness behavior.
+4. Separate confirmed failures from verification tasks and plausible enhancements.
+5. Test the smallest realistic behavioral floor before adding prose.
+
+## Apply guidance presumptively, not mechanically
+
+Classify guidance by strength:
+
+| Strength | Meaning | Deviation rule |
+|---|---|---|
+| Invariant | Required for correctness, safety, or the artifact contract | Deviate only when the invariant does not apply or a higher-priority instruction conflicts |
+| Default | The best general choice, but not a theorem about every implementation | Override with a concrete local fact, named consequence, substitute safeguard, and verification |
+| Heuristic | A useful technique or diagnostic question | Apply only when useful |
+
+Local evidence may override general guidance. Preference, confidence, and convenience may not.
+
+When a material deviation is necessary, record it proportionally:
+
+```text
+Guide deviation:
+- Rule and strength:
+- Local fact that makes the normal form unsuitable:
+- Failure, cost, or conflict the normal form would create here:
+- Chosen alternative and substitute safeguard:
+- Verification:
+```
+
+"This skill is unusual" is not a deviation record. If the same justified exception recurs, update the guide instead of multiplying local carve-outs.
+
+## Build the skill around an outcome spine
+
+State these before workflow:
+
+- **Result:** the artifact or decision the skill must produce.
+- **Next consumer:** the user, agent, skill, or system that uses it next.
+- **Done:** the observable completion condition.
+- **Intent:** only the non-obvious reason that could change the approach.
+
+Intent is useful when it helps a capable model distinguish the real goal from ancillary instructions. Motivational rationale that does not change behavior is noise.
+
+The protocol kernel begins with outcome and completion behavior. Add other fields only when they materially constrain the skill:
+
+- Authority, when sources may conflict.
+- Boundaries, when scope or mutation is risky.
+- Decision state, when work persists or branches.
+- Act/ask rules, when ambiguity can change scope or authority.
+- Evidence rules, when claims need provenance.
+- Coverage floors, when missing a category silently makes the result incomplete.
+- Failure branches, when a missing capability could otherwise cause a silent skip.
+
+**A skill another skill invokes runs in the caller's context on every host; there is no subagent boundary.** Anything it "returns" beyond its primary output is text the caller writes next, and that next write is often the user's message or an artifact such as a PR body. When the contract carries a caller-only channel (a change summary, a status note, a receipt), state at the callee when it is produced and where it may land: outside the primary output, out of any artifact, and only with a requester who asked. Fix this at the callee once; consumers cannot be taught to strip a channel they did not design. Worked case: `inline-callee-side-channel-must-name-where-it-may-not-land.md`. The same fact governs the turn boundary. Nothing resumes a caller when its callee returns, so a callee's return contract states that the return ends the skill and the caller's next step follows in the same session. A callee may claim the turn only under the condition that nothing invoked it. An orchestrator's completion rule states that a child's return resumes its next step in the same turn. Observed 2026-09-14: `lfg` ended the turn after `ce-debug` returned, because the callee called its return the final output and the caller said nothing about continuing.
+
+If many invariants share one outcome, authority domain, mutable state, and definition of done, keep one skill with an invariant index and conditional expansions. Split when outcomes, triggers, authority domains, audiences, or lifecycles are independently meaningful. Do not reduce visible line count by creating a hidden cross-skill state machine.
+
+## Make activation portable
+
+The name and description are an activation contract. A correct body is useless if it never runs. For a model-invoked skill, the description is also a context pointer: it sits in the window every turn, so it is pruned harder than the body.
+
+- Sentence 1 names the distinctive mechanism (what a sibling would not produce), front-loading the leading word that should fire it in prompts.
+- List one trigger per genuinely distinct branch in "Use when..." or "Use for..." form, written as an observable work-state.
+- Prefer "Use <sibling> for <that job>"; keep "Not for" only when the same words fire both skills. If the skill is harmful on the wrong job, put "Use only when" / "Skip when" in the description.
+- Preserve deliberate invocation as a fallback when automatic routing is unavailable.
+- Use capability language instead of relying on one harness's command syntax.
+- Do not open with identity boilerplate, catalog synonyms or examples of one branch, stuff quoted utterances or slash names into a model-invoked description, dump workflow, flags, or phase lists, or spend description words on content the body already carries. Distinctive how may stay. Quoted phrases and `/name` aliases belong only on a user-invoked or `disable-model-invocation` skill, after the mechanism.
+
+For an automatically routed follow-up that writes a durable artifact, a completion signal identifies the checkpoint, not eligibility. Pair it with a value condition that distinguishes knowledge missing from the primary artifacts from facts a reader can readily recover there. Put the cheap full gate in the caller and repeat the no-yield boundary in the skill, so routine completion does not launch an expensive workflow and direct routing still self-skips when it has nothing durable to add. A useful counterfactual is whether removing the secondary artifact would make a future maintainer likely to repeat the mistake or redo substantial investigation.
+
+Evaluate activation separately from execution with a few positive triggers, adjacent negatives, explicit invocations, and description-restraint fixtures for new model-invoked skills. A routing failure is not an execution failure.
+
+### Render user invocations at the output boundary
+
+Keep agent-to-agent routing capability-first: format formal skill names as inline code (for example, `ce-plan`) and invoke the named skill through the active harness's callable skill mechanism. Exact command spelling belongs only where the skill prints or copies a user-runnable invocation. At that output seam, default to `/skill-name`; use `$skill-name` only when the active harness is Codex or explicitly documents dollar-prefixed skill invocation. On oh-my-pi (`omp`), keep the default form for model-visible targets; use native `/skill:<name>` only when the target is not model-visible because it declares `disable-model-invocation` or `hide` (for example, `/skill:ce-polish`). In prose, render only the invocation as inline code; use a fenced block only when the command stands alone. Output exactly one form. Built-in commands such as `/goal` are separate capabilities, not evidence that slash-prefixed skill names are callable in Codex.
+
+An authoring guide cannot supply runtime behavior to an installed skill. Put the smallest self-contained rendering rule immediately before the smallest section that contains all affected user-copy seams. Do not repeat it in every step; repeat it only in a separately loaded reference that independently owns output. Use a focused contract test when independently edited skills must preserve the same handoff, without duplicating the rationale or a harness matrix.
+
+## Separate protocol from judgment
+
+For each prescriptive block, ask:
+
+> If this instruction disappears, can the workflow produce a wrong path, state, count, gate, field, boundary, coverage floor, or handoff?
+
+If yes, it is likely **protocol**. Keep it explicit and falsifiable.
+
+If removal mainly gives a capable model more freedom to reason, it is likely **judgment**. First try deleting it. If the outcome spine already guides the work and the realistic floor does not drift, leave it out. If observed behavior shows the guidance is needed, compress it to the smallest principle or contrast pair that closes the gap.
+
+**A placement or format absolute is protocol-shaped and is usually judgment wearing protocol's clothes.** A rule that constrains where text may sit or what a section may contain — "never part of the opening", "always its own block", "must come after" — is normally a proxy for a coherence condition the author stated correctly right beside it. The proxy agrees with the condition on the cases the author had in mind and forbids the input for which the condition demands the opposite form, so it does not merely miss bad work: an audit built on it instructs a reader to degrade correct work. State the condition and let placement fall out of it, at the one layer that owns the decision; a copy at a site that does not own it makes the shared absolute the only clause every site agrees on. Two tells that the proxy, not the condition, is now the operative rule: the same decision restated at more than one site in a procedure, and a maintainer rejecting output the skill was followed exactly to produce. Absolutes also read differently across hosts — a literal host obeys one where a permissive host treats it as style — so verify a placement rule on both rather than assuming a single-host pass generalizes. Worked case: `state-the-condition-not-a-placement-absolute.md`.
+
+| Usually protocol | Usually judgment |
+|---|---|
+| Output paths and stable file shapes | Long menus of possible reasoning approaches |
+| Stable fields, headings, and enums | Several examples proving the same distinction |
+| Ordering, state transitions, and gates | Multi-paragraph rationale after a clear rule |
+| Counts, thresholds, and scope quantifiers | Generic quality exhortations |
+| Permission and mutation boundaries | Step-by-step reasoning the model can choose itself |
+| Required coverage categories | Creative menus that supply inspiration only |
+| Failure and completion branches | Repetition without a demonstrated drift point |
+
+A menu is not automatically judgment. If omitting one item silently drops required coverage, the menu is protocol. If omitting it only narrows creative range, it is judgment.
+
+Mixed blocks must be decomposed before classification. Preserve the invariant skeleton, required fields, enums, and coverage. Compress or remove examples and rationale separately.
+
+## Match degrees of freedom to fragility
+
+Use high freedom when many approaches are valid and context should decide: state the outcome, hard constraints, and failure direction. Use medium freedom when one pattern is preferred: give one parameterized command, script, or example. Use low freedom when one known-good invocation exists and agents fail if they invent it: interacting flags, brittle order, a format selector that actually works, clip/archive/auth recipes, or anything live `--help` will not reconstruct. Pin that command once as the default, not a suggestion.
+
+For CLI-wrapper skills, the default is one canonical invocation plus named deltas. If two recipes share the same command skeleton, they are one recipe with a parameter, not two blocks. A catalog of commands is protocol only when each command protects a distinct invariant or supplies a non-derivable fact.
+
+This is not a ban on deterministic commands or bundled scripts. A bundled script is right when the glue is deterministic and annoying — quoting, combining inspection output, or a checked flag set — and agents would rebuild it wrong. The test is: if a capable model with live `--help` still ships the wrong command, the skill must give the command; if a one-line condition would steer it correctly, the extra block is noise. A prescribed mechanism also has to run on the caller's input: when the input is control data the model transcribes (a JSON carrier, an id, a mode token), a parser named in prose runs on the model's retyping and cannot reject malformed caller bytes — put that guard in a bundled script fed by argv or stdin, or in the host's invocation layer, or record it as a host limitation (`prose-cannot-validate-caller-control-data-byte-for-byte.md`).
+
+A pinned command still needs an ordered hatch. Write: run the pinned command; if it exits non-zero, returns the wrong shape, hits a bot/auth/version signal, or another named mismatch, then inspect, run live `--help`, or use the named fallback. Do not offer the hatch as a peer option to the default.
+
+## Preserve literal scope locally
+
+More literal models often lose a distant qualifier. Keep scope beside the action it governs:
+
+- "For each candidate separately..."
+- "Return exactly three..."
+- "Do not change files outside..."
+- "Stop after the first confirmed blocker..."
+
+Prefer a local quantifier or threshold over a general reminder elsewhere in the skill.
+
+When a skill judges external text (review findings, issue bodies, user requests), do not key an exclusion on a word that text uses about itself, such as "silent" or "breaking". A literal model matches the word instead of testing the condition, so state the property that decides (`key-exclusions-on-the-deciding-property-not-an-echoed-word.md`).
+
+## Define completion, not effort
+
+Avoid open-ended instructions such as "continue until good" or "be thorough." Define observable completion instead:
+
+- required artifact exists;
+- mandatory fields are populated;
+- evidence or verification is recorded;
+- each route ends in a result, routed action, required question, or blocker;
+- no launch-blocking questions remain when readiness is claimed.
+
+Do not request hidden reasoning or chain-of-thought. Ask for decisions, evidence, assumptions, material rejected alternatives, and next actions.
+
+Every skill needs one skill-level done bar. Add local done checks only where skipping the check can produce an unsafe action, fragile transition, scope expansion, mutation, auth mistake, irreversible external effect, or silent handoff failure. A "Done when" on every paragraph is over-prescription, not rigor.
+
+## Instruct long-running execution: batch, narrate, finish
+
+In long agent loops, current models drift in three ways the skill's prose must counter: implied-parallel tool calls get issued one per turn, user-facing narration goes quiet for minutes at a time, and turns end with work described rather than performed. A skill that owns a long-running or orchestrating workflow states all three disciplines; a skill that runs a few calls and returns needs none of them.
+
+- **Batching.** Instruct the agent to first privately list what it needs next, then issue every call that does not depend on another's result in one response. For work dispatched to subagents, the same rule schedules a wave: dispatch every independent unit together, and serialize only where the dependency graph actually demands it — uncertainty is resolved by inspecting the contested files and contracts, not by defaulting to serial.
+- **Narration.** Define updates by what the user needs to understand or decide: the intended outcome at kickoff, meaningful findings and blockers during work, and a closing recap with results and limitations. During longer work, give occasional updates on what was learned and what remains. Routine internal transitions need no separate announcement. Describe the work in terms of the user's goal; expose workflow terminology only when it helps explain a decision or limitation. State what each report preserves and what belongs in artifacts; "keep the user informed" is an effort instruction, not a contract.
+- **Finishing.** Gate completion claims on performed work: a step is done only after it actually ran, describing what a step would do is not doing it, and the turn does not end while in-scope work remains undone or merely described. Pair this with the skill-level done bar rather than adding per-step ceremony.
+
+## Describe capabilities before tools
+
+Tool calls are common in skills, but a named tool should not become the portable contract unless its exact semantics are load-bearing.
+
+Write in this order:
+
+1. State the required capability.
+2. State the observable success contract.
+3. State the acceptable degradation path.
+4. Name verified tools only as adapters, short-circuits, requirements for a load-bearing property, or non-exhaustive examples.
+
+A skill drives agent-callable capabilities. A user affordance such as a slash command is not necessarily callable by the agent. Do not instruct the model to use one unless the harness exposes it as an agent-callable mechanism.
+
+Preserve the semantic floor. If every iteration requires agent reasoning, sub-skill invocation, or a fresh judgment, a shell loop that only repeats the outer command is not an equivalent fallback.
+
+Do not infer that a capability is unavailable from one missing binary, environment variable, or MCP server. Check the harness's available interfaces and degrade explicitly.
+
+### Bundled files
+
+Distinguish three path cases:
+
+| Case | Rule |
+|---|---|
+| Read-time reference | Use a relative path from the skill root |
+| Prose pointer to a file the agent acts on | Use a relative path plus "from this skill's directory" |
+| Executed shell command | Use the repository's portable skill-directory anchor pattern |
+
+Diagnose before rewriting a path. Trace the skill-to-launcher, shell-to-launcher, and engine-to-resource boundaries. An engine may already locate sibling resources through its own source path. A pattern that looks suspicious is not a defect until the failure is reproduced or a necessary failing path is identified.
+
+### Temp directories
+
+Choose by whether anything must rediscover the directory without being handed its path. A later invocation that resumes state, attaches to a live session, or polls a job it did not start needs a known root, so create that directory under the scratch-root preamble copied from a shipped skill. A directory whose absolute path is passed to everything that uses it, including a worker the run starts and later polls, may be a unique `mktemp -d "${TMPDIR:-/tmp}/<name>-XXXXXX"`: it is created private (0700) and atomically, so the scratch root adds no privacy. Never use a fixed name or a name from an optional tool such as `openssl`; two runs then share a path, or a missing tool collapses every run onto one.
+
+## Make authority proportional to risk
+
+Most read-only, single-shot, non-delegating skills need no authorization apparatus. Skip it.
+
+For consequential workflows, distinguish:
+
+- the action the user directly requested;
+- in-envelope actions that are necessary to complete it;
+- actions that remain outside the envelope;
+- higher-priority prohibitions that invocation cannot erase.
+
+Invocation may satisfy a default confirmation requirement when the skill clearly names a bounded class of mutations as part of its job. It does not override system, organization, or user prohibitions.
+
+Keep autonomy as one compact envelope. Name safe local actions — reading files, inspecting logs, editing in-scope files, and running non-destructive validation — and let in-scope work that follows from the user's request proceed, including an external write that is the requested job or named in the skill's authority envelope. Stop for confirmation when an external write, destructive action, purchase, or material scope expansion is outside that envelope, or when only the user can supply the input. Do not repeat "ask first", "do not mutate", or "wait for approval" at each step unless each occurrence marks a different boundary.
+
+Write the positive rule when invocation supplies authority:
+
+```text
+Invoking this workflow authorizes the following in-envelope actions without
+per-action confirmation, including named external writes: [...]. It does not
+authorize actions outside that envelope: [...].
+```
+
+For chained mutation workflows, carry authority as bounded data. Include the target, permitted action classes, exclusions, and whether authority is user-direct or inherited. Downstream skills may narrow inherited authority, never broaden it. If structured authority cannot travel, fall back to the harness confirmation default. A live user instruction can narrow or revoke the active envelope at any time.
+
+## Load instructions when they can change behavior
+
+Always-loaded skill prose remains in context throughout the workflow. Extract substantial content when it is conditional or late-sequence.
+
+- Keep the outcome spine, protocol kernel, and load-bearing route inline.
+- Move large schemas, specialist prompts, examples, and route-specific instructions to references.
+- Keep the instruction to load the reference inline at the point of use, and state once in the body that a read made before that point does not satisfy it; a host that reads every reference at skill load meets the letter of "read before the step" while losing both the context saving and any safety path that depends on a late read (`size-driven-skill-restructure.md`, "When a host front-loads the references").
+- Do not inline a summary complete enough to suppress loading the authoritative reference.
+- Pass large context to subagents by file path plus a short gist rather than duplicating it into prompts.
+
+Dispatch a subagent only for a reason that survives better compaction. There are four: the work must read far more than it returns and the parent will not need the raw material again; independent judgment is the product (review, verification, ideation, judging), so the parent's context would anchor it; substantial units can run in parallel without shared files or state; or the harness can actually select a different model for it. Do the work in the parent when its input lives only in the parent (the conversation, decisions settled this session), when the parent will read the full output back anyway, or when it is a small change to code the parent already read. A fresh subagent sees only what its prompt carries, so a subagent told to "extract the conversation" without being handed it is a broken dispatch, not a cheap one: `ce-compound` once drafted every learning that way. Inlining is not free either. Tokens added to a long-lived parent, such as an `lfg` or `ce-babysit-pr` chain, are re-read on every later turn, and in one measured `ce-code-review` run the orchestrator's cache reads were twice those of its six subagents combined (`review-cost-is-in-entering-the-spine-not-the-findings.md`). Each delegated task still needs a distinct scope, output contract, and synthesis owner.
+
+Stable cross-skill fields, enums, and return statuses are protocols. Version or parity-test them when independently evolving skills depend on exact agreement.
+
+## Diagnose before prescribing
+
+A review agent is biased toward producing changes. Counter that bias directly.
+
+The agent using a review must check each finding against the requested outcome. Confidence and reviewer agreement can strengthen evidence; they do not prove that a change is worthwhile or grant permission to edit. Apply the same standard to every output field so rejected suggestions do not return as risks or open questions. Reviewer personas and schema descriptions must use that same standard; a local rubric must not require concerns that synthesis is expected to discard. The agent should choose technical fixes from project evidence within the agreed outcome and constraints; permission governs whether it may apply them. Several workable approaches or newly specified details do not by themselves require a user decision. A calling workflow still owns its deliverable after review: preserve readable findings without treating the reviewer's wording, classifications, or counts as binding. When an assessment skill lacks essential context, it returns what is missing and why it matters to the calling agent instead of starting its own interview.
+
+### Suspected defects
+
+A required correctness or protocol fix must cite one of:
+
+- a reproduced failure;
+- the exact implementation path that necessarily fails.
+
+If neither is available, return a verification task instead of a change prescription.
+
+### Proposed additions
+
+An addition must name:
+
+- the observable consequence of its absence;
+- the unmet consumer contract or material risk;
+- the affected layer;
+- why the proposed mechanism is the smallest suitable one.
+
+If the value is plausible but unverified, label it **Consider**, not **Change**.
+
+Use three finding classes:
+
+- **Change:** demonstrated gap with a supported smallest fix.
+- **Verify:** concrete risk that still needs reproduction or implementation tracing.
+- **Consider:** plausible enhancement whose value has not been demonstrated.
+
+Do not solve a non-problem with a rewrite. Prefer an additive guard or explicit definition over replacing an implementation that already works.
+
+## Evaluate proportionally
+
+Mechanical checks belong in CI when they are deterministic and available to contributors:
+
+- frontmatter and schema validation;
+- broken references and path checks;
+- duplicated-contract parity;
+- stable fields, headings, and enums;
+- script and fixture tests;
+- conversion and packaging invariants.
+
+Behavioral agent evals are best-effort local evidence, not a mandatory exhaustive matrix. Use a small targeted fixture pack for the largest portability risks introduced by the change. Proportional means proportional to the skill's reach: a skill run every day gets its full entry-path matrix on every supported harness with pre/post arms and an independent grader, while a narrow change to a rarely-entered path gets the small pack (`size-driven-skill-restructure.md`, "Size the eval to the skill's reach"); for a skill that dispatches peers or returns to an orchestrator, grade on real dispatch artifacts — a fake boundary is not sufficient evidence.
+
+Prioritize:
+
+1. **Weakest realistic layer:** does the minimum supported model or harness preserve the protocol?
+2. **Strong-model regression:** did added prose reduce judgment quality, novelty, synthesis, or restraint?
+3. **Restraint:** does the agent avoid inventing defects, additions, authority machinery, or unrelated work?
+4. **Fresh downstream consumer:** can the next skill or agent use the output without clarification?
+5. **Activation:** do positive and adjacent-negative prompts route correctly?
+
+Do not imply a full model-by-harness suite for every edit. Choose fixtures tied to the biggest gotchas in the change.
+
+Use fresh context for behavioral prose evaluation. Verify that every callable copy of each workflow skill matches the frozen source in the actual host workspace, including sibling skills reached through native invocation. Record the resolved paths and content hashes. A fresh session can still load an older project-local copy after reading an updated bundle; some harnesses also cache skills at session start. Keep historical source being reviewed separate from the workflow skills executing the review.
+
+For side-effecting skills, evaluate in layers:
+
+1. Grade the intended and explicitly suppressed actions.
+2. Use fake boundaries, dry-run contracts, or mutation logs.
+3. Use an ephemeral external system if integration behavior matters.
+4. Use a live canary only when the remaining risk justifies it.
+
+Verify load-bearing harness claims live on the runtimes that depend on them. Leave unverified claims as explicit verification tasks rather than universal assertions.
+
+Read a tie honestly. If old and new prose both succeed on a strong model, the test shows no regression but not improvement. Test the claimed determinism or weaker-model insurance at the layer where it matters.
+
+Measure the outcome the skill exists to improve, not proxy volume:
+
+- creative work: grounded novelty, diversity of surviving decisions, and downstream usefulness;
+- planning: clarification burden and execution errors;
+- research: claim support and recall;
+- orchestration: correct routing, state, authority, and completion rather than tool-call count.
+
+## Authoring checklist
+
+### Outcome and restraint
+
+- [ ] The outcome spine appears before workflow.
+- [ ] Non-obvious intent is included only when it changes the approach.
+- [ ] The skill stops at the minimal form unless evidence, risk, or a consumer contract justifies more.
+- [ ] Every route has a completion or blocker branch.
+- [ ] The skill has one skill-level done bar; local done checks protect only unsafe or fragile seams.
+- [ ] Each instruction is stated once; variants name deltas instead of repeating the full rule.
+- [ ] CLI recipes that share a command skeleton are one parameterized recipe, not repeated blocks.
+- [ ] Cross-model output guidance names must-preserve content instead of using blanket "be concise" / "keep it short" slogans.
+- [ ] Vendor guidance conflicts resolve Sol-first for this org's multi-model skills; Fable-only deletions do not strip Sol-critical determinism.
+- [ ] Generic quality exhortations and motivational rationale are absent.
+- [ ] Long-running or orchestrating workflows state batching, narration, and finish-fully discipline; skills that run a few calls and return omit them.
+- [ ] A caller-only channel in an inline-invoked skill's contract (summary, status note, receipt) says when it is produced and where it may land, at the callee.
+- [ ] A callee's return or terminal report never claims the turn unconditionally; an orchestrator's completion rule says a child's return resumes its next step in the same turn.
+
+### Protocol and judgment
+
+- [ ] Protocol is explicit and falsifiable.
+- [ ] Judgment is deleted when the outcome already guides it.
+- [ ] Remaining judgment guidance is the smallest supported principle or contrast pair.
+- [ ] The degrees of freedom match the task's fragility: high for many valid approaches, medium for a preferred pattern, low for known-good fragile commands or exact sequences.
+- [ ] Required coverage menus and local quantifiers are preserved.
+- [ ] Mixed blocks were decomposed before classification.
+
+### Runtime portability
+
+- [ ] The current authoring model and harness are identified.
+- [ ] Model masking and compensation risks are stated.
+- [ ] Activation has positive, adjacent-negative, and explicit-invocation cases.
+- [ ] Capabilities and observable contracts precede named tools.
+- [ ] Missing capabilities degrade without silent skips.
+- [ ] Bundled execution paths are deterministic and were diagnosed before rewriting.
+
+### Authority and delegation
+
+- [ ] Read-only, non-delegating skills skip mutation-authority machinery.
+- [ ] Consequential workflows name their bounded mutation envelope and exclusions.
+- [ ] Higher-priority prohibitions remain intact.
+- [ ] Inherited authority is explicit and can only narrow.
+- [ ] Delegated tasks have distinct scopes, output contracts, and a synthesis owner.
+- [ ] Each subagent dispatch names its reason (flood protection, independent judgment, parallel units, or a selectable model) and receives every input it needs; work whose input lives only in the parent stays in the parent.
+
+### Evidence and evaluation
+
+- [ ] Correctness fixes cite a reproduced failure or necessary failing path.
+- [ ] Additions cite an observable consequence, consumer contract, or material risk.
+- [ ] Unconfirmed defects are verification tasks.
+- [ ] Unproven enhancements are considerations.
+- [ ] The smallest supported change is preferred.
+- [ ] Mechanical contracts are tested deterministically.
+- [ ] Targeted behavioral fixtures cover the biggest portability risks.
+- [ ] Both weaker-model insurance and strong-model regression are considered.
+
+## Compact review prompt
+
+```text
+Review or author this skill for portability across models and agent harnesses.
+
+Do not materialize every section of the guide. Start with the outcome spine:
+result, next consumer, done condition, and non-obvious intent when it changes
+the approach. Add only the protocol needed to protect that outcome.
+
+1. State the current model or capability tier and harness. Name likely masking
+   and compensation effects.
+2. Diagnose before prescribing. A correctness fix needs a reproduced failure or
+   necessary failing path. An addition needs an observable consequence, unmet
+   consumer contract, or material risk. Otherwise return Verify or Consider.
+3. Separate model behavior, harness mechanics, and authority context.
+4. Treat the name and description as an activation contract.
+5. Keep protocol explicit. Delete judgment guidance when the outcome is enough;
+   otherwise use the smallest supported principle or contrast pair. Prescribe a
+   mechanism only where this skill owns it and where the mechanism receives the
+   raw input — byte-exact validation of caller data belongs in a script fed by
+   argv or stdin, never in a prose parser recipe; a delegating skill states the
+   condition, the safe failure direction, and the non-derivable callee facts.
+   A finding that a prescribed command fails in some state, against a
+   delegating skill, is a representation finding: propose the deletion.
+6. Preserve local quantifiers, gates, stable fields, coverage floors, and
+   completion branches. Keep one skill-level done bar; add local done checks
+   only for unsafe or fragile seams.
+7. Describe capabilities and observable behavior before named tools. Preserve
+   the semantic floor and define degradation.
+8. State each instruction once. For CLI wrappers, one canonical invocation plus
+   named deltas beats repeated command blocks with the same skeleton. Pin a
+   known-good fragile command once when live `--help` is not enough; make it
+   the default with an ordered failure hatch, not a peer option.
+9. For cross-model skills, control output length by naming what a short report
+   must preserve; do not ship blanket "be concise" / "keep it short" slogans.
+10. Resolve vendor conflicts Sol-first for this org's multi-model skills:
+   Fable-only deletions must not strip Sol-critical determinism.
+11. Add authority and delegation machinery only when the skill actually mutates
+   or delegates consequential work.
+12. Use a small targeted evaluation set for the weakest realistic layer,
+   strong-model regression, restraint, activation, and the next consumer.
+13. Choose the smallest supported change and record any material deviation.
+
+Return the outcome spine, proposed skill or findings, intentionally inapplicable
+guide sections, Change/Verify/Consider findings, targeted tests, and unresolved
+decisions that would materially change the contract.
+```
+
+## Sources
+
+The principles above are model-neutral. Model-specific behavior examples should be rechecked as generations change.
+
+- [OpenAI: Prompt guidance for GPT-5.6](https://developers.openai.com/api/docs/guides/prompt-guidance-gpt-5p6)
+- [OpenAI: Model guidance](https://developers.openai.com/api/docs/guides/latest-model)
+- [OpenAI: Evals](https://developers.openai.com/api/docs/guides/evals)
+- [Anthropic: Prompt engineering overview](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview)
+- [Anthropic: Prompting Claude Fable 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5)
+- [Anthropic: Skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices)

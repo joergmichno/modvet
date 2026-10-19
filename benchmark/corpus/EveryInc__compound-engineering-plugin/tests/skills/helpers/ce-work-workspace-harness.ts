@@ -1,0 +1,454 @@
+import { afterAll, afterEach } from "bun:test"
+import { type SpawnSyncOptionsWithStringEncoding, spawnSync } from "node:child_process"
+import {
+  chmodSync,
+  cpSync,
+  existsSync,
+  linkSync,
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  realpathSync,
+  renameSync,
+  rmSync,
+  symlinkSync,
+  statSync,
+  truncateSync,
+  writeFileSync,
+} from "node:fs"
+import { tmpdir } from "node:os"
+import path from "node:path"
+import { createHash } from "node:crypto"
+import { isLostChildExit, throwLostChildExit } from "../../helpers/lost-child-exit"
+
+export { isLostChildExit, throwLostChildExit }
+
+
+export const SCRIPT = path.join(__dirname, "../../../skills/ce-work/scripts/unit-workspace.py")
+export const ADAPTER = path.join(__dirname, "../../../skills/ce-work/scripts/cross-model-work.sh")
+const roots: string[] = []
+const templateRoots: string[] = []
+const seedTemplates = new Map<string, { repo: string; digest: string; base: string }>()
+const CTL_TIMEOUT_MS = 20_000
+// Host global git often enables Linux fsmonitor (git 2.55+) and commit signing.
+// Hundreds of throwaway repos then spawn daemons or block on pinentry; Bun
+// reports "killed 1 dangling process" and the rest of the file times out.
+// Point GIT_CONFIG_GLOBAL at a real file, not /dev/null: git may try to take
+// /dev/null.lock and hang. spawnSync must SIGKILL — git ignores SIGTERM while
+// waiting on a lock, so the default timeout never reaps and the test hits 60s.
+const isolatedGitConfigRoot = mkdtempSync(path.join(tmpdir(), "ce-work-isolated-gitconfig-"))
+const isolatedGitConfig = path.join(isolatedGitConfigRoot, "config")
+writeFileSync(isolatedGitConfig, "[core]\n\tfsmonitor = false\n\tuntrackedCache = false\n")
+const isolatedGitEnv = {
+  GIT_CONFIG_GLOBAL: isolatedGitConfig,
+  GIT_CONFIG_SYSTEM: isolatedGitConfig,
+  GIT_CONFIG_NOSYSTEM: "1",
+  GIT_TERMINAL_PROMPT: "0",
+  GIT_OPTIONAL_LOCKS: "0",
+}
+
+const RUN_IN_GROUP = path.join(__dirname, "run-in-group.py")
+const GROUP_TIMEOUT_STATUS = 124 // must match TIMEOUT_STATUS in run-in-group.py
+
+// A spawnSync timeout kills only the direct child; what the Python controller
+// started (git) survives and can hold the output pipes open (#1784). Plain git
+// calls start no lasting children, so they skip the extra interpreter startup.
+function spawnInGroup(argv: string[], options: SpawnSyncOptionsWithStringEncoding, label = argv) {
+  const r = spawnSync("python3", [RUN_IN_GROUP, String(CTL_TIMEOUT_MS / 1000), ...argv], {
+    ...options,
+    timeout: CTL_TIMEOUT_MS + 10_000,
+    killSignal: "SIGKILL",
+  })
+  if (r.status === GROUP_TIMEOUT_STATUS || isLostChildExit(r)) throwLostChildExit(label)
+  return r
+}
+
+afterAll(() => {
+  for (const root of templateRoots.splice(0)) rmSync(root, { recursive: true, force: true })
+})
+
+export function tmp(prefix: string): string {
+  const root = mkdtempSync(path.join(tmpdir(), prefix))
+  roots.push(root)
+  return root
+}
+
+export function sh(cwd: string, argv: string[], check = true) {
+  const r = spawnSync(argv[0], argv.slice(1), {
+    cwd,
+    encoding: "utf8",
+    env: { ...process.env, ...isolatedGitEnv },
+    timeout: CTL_TIMEOUT_MS,
+    killSignal: "SIGKILL",
+  })
+  if (isLostChildExit(r)) throwLostChildExit(argv)
+  if (check && r.status !== 0) {
+    const detail = r.signal ? `killed by ${r.signal}` : r.stderr
+    throw new Error(`${argv.join(" ")}\n${detail}`)
+  }
+  return r
+}
+
+export function git(cwd: string, ...args: string[]): string {
+  return sh(cwd, ["git", ...args]).stdout.trim()
+}
+
+function seedTemplateOnce(objectFormat: "sha1" | "sha256"): { repo: string; digest: string; base: string } {
+  const root = mkdtempSync(path.join(tmpdir(), "ce-work-repo-template-"))
+  templateRoots.push(root)
+  const repo = path.join(root, "repo")
+  mkdirSync(repo)
+  git(repo, "init", `--object-format=${objectFormat}`, "-b", "main")
+  git(repo, "config", "core.fsmonitor", "false")
+  git(repo, "config", "core.untrackedCache", "false")
+  git(repo, "config", "user.name", "CE Work Test")
+  git(repo, "config", "user.email", "ce-work@example.test")
+  mkdirSync(path.join(repo, "docs", "plans"), { recursive: true })
+  writeFileSync(path.join(repo, "keep.txt"), "keep\n")
+  writeFileSync(path.join(repo, "delete.txt"), "delete\n")
+  writeFileSync(path.join(repo, "mode.sh"), "#!/bin/sh\necho old\n")
+  chmodSync(path.join(repo, "mode.sh"), 0o644)
+  const plan = path.join(repo, "docs", "plans", "plan.md")
+  writeFileSync(plan, "# Plan\n")
+  git(repo, "add", ".")
+  git(repo, "commit", "-m", "seed")
+  return {
+    repo,
+    digest: createHash("sha256").update(readFileSync(plan)).digest("hex"),
+    base: git(repo, "rev-parse", "HEAD"),
+  }
+}
+
+function seedTemplate(objectFormat: "sha1" | "sha256"): { repo: string; digest: string; base: string } {
+  const cached = seedTemplates.get(objectFormat)
+  // CI has lost this directory mid-file after a timed-out test. Reseed rather than
+  // throw ENOENT from every later makeRepo: a non-TimeoutError failure blocks the
+  // suite's TimeoutError-only re-run (scripts/run-tests.ts).
+  if (cached && existsSync(cached.repo)) return cached
+  let lastError: unknown
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const template = seedTemplateOnce(objectFormat)
+      seedTemplates.set(objectFormat, template)
+      return template
+    } catch (error) {
+      lastError = error
+    }
+  }
+  throw lastError
+}
+
+export function makeRepo(objectFormat: "sha1" | "sha256" = "sha1"): { repo: string; plan: string; digest: string; base: string } {
+  const template = seedTemplate(objectFormat)
+  const repo = path.join(tmp("ce-work-repo-"), "repo")
+  mkdirSync(path.dirname(repo), { recursive: true })
+  cpSync(template.repo, repo, { recursive: true })
+  return {
+    repo,
+    plan: path.join(repo, "docs", "plans", "plan.md"),
+    digest: template.digest,
+    base: template.base,
+  }
+}
+
+export function packetFile(content: string): string {
+  const packet = path.join(tmp("ce-work-packet-"), "unit.md")
+  writeFileSync(packet, content, { mode: 0o600 })
+  return packet
+}
+
+export function packetDigest(content: string): string {
+  return createHash("sha256").update(content).digest("hex")
+}
+
+export function ctl(runsRoot: string, ...args: string[]) {
+  return ctlWithEnv(runsRoot, {}, ...args)
+}
+
+export function ctlWithEnv(runsRoot: string, extraEnv: Record<string, string>, ...args: string[]) {
+  return ctlWithScriptAndEnv(SCRIPT, runsRoot, extraEnv, ...args)
+}
+
+export function ctlWithScript(script: string, runsRoot: string, ...args: string[]) {
+  return ctlWithScriptAndEnv(script, runsRoot, {}, ...args)
+}
+
+export function ctlWithScriptAndEnv(script: string, runsRoot: string, extraEnv: Record<string, string>, ...args: string[]) {
+  const r = spawnInGroup(["python3", script, ...args], {
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      ...isolatedGitEnv,
+      CE_WORK_RUNS_ROOT: runsRoot,
+      CE_PEER_JOBS_ROOT: path.dirname(runsRoot),
+      ...extraEnv,
+    },
+  })
+  const lines = r.stdout.trim().split("\n")
+  let body: any = null
+  if (lines.length > 1) body = JSON.parse(lines.slice(1).join("\n"))
+  return { code: r.status ?? -1, word: lines[0] || "", body, stderr: r.stderr }
+}
+
+export function ownerRootProbe(ownerRoot: string, runsRoot: string, foreignLike = false) {
+  const source = [
+    "import os, sys",
+    `sys.path.insert(0, ${JSON.stringify(path.dirname(SCRIPT))})`,
+    "import unit_workspace_state as state",
+    "state.OWNER_SCRATCH_ROOT = sys.argv[1]",
+    foreignLike ? "state._EFFECTIVE_UID = os.geteuid() + 1" : "",
+    "print(state.ensure_root())",
+  ].filter(Boolean).join("; ")
+  const r = spawnInGroup(["python3", "-c", source, ownerRoot], {
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      ...isolatedGitEnv,
+      CE_WORK_RUNS_ROOT: runsRoot,
+      CE_PEER_JOBS_ROOT: "",
+    },
+  }, ["python3", "-c", "ownerRootProbe", ownerRoot])
+  return r
+}
+
+export function init(runsRoot: string, runId: string, fixture: ReturnType<typeof makeRepo>) {
+  return initWithBinding(runsRoot, runId, fixture, "prefer")
+}
+
+export function initWithBinding(
+  runsRoot: string,
+  runId: string,
+  fixture: ReturnType<typeof makeRepo>,
+  mode: "prefer" | "require",
+) {
+  return ctl(
+    runsRoot,
+    "init",
+    "--run-id", runId,
+    "--repo", fixture.repo,
+    "--plan", fixture.plan,
+    "--plan-digest", fixture.digest,
+    "--binding-json", JSON.stringify({ mode, target: "codex", model: null, source: "test" }),
+    "--egress-json", '{"sanction_source":"test","route":"codex","intermediaries":[],"exposed_material":["U2"],"restrictions":[]}',
+  )
+}
+
+export function initWithPrompt(
+  runsRoot: string,
+  runId: string,
+  fixture: ReturnType<typeof makeRepo>,
+  prompt: string,
+) {
+  const brief = packetFile(prompt)
+  return {
+    brief,
+    digest: packetDigest(prompt),
+    result: ctl(
+      runsRoot,
+      "init",
+      "--run-id", runId,
+      "--repo", fixture.repo,
+      "--prompt-brief", brief,
+      "--prompt-digest", packetDigest(prompt),
+      "--binding-json", JSON.stringify({ mode: "prefer", target: "codex", model: null, source: "test" }),
+      "--egress-json", '{"sanction_source":"test","route":"codex","intermediaries":[],"exposed_material":["P1"],"restrictions":[]}',
+    ),
+  }
+}
+
+export function authorizeDispatch(
+  runsRoot: string,
+  runId: string,
+  unitId: string,
+  prepared: any,
+  overrides: Record<string, string> = {},
+) {
+  const values = {
+    runId,
+    unitId,
+    attemptId: "attempt-1",
+    authorization: prepared.authorization_path,
+    authorizationDigest: prepared.authorization_digest,
+    workspace: prepared.workspace,
+    packet: prepared.packet_path,
+    packetDigest: prepared.packet_digest,
+    resultDir: prepared.result_dir,
+    adapter: ADAPTER,
+    ...overrides,
+  }
+  const jobId = overrides.jobId ?? `job-auth-${Math.random().toString(16).slice(2)}`
+  const jobDir = path.join(runsRoot, runId, "jobs", jobId)
+  mkdirSync(jobDir, { recursive: true, mode: 0o700 })
+  chmodSync(jobDir, 0o700)
+  writeFileSync(path.join(jobDir, "meta.json"), `${JSON.stringify({
+    job_id: jobId,
+    skill: "ce-work",
+    run_id: values.runId,
+    label: values.unitId,
+    input_digest: values.packetDigest,
+    worker_argv: [values.adapter, values.authorization, values.workspace, values.packet, values.packetDigest, values.resultDir],
+    result_path: path.join(values.resultDir, "implementation-result.json"),
+  })}\n`, { mode: 0o600 })
+  return ctl(
+    runsRoot,
+    "authorize-dispatch",
+    "--run-id", values.runId,
+    "--unit-id", values.unitId,
+    "--attempt-id", values.attemptId,
+    "--job-id", jobId,
+    "--authorization", values.authorization,
+    "--authorization-digest", values.authorizationDigest,
+    "--workspace", values.workspace,
+    "--packet", values.packet,
+    "--packet-digest", values.packetDigest,
+    "--result-dir", values.resultDir,
+  )
+}
+
+export function fakeRunningJob(runsRoot: string, runId: string, unitId: string, packetContent: string, id = "job-live") {
+  const dir = path.join(runsRoot, runId, "jobs", id)
+  mkdirSync(dir, { recursive: true, mode: 0o700 })
+  chmodSync(path.join(runsRoot, runId, "jobs"), 0o700)
+  chmodSync(dir, 0o700)
+  const digest = packetDigest(packetContent)
+  const unitRoot = path.join(runsRoot, runId, "units", unitId)
+  const meta = {
+    job_id: id,
+    skill: "ce-work",
+    run_id: runId,
+    label: unitId,
+    input_digest: digest,
+    result_path: path.join(unitRoot, "result", "implementation-result.json"),
+    worker_argv: [ADAPTER, path.join(unitRoot, "authorization.json"), path.join(unitRoot, "workspace"), path.join(unitRoot, "packet.md"), digest, path.join(unitRoot, "result")],
+  }
+  for (const [name, value] of [
+    ["meta.json", JSON.stringify(meta) + "\n"],
+    ["pid", JSON.stringify({ supervisor_pid: 2_000_000_001, supervisor_pgid: 2_000_000_001, worker_pid: 2_000_000_002 }) + "\n"],
+    ["out.log", "last known activity\n"],
+  ]) {
+    writeFileSync(path.join(dir, name), value as string, { mode: 0o600 })
+    chmodSync(path.join(dir, name), 0o600)
+  }
+  return id
+}
+
+export function terminalizeFakeJob(runsRoot: string, runId: string, id: string, state: "failed" | "timeout" | "died-without-result") {
+  const dir = path.join(runsRoot, runId, "jobs", id)
+  writeFileSync(path.join(dir, "status"), `${state}\n`, { mode: 0o600 })
+  writeFileSync(path.join(dir, "reason"), `test ${state}\n`, { mode: 0o600 })
+  chmodSync(path.join(dir, "status"), 0o600)
+  chmodSync(path.join(dir, "reason"), 0o600)
+}
+
+export function fakeDoneJob(
+  runsRoot: string,
+  runId: string,
+  unitId: string,
+  packetContent: string,
+  id = "job-1",
+  terminalStatus: "completed" | "blocked" | "scope_expansion" = "completed",
+  changedFiles: string[] = [],
+) {
+  const dir = path.join(runsRoot, runId, "jobs", id)
+  mkdirSync(dir, { recursive: true, mode: 0o700 })
+  chmodSync(path.join(runsRoot, runId, "jobs"), 0o700)
+  chmodSync(dir, 0o700)
+  const digest = packetDigest(packetContent)
+  const unitRoot = path.join(runsRoot, runId, "units", unitId)
+  const resultDir = path.join(unitRoot, "result")
+  const resultPath = path.join(resultDir, "implementation-result.json")
+  const logPath = path.join(resultDir, "adapter.log")
+  const meta = {
+    job_id: id,
+    skill: "ce-work",
+    run_id: runId,
+    label: unitId,
+    input_digest: digest,
+    result_path: resultPath,
+    worker_argv: [ADAPTER, path.join(unitRoot, "authorization.json"), path.join(unitRoot, "workspace"), path.join(unitRoot, "packet.md"), digest, resultDir],
+  }
+  for (const [name, value] of [
+    ["meta.json", JSON.stringify(meta) + "\n"],
+    ["status", "done\n"],
+    ["reason", "worker exited 0\n"],
+    ["out.log", "activity\n"],
+  ]) {
+    writeFileSync(path.join(dir, name), value as string, { mode: 0o600 })
+    chmodSync(path.join(dir, name), 0o600)
+  }
+  writeFileSync(logPath, "adapter activity\n", { mode: 0o600 })
+  chmodSync(logPath, 0o600)
+  writeFileSync(resultPath, `${JSON.stringify({
+    schema_version: 1,
+    terminal_status: terminalStatus,
+    summary: "done",
+    changed_files: changedFiles,
+    evidence: ["fake"],
+    scope_expansion: terminalStatus === "scope_expansion"
+      ? { requested_paths: ["shared.ts"], reason: "required by unit" }
+      : null,
+    requested_route: "codex",
+    actual_route: "codex",
+    target: "codex",
+    harness: "codex",
+    intermediaries: [],
+    model_requested: "auto",
+    model_actual: "unverified",
+    model_receipt_status: "unverified",
+    activity_posture: "incremental",
+    restriction_posture: "cooperative",
+    failure_reason: null,
+    raw_log: logPath,
+    packet_digest: digest,
+  })}\n`, { mode: 0o600 })
+  chmodSync(resultPath, 0o600)
+  return id
+}
+
+export function registerWorkspaceCleanup(): void {
+  afterEach(() => {
+    for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true })
+  })
+}
+
+export function worktreePaths(repo: string): string[] {
+  const out = git(repo, "worktree", "list", "--porcelain")
+  return out.split("\n").filter((line) => line.startsWith("worktree ")).map((line) => path.resolve(line.slice(9)))
+}
+
+/**
+ * Seeds a node_modules-shaped ignored inventory: >512 regular files (~1 MiB
+ * total), a `.bin/` directory of shim symlinks, one hardlink pair, and
+ * optionally a nested git repository — the warm-checkout shape from the
+ * cross-model plan.
+ */
+export function seedWarmCheckoutFixture(
+  repo: string,
+  fileCount = 520,
+  fileSizeBytes = 2000,
+  options: { nestedRepo?: boolean } = {},
+) {
+  writeFileSync(path.join(repo, ".git", "info", "exclude"), options.nestedRepo ? "node_modules/\nnested/\n" : "node_modules/\n")
+  const nodeModules = path.join(repo, "node_modules")
+  const bin = path.join(nodeModules, ".bin")
+  mkdirSync(bin, { recursive: true })
+  const content = "x".repeat(fileSizeBytes)
+  const files: string[] = []
+  for (let index = 0; index < fileCount; index += 1) {
+    const name = `pkg-${index.toString().padStart(4, "0")}.js`
+    const filePath = path.join(nodeModules, name)
+    writeFileSync(filePath, content)
+    files.push(filePath)
+  }
+  symlinkSync(path.join("..", "pkg-0000.js"), path.join(bin, "tool-a"))
+  symlinkSync(path.join("..", "pkg-0001.js"), path.join(bin, "tool-b"))
+  linkSync(files[2], path.join(nodeModules, "pkg-hardlink.js"))
+  if (options.nestedRepo) {
+    const nested = path.join(repo, "nested")
+    mkdirSync(nested)
+    git(nested, "init")
+    writeFileSync(path.join(nested, "inner.txt"), "inner\n")
+  }
+  return { nodeModules, bin, files }
+}

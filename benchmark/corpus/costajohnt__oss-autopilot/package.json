@@ -1,0 +1,68 @@
+{
+  "name": "oss-autopilot",
+  "description": "AI-powered autopilot for managing open source contributions",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "bundle": "pnpm --filter @oss-autopilot/core run build && pnpm -r run bundle",
+    "start": "pnpm --filter @oss-autopilot/core run start",
+    "test": "pnpm -r run test",
+    "test:watch": "pnpm -r run test:watch",
+    "test:coverage": "pnpm -r run test:coverage",
+    "typecheck": "pnpm -r run typecheck",
+    "lint": "eslint packages/ --max-warnings 3550",
+    "lint:fix": "eslint packages/ --fix",
+    "format": "prettier --write packages/",
+    "format:check": "prettier --check packages/",
+    "docs": "pnpm --filter @oss-autopilot/core run docs",
+    "docs:check": "pnpm --filter @oss-autopilot/core run docs:check",
+    "dashboard:dev": "pnpm --filter @oss-autopilot/dashboard run dev",
+    "dashboard:build": "pnpm --filter @oss-autopilot/dashboard run build",
+    "generate:reference": "node scripts/generate-reference.mjs",
+    "prepare": "[ -n \"$CI\" ] || simple-git-hooks"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm format:check",
+    "pre-push": "pnpm run lint",
+    "commit-msg": "./scripts/commit-msg.sh \"$1\""
+  },
+  "keywords": [
+    "claude-code-plugin",
+    "open-source",
+    "github",
+    "contributions",
+    "ai-agent",
+    "cli"
+  ],
+  "author": "John Costa",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/costajohnt/oss-autopilot.git"
+  },
+  "homepage": "https://github.com/costajohnt/oss-autopilot#readme",
+  "bugs": {
+    "url": "https://github.com/costajohnt/oss-autopilot/issues"
+  },
+  "packageManager": "pnpm@10.27.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@vitest/eslint-plugin": "1.6.24",
+    "eslint": "^10.8.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import-x": "^4.17.1",
+    "eslint-plugin-n": "^18.2.2",
+    "eslint-plugin-promise": "^7.3.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-regexp": "^3.1.1",
+    "eslint-plugin-sonarjs": "^4.2.0",
+    "eslint-plugin-unicorn": "^76.0.0",
+    "prettier": "^3.9.6",
+    "simple-git-hooks": "^2.14.0",
+    "typescript-eslint": "^8.69.0"
+  }
+}

@@ -35,8 +35,8 @@ def test_malicious_mod():
     names = {f["pattern_name"] for f in rep["findings"]}
     assert rep["risk_level"] in ("CRITICAL", "HIGH"), rep["risk_level"]
     assert "Direct Override (EN/LLM01)" in names, names
-    assert "Shell Pipe Download" in names, names
-    assert "Base64 Decode Execute" in names, names
+    # Dedupe: Command-Execution-Muster feuern je Zeile nur EINMAL (schwerstes gewinnt)
+    assert any(n in names for n in ("Shell Pipe Download", "Base64 Decode Execute", "Curl Pipe to Shell (LLM03)")), names
     assert "Env-Read + POST (Exfil-Pfad)" in names, names
     assert "Hardcoded Secret" in names, names
     assert "MCP Manifest" in names, names

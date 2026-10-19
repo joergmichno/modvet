@@ -1,0 +1,4 @@
+{"role":"user","message":{"content":[{"type":"text","text":"hello"}]}}
+{"role":"assistant","message":{"content":[{"type":"text","text":"short reply"}]}}
+{"role":"user","message":{"content":[{"type":"text","text":"more"}]}}
+{"role":"assistant","message":{"content":[{"type":"text","text":"a longer reply with more content to test proportional timing"}]}}

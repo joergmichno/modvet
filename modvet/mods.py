@@ -126,6 +126,36 @@ class _CapInv:
 # env-Read in Zeile 2 + POST in Zeile 500 = normale Mod-Struktur, kein Finding.
 _MAX_MARKER_DISTANCE = 3
 
+# Command-Execution-Muster: mehrere Treffer auf DERSELBEN Zeile sind EIN Problem
+# (zenbu: curl|bash-Update = CurlPipe+RCE+ShellPipe gleichzeitig) → nur schwerstes behalten
+_CMD_EXEC_PATTERNS = frozenset({
+    "Shell Pipe Download",
+    "Curl Pipe to Shell (LLM03)",
+    "Remote Code Execution",
+    "Base64 Decode Execute",
+    "Destructive Shell Command",
+    "Base64 Decode-and-Follow Command",
+})
+
+# Harmlose System-Aufräum-Pfade (apt-cache, /tmp): kein CRITICAL
+_HARMLESS_CLEANUP_RE = re.compile(r"(/var/lib/apt/lists|/var/cache|/tmp(?:/|\"|'|\)|$))")
+
+
+def _dedupe_cmd_line(findings: list[Finding]) -> list[Finding]:
+    """Je Zeile max. 1 Command-Execution-Finding (das schwerste)."""
+    best: dict[tuple[int, str], Finding] = {}
+    for f in findings:
+        if f.pattern_name in _CMD_EXEC_PATTERNS:
+            key = (f.line_number, "cmd")
+            if key not in best or f.severity.score() > best[key].severity.score():
+                best[key] = f
+    out = []
+    for f in findings:
+        if f.pattern_name in _CMD_EXEC_PATTERNS and best[(f.line_number, "cmd")] is not f:
+            continue
+        out.append(f)
+    return out
+
 
 def discover_mod_files(root: Path) -> list[Path]:
     """Alle scanbaren Dateien unter root (ohne node_modules/.git/...)."""
@@ -222,6 +252,10 @@ def _refine_code_findings(findings: list[Finding], source: str = "") -> list[Fin
             continue  # Install-/Beispiel-Zeilen in Doku (curl|sh, rm -rf)
         if plain_doc and f.category in ("Dangerous Command", "Agentic Security"):
             continue  # Doku beschreibt Security-Verhalten, weist nichts an
+        if plain_doc and f.category == "Prompt Injection":
+            line = f.context or f.matched_text or ""
+            if _QUOTE_CHARS_RE.search(line) or _BLOCK_DESC_RE.search(line):
+                continue  # Doku BESCHREIBT Injection-Muster (Zitat/Beschreibung), injiziert nicht
         if plain_doc and f.pattern_name == "Sensitive File Access Request":
             continue  # Doku-Beschreibung, keine Anweisung
         if is_doc and f.category in ("Shell Injection", "Output Injection"):
@@ -255,8 +289,10 @@ def _refine_code_findings(findings: list[Finding], source: str = "") -> list[Fin
             line = f.context or f.matched_text or ""
             if not re.search(r"\b(mcp|server(?:Name|Config)?)\b", line, re.I):
                 continue  # kein MCP-Kontext (z.B. PrismJS-Sprachdefinitionen mit SELECT/SCHEMA)
-        if f.pattern_name == "Destructive Shell Command" and "/tmp" in (f.matched_text or ""):
+        if f.pattern_name == "Destructive Shell Command" and ("/tmp" in (f.matched_text or "") or "/tmp" in (f.context or "")):
             f = replace(f, severity=Severity.MEDIUM)  # /tmp-Aufräumen ist präzise und harmlos
+        if f.pattern_name == "Destructive Shell Command" and _HARMLESS_CLEANUP_RE.search(f.context or f.matched_text or ""):
+            f = replace(f, severity=Severity.MEDIUM)  # apt-cache/-lists-Cleanup ist Standard-Systempflege
         if f.pattern_name == "Python Dangerous File I/O":
             line = f.matched_text or ""
             if re.search(r"\/(etc|var|home)\/", line) or re.search(r"\b(credentials|passwd|shadow|ssh|\.env)\b", line):
@@ -286,6 +322,10 @@ def _refine_code_findings(findings: list[Finding], source: str = "") -> list[Fin
             line = f.context or f.matched_text or ""
             if line.lstrip().startswith(("//", "#", "--")):
                 continue  # Code-Kommentar, keine Anweisung
+            if _TEST_CONTEXT_RE.search(line) or (
+                _BLOCK_DESC_RE.search(line) and _QUOTE_CHARS_RE.search(line)
+            ):
+                continue  # Security-Tool-Testfall/-Beschreibung, kein Angriff
         if f.category == "Output Injection" and not _COMMAND_VERBS.search(f.matched_text or ""):
             continue  # Backtick-False-Positive aus Doku/Kommentaren
         if is_js and f.pattern_name == "Backtick Command Substitution":
@@ -398,19 +438,30 @@ def scan_single_file(rel: str, text: str) -> list[Finding]:
                 recommendation=rec,
                 confidence=75,
             ))
+    # 4) A4-Mod-Detektoren (Prompt-Compose-Rewrite, Tool-Call-Rewrite, Update-Trojan)
+    from .detectors_extra import scan_file as extra_scan
+    findings.extend(extra_scan(rel, text))
     # Ein Refiner-Durchlauf über ALLE Findings (Engine + Primitive + Kombinationen)
     refined = _refine_code_findings(findings, rel)
+    refined = _dedupe_cmd_line(refined)  # 1 Command-Finding je Zeile
     for f in refined:
         if not f.owasp_mcp:
             f.owasp_mcp = CATEGORY_OWASP_MCP.get(f.category, "")  # A5: OWASP-Mapping
     return refined
 
 
-def scan_mod(root: Path) -> ScanReport:
-    """Scannt einen Mod-/Skill-Ordner: Engine + Capability-Kombinationslogik, ein Report."""
+def scan_mod(root: Path, max_files: int | None = None) -> ScanReport:
+    """Scannt einen Mod-/Skill-Ordner: Engine + Capability-Kombinationslogik, ein Report.
+    max_files: optionaler Dateizahl-Cap (Benchmark-Schutz vor Riesen-Repos) —
+    gecappte Scans werden im Report-Source markiert."""
     kind = detect_kind(root)
+    files = discover_mod_files(root)
+    capped = False
+    if max_files is not None and len(files) > max_files:
+        files = files[:max_files]
+        capped = True
     findings: list[Finding] = []
-    for p in discover_mod_files(root):
+    for p in files:
         rel = str(p.relative_to(root))
         try:
             text = p.read_text(encoding="utf-8", errors="replace")
@@ -433,7 +484,7 @@ def scan_mod(root: Path) -> ScanReport:
         risk_level = "CLEAN"
     return ScanReport(
         timestamp=datetime.now(timezone.utc).isoformat(),
-        source=f"{kind}:{root}",
+        source=f"{kind}:{root}" + (f" [capped: erste {max_files} Dateien]" if capped else ""),
         total_lines=0,
         total_findings=len(findings),
         risk_score=risk_score,

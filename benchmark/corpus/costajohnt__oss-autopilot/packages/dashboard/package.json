@@ -1,0 +1,47 @@
+{
+  "name": "@oss-autopilot/dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Interactive dashboard for OSS Autopilot (Phase 3 — Preact + Vite SPA)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "bundle": "pnpm run build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "exports": {
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@oss-autopilot/core": "workspace:*",
+    "canvas-confetti": "^1.9.4",
+    "chart.js": "^4.4.8",
+    "preact": "^10.29.8",
+    "preact-iso": "^2.12.2"
+  },
+  "devDependencies": {
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@fontsource/plus-jakarta-sans": "^5.3.0",
+    "@preact/preset-vite": "^2.10.6",
+    "@testing-library/preact": "^3.2.4",
+    "@types/canvas-confetti": "^1.9.0",
+    "@vitest/coverage-v8": "^5.0.0",
+    "jsdom": "^30.0.1",
+    "typescript": "^6.0.3",
+    "vite": "^8.2.2",
+    "vitest": "^5.0.0"
+  }
+}

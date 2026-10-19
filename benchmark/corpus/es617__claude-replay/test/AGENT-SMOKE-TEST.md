@@ -1,0 +1,209 @@
+# Agent Smoke Test
+
+Run this checklist when asked to verify claude-replay before a release. Execute each step and report pass/fail.
+
+## Prerequisites
+
+```bash
+npm install
+npm run build
+```
+
+## 1. Unit tests
+
+```bash
+npm test
+```
+
+All tests must pass with zero failures.
+
+## 2. E2E tests
+
+```bash
+npx playwright test
+```
+
+All tests must pass. If browsers aren't installed, run `npx playwright install chromium` first.
+
+## 3. CLI — Claude Code format
+
+```bash
+node bin/claude-replay.mjs test/fixture.jsonl -o /tmp/smoke-claude.html --no-minify
+```
+
+- Verify exit code 0 and "3 turns" in output
+- Verify the file exists and is valid HTML: `head -1 /tmp/smoke-claude.html` should show `<!DOCTYPE html>`
+
+## 4. CLI — Cursor format
+
+```bash
+node bin/claude-replay.mjs test/fixture-cursor.jsonl -o /tmp/smoke-cursor.html --no-minify
+```
+
+- Verify exit code 0 and "2 turns" in output
+- Verify the file is valid HTML
+
+## 5. CLI — Codex format
+
+```bash
+node bin/claude-replay.mjs test/fixture-codex.jsonl -o /tmp/smoke-codex.html --no-minify
+```
+
+- Verify exit code 0 and "3 turns" in output
+- Verify the file is valid HTML
+
+## 6. CLI — real session from disk
+
+```bash
+# Find a real Claude Code session and verify it parses with > 0 turns
+REAL_SESSION=$(find ~/.claude/projects -name "*.jsonl" -type f 2>/dev/null | head -1)
+if [ -n "$REAL_SESSION" ]; then
+  node bin/claude-replay.mjs "$REAL_SESSION" -o /tmp/smoke-real.html --no-minify 2>&1
+  # Should produce > 0 turns — if it says "0 turns", detection is broken
+else
+  echo "No real Claude Code session found on this machine — skipping"
+fi
+```
+
+- Verify the turn count is > 0 (not "0 turns")
+- This catches detection bugs that synthetic fixtures miss (metadata preamble, etc.)
+
+## 7. CLI — session ID resolution
+
+```bash
+# Should find sessions or show "no session found" (not crash)
+node bin/claude-replay.mjs nonexistent-id 2>&1; echo "exit: $?"
+```
+
+- Verify it prints a helpful error message mentioning searched paths
+- Verify exit code is 1
+
+## 8. CLI — options
+
+```bash
+# Turn filtering
+node bin/claude-replay.mjs test/fixture.jsonl --turns 1-2 -o /tmp/smoke-turns.html --no-minify 2>&1
+# Should say "2 turns"
+
+# Exclude turns
+node bin/claude-replay.mjs test/fixture.jsonl --exclude-turns 1,3 -o /tmp/smoke-exclude.html --no-minify 2>&1
+# Should say "1 turns"
+
+# Paced timing
+node bin/claude-replay.mjs test/fixture.jsonl --timing paced -o /tmp/smoke-paced.html --no-minify 2>&1
+
+# Theme
+node bin/claude-replay.mjs test/fixture.jsonl --theme dracula -o /tmp/smoke-theme.html --no-minify 2>&1
+
+# List themes
+node bin/claude-replay.mjs --list-themes 2>&1
+# Should list theme names
+
+# Bookmarks
+node bin/claude-replay.mjs test/fixture.jsonl --mark "1:Start" --mark "3:Middle" -o /tmp/smoke-bookmarks.html --no-minify 2>&1
+
+# Labels
+node bin/claude-replay.mjs test/fixture.jsonl --user-label "Dev" --assistant-label "Bot" -o /tmp/smoke-labels.html --no-minify 2>&1
+
+# Redaction
+node bin/claude-replay.mjs test/fixture.jsonl --redact "BLE" -o /tmp/smoke-redact.html --no-minify --no-compress 2>&1
+# Verify: grep -c "BLE" /tmp/smoke-redact.html should be 0
+```
+
+Verify each command exits with code 0.
+
+## 9. CLI — multi-session concat
+
+```bash
+node bin/claude-replay.mjs test/fixture.jsonl test/fixture-cursor.jsonl -o /tmp/smoke-concat.html --no-minify 2>&1
+```
+
+- Should say "5 turns" (3 + 2)
+
+## 10. CLI — extract and round-trip
+
+```bash
+# Extract as JSONL (default)
+node bin/claude-replay.mjs extract /tmp/smoke-bookmarks.html -o /tmp/smoke-extracted.jsonl 2>&1
+# Should say "3 turns, 2 bookmarks"
+
+# Extract as JSON (legacy)
+node bin/claude-replay.mjs extract /tmp/smoke-claude.html -o /tmp/smoke-extracted.json --format json 2>&1
+node -e "const d=JSON.parse(require('fs').readFileSync('/tmp/smoke-extracted.json','utf8')); console.log(d.turns.length)"
+# Should print 3
+
+# Round-trip: extracted JSONL → new HTML with bookmarks preserved
+node bin/claude-replay.mjs /tmp/smoke-extracted.jsonl -o /tmp/smoke-roundtrip.html --no-minify --no-compress 2>&1
+# Should say "3 turns"
+# Verify bookmarks: grep -c '"label"' /tmp/smoke-roundtrip.html should be > 0
+```
+
+## 11. Editor server
+
+```bash
+# Start server in background
+node bin/claude-replay.mjs --port 17999 &
+SERVER_PID=$!
+sleep 1
+
+# Test API endpoints
+curl -s http://127.0.0.1:17999/api/sessions | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')); console.log('groups:', d.groups.length)"
+curl -s http://127.0.0.1:17999/api/themes | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')); console.log('themes:', d.length)"
+
+# Load a session
+curl -s -X POST http://127.0.0.1:17999/api/load -H 'Content-Type: application/json' -d "{\"path\":\"$(pwd)/test/fixture.jsonl\"}" | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')); console.log('turns:', d.turns.length, 'format:', d.format)"
+
+# Clean up
+kill $SERVER_PID
+```
+
+- Sessions endpoint should return groups (number depends on machine)
+- Themes endpoint should return 6+ themes
+- Load should return 3 turns with format "claude-code"
+
+## 12. Compressed vs uncompressed
+
+```bash
+node bin/claude-replay.mjs test/fixture.jsonl -o /tmp/smoke-compressed.html --no-minify 2>&1
+node bin/claude-replay.mjs test/fixture.jsonl -o /tmp/smoke-uncompressed.html --no-minify --no-compress 2>&1
+```
+
+- Both should produce valid HTML
+- Compressed file should be smaller: `wc -c /tmp/smoke-compressed.html /tmp/smoke-uncompressed.html`
+
+## 13. Serve and watch
+
+```bash
+# --serve should start a server
+node bin/claude-replay.mjs test/fixture.jsonl --serve --port 17998 &
+SERVE_PID=$!
+sleep 1
+
+# Should serve HTML
+curl -s http://127.0.0.1:17998 | head -1
+# Should show <!DOCTYPE html>
+
+# Reload endpoint should return version and turn count
+curl -s http://127.0.0.1:17998/__reload
+# Should return JSON with version and turns fields
+
+kill $SERVE_PID
+
+# --watch without --serve should require -o
+node bin/claude-replay.mjs test/fixture.jsonl --watch 2>&1; echo "exit: $?"
+# Should print error and exit 1
+
+# --watch -o should write file
+cp test/fixture.jsonl /tmp/smoke-watch-input.jsonl
+node bin/claude-replay.mjs /tmp/smoke-watch-input.jsonl --watch -o /tmp/smoke-watch.html &
+WATCH_PID=$!
+sleep 1
+head -1 /tmp/smoke-watch.html
+# Should show <!DOCTYPE html>
+kill $WATCH_PID
+rm /tmp/smoke-watch-input.jsonl /tmp/smoke-watch.html
+```
+
+## Reporting
+
+Report each section as PASS or FAIL. If any section fails, include the error output.

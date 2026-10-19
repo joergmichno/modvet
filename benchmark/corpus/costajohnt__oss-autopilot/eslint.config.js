@@ -1,0 +1,256 @@
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import eslintConfigPrettier from 'eslint-config-prettier';
+import importX from 'eslint-plugin-import-x';
+import nodePlugin from 'eslint-plugin-n';
+import promise from 'eslint-plugin-promise';
+import * as regexp from 'eslint-plugin-regexp';
+import vitest from '@vitest/eslint-plugin';
+import unicorn from 'eslint-plugin-unicorn';
+import sonarjs from 'eslint-plugin-sonarjs';
+import reactHooks from 'eslint-plugin-react-hooks';
+
+// Helper: take a flat-config preset and downgrade every rule it sets to 'warn'.
+// Used to onboard opinionated plugins (unicorn, sonarjs) without gating CI
+// while we triage. Ratchet to 'error' as warning counts drop.
+//
+// The ratchet is `--max-warnings` in the root `lint` script. It is set about
+// 1% above the count CI sees, and CI lints WITHOUT building, where unresolved
+// cross-package types add ~500 no-unsafe-* warnings over a built tree. So
+// measure it the same way before changing it:
+//   git worktree add /tmp/lint-count origin/main && cd /tmp/lint-count
+//   pnpm install --frozen-lockfile && pnpm exec eslint packages/
+// Lower the cap when the count drops. Raise it only with a reason in the PR.
+function downgradeToWarn(config) {
+  return {
+    ...config,
+    rules: Object.fromEntries(
+      Object.entries(config.rules ?? {}).map(([rule, value]) => [
+        rule,
+        Array.isArray(value) ? ['warn', ...value.slice(1)] : 'warn',
+      ]),
+    ),
+  };
+}
+
+export default tseslint.config(
+  eslint.configs.recommended,
+  // Type-aware preset for source files only (test files are excluded from
+  // per-package tsconfig.json — see scoped block below).
+  ...tseslint.configs.recommendedTypeChecked,
+  importX.flatConfigs.recommended,
+  // Skip importX.flatConfigs.typescript — typescript-eslint already handles
+  // module resolution; the import-x typescript resolver fights it and emits
+  // 220 spurious "invalid interface loaded as resolver" warnings.
+  nodePlugin.configs['flat/recommended-module'],
+  promise.configs['flat/recommended'],
+  regexp.configs['flat/recommended'],
+  // Unicorn + SonarJS as warnings — opinionated rule sets we want to surface
+  // gradually rather than gate CI on. See downgradeToWarn comment.
+  downgradeToWarn(unicorn.configs.recommended),
+  downgradeToWarn(sonarjs.configs.recommended),
+  eslintConfigPrettier,
+  {
+    // Root tooling scripts (and this config file) sit outside every package
+    // tsconfig, so the type-aware projectService can't parse them and a
+    // repo-root `eslint .` fails even though `eslint packages/` (the lint
+    // script) passes. They were never part of the lint gate — ignore them so
+    // both invocations agree.
+    ignores: [
+      'packages/*/dist/**',
+      'packages/*/docs/**',
+      'packages/*/coverage/**',
+      'node_modules/**',
+      '**/*.cjs',
+      'eslint.config.js',
+      'scripts/**',
+    ],
+  },
+  {
+    languageOptions: {
+      parserOptions: {
+        // projectService discovers tsconfig.json per-package automatically.
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      // Allow unused vars prefixed with _ (common pattern)
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+        },
+      ],
+      // Warn on explicit any in production code; test files override this to off
+      '@typescript-eslint/no-explicit-any': 'warn',
+      // Allow non-null assertion (used in tests)
+      '@typescript-eslint/no-non-null-assertion': 'off',
+
+      // ── Type-aware rules — kept as ERROR (these catch real bugs) ─────
+      // no-floating-promises catches the audit's silent-failure pattern;
+      // no-misused-promises catches passing async fns where sync is expected.
+      '@typescript-eslint/no-floating-promises': 'error',
+      // Allow async functions as React event handlers and as Node http.createServer
+      // callbacks — both APIs handle returned promises fine. Still catches
+      // higher-signal cases like `if (asyncFn())` and conditional checks.
+      '@typescript-eslint/no-misused-promises': [
+        'error',
+        { checksVoidReturn: { arguments: false, attributes: false, properties: false } },
+      ],
+      '@typescript-eslint/no-base-to-string': 'error',
+      '@typescript-eslint/prefer-promise-reject-errors': 'error',
+
+      // ── Type-aware rules — downgraded to WARN ───────────────────────
+      // The unsafe-* family fires heavily on JSON.parse, env vars, third-party
+      // returns. Each one needs hand-review; warn level keeps them visible
+      // without gating CI. Ratchet to error once the warning count is low.
+      '@typescript-eslint/no-unsafe-assignment': 'warn',
+      '@typescript-eslint/no-unsafe-member-access': 'warn',
+      '@typescript-eslint/no-unsafe-call': 'warn',
+      '@typescript-eslint/no-unsafe-argument': 'warn',
+      '@typescript-eslint/no-unsafe-return': 'warn',
+      '@typescript-eslint/restrict-template-expressions': 'warn',
+      '@typescript-eslint/require-await': 'warn',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
+      '@typescript-eslint/no-redundant-type-constituents': 'warn',
+
+      // import-x: dev dependencies are fine in tests + tooling
+      'import-x/no-unresolved': 'off', // typescript-eslint handles resolution
+      'import-x/named': 'off', // ditto
+      'import-x/namespace': 'off', // ditto
+      'import-x/default': 'off', // ditto
+
+      // n: turn off rules covered by typescript-eslint or that conflict with bundling
+      'n/no-missing-import': 'off', // typescript-eslint handles this
+      'n/no-unpublished-import': 'off', // false positives in workspace
+      'n/no-extraneous-import': 'off', // workspace deps confuse this
+      'n/no-process-exit': 'off', // this is a CLI — exit codes are required
+      // The hashbang rule wants `#!/usr/bin/env node` only when the file is
+      // listed in package.json `bin`. Our bin field points at the bundled
+      // dist/cli.bundle.cjs (built by esbuild from src/cli.ts), so the rule
+      // can't see the source files as bin entries. Source files DO need the
+      // shebang — esbuild copies it through to the bundle, and the CI verify
+      // step grep's for it. Disable globally; entry points keep the shebang.
+      'n/hashbang': 'off',
+
+      // ── Opinionated unicorn/sonarjs rules disabled (signal:noise too low) ──
+      // Variable naming — too subjective; we have established conventions
+      'unicorn/prevent-abbreviations': 'off',
+      // null vs undefined — codebase intentionally uses null for "absent"
+      // (matches GitHub API, JSON, and our Zod schemas)
+      'unicorn/no-null': 'off',
+      // wants `(error)` not `(err)` — bikeshed; codebase uses both
+      'unicorn/catch-error-name': 'off',
+      // Same bikeshed as catch-error-name, wider net: flags every `err`, `e`,
+      // `args`, `opts`. Was the single largest warning source (~1,200).
+      'unicorn/name-replacements': 'off',
+      // Comment layout only: leading ` * ` in JSDoc bodies and `/* x */` vs
+      // `// x`. Prettier leaves comments alone and so do we (~1,650 combined).
+      'unicorn/no-asterisk-prefix-in-documentation-comments': 'off',
+      'unicorn/single-line-block-comment-style': 'off',
+      // `() => x` vs `() => { return x; }` — style, no defect class behind it.
+      'unicorn/consistent-arrow-return-style': 'off',
+      // Temporal is not available in the Node versions we support (>=22).
+      'unicorn/prefer-temporal': 'off',
+      // Control-flow restyling rules that unicorn 76 added or widened (the
+      // ternary/guard family alone went from 2 to ~120 warnings). Each one
+      // rewrites working if/else, loop and guard shapes with no defect class
+      // behind it, and together they pushed lint past --max-warnings.
+      'unicorn/prefer-ternary': 'off',
+      'unicorn/prefer-minimal-ternary': 'off',
+      'unicorn/prefer-logical-operator-over-ternary': 'off',
+      'unicorn/prefer-combined-guards': 'off',
+      'unicorn/prefer-early-return': 'off',
+      'unicorn/prefer-continue': 'off',
+      // CSS-only rules (prefer-explicit-viewport-units added in unicorn 73,
+      // the rest in 76) that recommended turns on for every language. ESLint 10
+      // hard-errors when a rule is applied to a language it does not support,
+      // so leaving any of them on fails the whole lint run on "js/js". We lint
+      // no CSS, so turn them off rather than scope them to a files glob. (CSS
+      // rules carry meta.languages: ['css/css']; if this list keeps growing per
+      // major, filter recommended on that instead.)
+      'unicorn/prefer-explicit-viewport-units': 'off',
+      'unicorn/no-deprecated-css-features': 'off',
+      'unicorn/no-duplicate-css-selectors': 'off',
+      'unicorn/no-duplicate-font-family-names': 'off',
+      'unicorn/no-invalid-media-features': 'off',
+      'unicorn/no-nesting-with-mixed-specificity': 'off',
+      'unicorn/no-redundant-nested-style-rules': 'off',
+      'unicorn/no-unknown-css-annotations': 'off',
+      'unicorn/no-unknown-pseudo-selectors': 'off',
+      'unicorn/no-unscoped-css-nesting-selector': 'off',
+      'unicorn/prefer-media-feature-range-syntax': 'off',
+      // wants `(arg) => ...` over `arg => ...` — prettier already enforces
+      'sonarjs/arrow-function-convention': 'off',
+      // flags any string literal repeated 3+ times — false positive heaven
+      // for CLI tools where flag/option strings recur intentionally
+      'sonarjs/no-duplicate-string': 'off',
+      // wants a copyright header in every file — we don't use them
+      'sonarjs/file-header': 'off',
+      // wants explicit `=== undefined` over destructured defaults — noisy
+      'sonarjs/no-undefined-assignment': 'off',
+      // already covered by typescript-eslint's import resolution
+      'sonarjs/no-wildcard-import': 'off',
+      // false positive on ES modules — top-level declarations are module-
+      // scoped, not global. Rule is designed for legacy script files.
+      'sonarjs/declarations-in-global-scope': 'off',
+      // false positive on Node globals (`process`, `Buffer`) — sonarjs
+      // doesn't load @types/node
+      'sonarjs/no-reference-error': 'off',
+    },
+  },
+  {
+    // Rules of Hooks for the Preact SPA (#1369). preact/hooks is positional
+    // (slot-indexed by call order), so a hook placed below a conditional
+    // return silently corrupts hook state on render paths that change the
+    // call count — that exact bug shipped in app.tsx. The plugin detects
+    // any `use*` call regardless of import source, so it works for
+    // preact/hooks without React. `exhaustive-deps` is intentionally not
+    // enabled: deps in this codebase are hand-tuned (see #1058 M37).
+    files: ['packages/dashboard/src/**/*.{ts,tsx}'],
+    plugins: { 'react-hooks': reactHooks },
+    rules: {
+      'react-hooks/rules-of-hooks': 'error',
+    },
+  },
+  {
+    // Test files are excluded from per-package tsconfig.json (they don't ship
+    // in dist). Disable type-aware rules for them — vitest already provides
+    // type checking at runtime. The high-value rules (no-floating-promises,
+    // no-misused-promises) primarily catch bugs in production code paths,
+    // not test setup.
+    files: [
+      '**/*.test.ts',
+      '**/*.test.tsx',
+      '**/*.e2e.test.ts',
+      // Test-support helpers shared between test files; excluded from the
+      // package tsconfig (they don't ship), so the type-aware projectService
+      // can't see them — disable type-checked rules like the tests they serve.
+      '**/src/test-lib/**/*.ts',
+      '**/vitest.config.ts',
+      '**/vitest.setup.ts',
+      '**/vite.config.ts',
+    ],
+    ...tseslint.configs.disableTypeChecked,
+    plugins: { vitest },
+    rules: {
+      ...tseslint.configs.disableTypeChecked.rules,
+      '@typescript-eslint/no-explicit-any': 'off',
+      ...vitest.configs.recommended.rules,
+      // Allow `it.skip` for gated tests; project uses `it.todo` for stubs
+      'vitest/no-disabled-tests': 'warn',
+      // Conditional expects sometimes the right pattern (loop+branch tests);
+      // surface as warn so they're visible but don't gate CI
+      'vitest/no-conditional-expect': 'warn',
+      'vitest/no-standalone-expect': 'warn',
+      // Vitest accepts a 2nd arg to expect() as a custom error message
+      // (jest does not). The plugin's default of maxArgs=1 mismatches the
+      // actual vitest API; bump to allow the documented form.
+      'vitest/valid-expect': ['error', { maxArgs: 2 }],
+    },
+  },
+);

@@ -1,0 +1,6 @@
+repos:
+  - repo: https://github.com/oxc-project/mirrors-oxlint
+    rev: v0.16.10
+    hooks:
+      - id: oxlint
+        args: [--deny-warnings, src/, bin/]

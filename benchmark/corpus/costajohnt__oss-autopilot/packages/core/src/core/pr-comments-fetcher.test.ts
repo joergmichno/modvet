@@ -1,0 +1,475 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { Octokit } from '@octokit/rest';
+import { fetchPRCommentBundle, fetchPRCommentBundlesBatch } from './pr-comments-fetcher.js';
+import { extractFromFence } from './untrusted-content.js';
+
+// Note: paginateAll is NOT mocked — these tests exercise the real pagination
+// loop. Existing tests use small data sets (< 100 items per list) so
+// paginateAll naturally stops after page 1 (data.length < perPage); the
+// '2-page' test below intentionally returns 100 items on page 1 to verify
+// the loop continues to page 2 and concatenates correctly (#1209 L1).
+
+// ── Fixture builders ────────────────────────────────────────────────────────
+
+interface MockComment {
+  user: { login: string; type?: string } | null;
+  author_association?: string;
+  body?: string;
+  path?: string;
+  created_at?: string;
+  submitted_at?: string;
+}
+
+function makePR(overrides: Partial<{ title: string; merged_at: string | null; closed_at: string | null }> = {}) {
+  return {
+    title: 'Add feature X',
+    merged_at: '2026-04-20T12:00:00Z',
+    closed_at: null,
+    ...overrides,
+  };
+}
+
+function makeOctokit(opts: {
+  pr?: ReturnType<typeof makePR>;
+  reviews?: MockComment[];
+  reviewComments?: MockComment[];
+  issueComments?: MockComment[];
+  failPrGet?: boolean;
+}): Octokit {
+  const pr = opts.pr ?? makePR();
+  return {
+    pulls: {
+      get: vi.fn(async () => {
+        if (opts.failPrGet) throw new Error('Not Found');
+        return { data: pr };
+      }),
+      listReviews: vi.fn(async () => ({ data: opts.reviews ?? [] })),
+      listReviewComments: vi.fn(async () => ({ data: opts.reviewComments ?? [] })),
+    },
+    issues: {
+      listComments: vi.fn(async () => ({ data: opts.issueComments ?? [] })),
+    },
+  } as unknown as Octokit;
+}
+
+const PR_URL = 'https://github.com/owner/repo/pull/42';
+
+describe('fetchPRCommentBundle', () => {
+  it('returns a well-formed bundle for a valid PR URL', async () => {
+    const octokit = makeOctokit({
+      reviews: [
+        {
+          user: { login: 'maintainer1' },
+          author_association: 'OWNER',
+          body: 'Looks good with one nit.',
+          submitted_at: '2026-04-20T10:00:00Z',
+        },
+      ],
+      reviewComments: [
+        {
+          user: { login: 'maintainer1' },
+          author_association: 'OWNER',
+          body: 'Use camelCase here.',
+          path: 'src/x.ts',
+          created_at: '2026-04-20T10:01:00Z',
+        },
+      ],
+      issueComments: [
+        {
+          user: { login: 'maintainer2' },
+          author_association: 'COLLABORATOR',
+          body: 'Thanks for the contribution!',
+          created_at: '2026-04-20T11:00:00Z',
+        },
+      ],
+    });
+
+    const bundle = await fetchPRCommentBundle(octokit, PR_URL, 'me');
+
+    expect(bundle.prUrl).toBe(PR_URL);
+    expect(bundle.prTitle).toBe('Add feature X');
+    expect(bundle.repo).toBe('owner/repo');
+    expect(bundle.mergedAt).toBe('2026-04-20T12:00:00Z');
+    expect(bundle.reviews).toHaveLength(1);
+    expect(bundle.reviews[0]).toMatchObject({
+      author: 'maintainer1',
+      authorAssociation: 'OWNER',
+    });
+    // Bodies are emitted `<github-content>`-fenced with provenance (#1372).
+    expect(bundle.reviews[0].body).toBe(
+      '<github-content label="owner/repo#42" author="maintainer1" association="OWNER" source="pr-review">' +
+        'Looks good with one nit.</github-content>',
+    );
+    expect(bundle.reviewComments[0].path).toBe('src/x.ts');
+    expect(bundle.issueComments[0].author).toBe('maintainer2');
+  });
+
+  it('throws ValidationError on a non-PR URL', async () => {
+    const octokit = makeOctokit({});
+    await expect(fetchPRCommentBundle(octokit, 'https://github.com/owner/repo/issues/1', 'me')).rejects.toThrow(
+      /Invalid PR URL/,
+    );
+  });
+
+  it('throws ValidationError on a malformed URL', async () => {
+    const octokit = makeOctokit({});
+    await expect(fetchPRCommentBundle(octokit, 'not-a-url', 'me')).rejects.toThrow(/Invalid PR URL/);
+  });
+
+  it("excludes the authenticated user's own comments", async () => {
+    const octokit = makeOctokit({
+      reviews: [{ user: { login: 'me' }, author_association: 'CONTRIBUTOR', body: 'self review' }],
+      reviewComments: [{ user: { login: 'me' }, author_association: 'CONTRIBUTOR', body: 'my own inline' }],
+      issueComments: [
+        { user: { login: 'me' }, author_association: 'CONTRIBUTOR', body: 'my own thread' },
+        { user: { login: 'maintainer1' }, author_association: 'OWNER', body: 'theirs' },
+      ],
+    });
+    const bundle = await fetchPRCommentBundle(octokit, PR_URL, 'me');
+    expect(bundle.reviews).toHaveLength(0);
+    expect(bundle.reviewComments).toHaveLength(0);
+    expect(bundle.issueComments).toHaveLength(1);
+    expect(bundle.issueComments[0].author).toBe('maintainer1');
+  });
+
+  it('compares the user login case-insensitively', async () => {
+    const octokit = makeOctokit({
+      issueComments: [{ user: { login: 'CostaJohnt' }, author_association: 'CONTRIBUTOR', body: 'mine' }],
+    });
+    const bundle = await fetchPRCommentBundle(octokit, PR_URL, 'costajohnt');
+    expect(bundle.issueComments).toHaveLength(0);
+  });
+
+  it('excludes bot accounts (login containing [bot])', async () => {
+    const octokit = makeOctokit({
+      issueComments: [
+        { user: { login: 'dependabot[bot]' }, author_association: 'NONE', body: 'CI noise' },
+        { user: { login: 'maintainer1' }, author_association: 'OWNER', body: 'real' },
+      ],
+    });
+    const bundle = await fetchPRCommentBundle(octokit, PR_URL, 'me');
+    expect(bundle.issueComments).toHaveLength(1);
+    expect(bundle.issueComments[0].author).toBe('maintainer1');
+  });
+
+  it('excludes entries with no user (deleted account)', async () => {
+    const octokit = makeOctokit({
+      issueComments: [
+        { user: null, body: 'orphaned' },
+        { user: { login: 'maintainer1' }, author_association: 'OWNER', body: 'real' },
+      ],
+    });
+    const bundle = await fetchPRCommentBundle(octokit, PR_URL, 'me');
+    expect(bundle.issueComments).toHaveLength(1);
+    expect(bundle.issueComments[0].author).toBe('maintainer1');
+  });
+
+  it('populates authorAssociation on every comment entry', async () => {
+    const octokit = makeOctokit({
+      reviews: [{ user: { login: 'a' }, author_association: 'MEMBER', body: '' }],
+      reviewComments: [{ user: { login: 'b' }, author_association: 'COLLABORATOR', body: '', path: 'x' }],
+      issueComments: [{ user: { login: 'c' }, author_association: 'NONE', body: '' }],
+    });
+    const bundle = await fetchPRCommentBundle(octokit, PR_URL, 'me');
+    expect(bundle.reviews[0].authorAssociation).toBe('MEMBER');
+    expect(bundle.reviewComments[0].authorAssociation).toBe('COLLABORATOR');
+    expect(bundle.issueComments[0].authorAssociation).toBe('NONE');
+  });
+
+  it("defaults authorAssociation to 'NONE' when GitHub omits it", async () => {
+    const octokit = makeOctokit({
+      issueComments: [{ user: { login: 'a' }, body: 'x' }], // no author_association
+    });
+    const bundle = await fetchPRCommentBundle(octokit, PR_URL, 'me');
+    expect(bundle.issueComments[0].authorAssociation).toBe('NONE');
+  });
+
+  it('uses closed_at when merged_at is null (closed without merge)', async () => {
+    const octokit = makeOctokit({
+      pr: makePR({ merged_at: null, closed_at: '2026-04-19T08:00:00Z' }),
+    });
+    const bundle = await fetchPRCommentBundle(octokit, PR_URL, 'me');
+    expect(bundle.mergedAt).toBe('2026-04-19T08:00:00Z');
+  });
+
+  it('returns mergedAt as empty string when neither timestamp is set (still-open PR edge case)', async () => {
+    const octokit = makeOctokit({
+      pr: makePR({ merged_at: null, closed_at: null }),
+    });
+    const bundle = await fetchPRCommentBundle(octokit, PR_URL, 'me');
+    expect(bundle.mergedAt).toBe('');
+  });
+
+  it('paginates real Octokit list responses across page boundaries (#1209 L1)', async () => {
+    // 100 reviews on page 1 (== per_page → triggers another page fetch),
+    // 1 review on page 2 (< per_page → loop terminates). Verifies the
+    // bundle includes items from both pages, catching regressions in the
+    // pagination contract that the previous paginateAll mock hid.
+    const page1Reviews = Array.from({ length: 100 }, (_, i) => ({
+      user: { login: `m${i + 1}` },
+      author_association: 'OWNER',
+      body: `review ${i + 1}`,
+      submitted_at: `2026-04-${String((i % 28) + 1).padStart(2, '0')}T10:00:00Z`,
+    }));
+    const page2Reviews = [
+      {
+        user: { login: 'm101' },
+        author_association: 'OWNER',
+        body: 'final review',
+        submitted_at: '2026-04-30T10:00:00Z',
+      },
+    ];
+
+    const octokit = {
+      pulls: {
+        get: vi.fn(async () => ({ data: makePR() })),
+        listReviews: vi.fn(async (args: { page?: number }) => {
+          if (args.page === 1) return { data: page1Reviews };
+          if (args.page === 2) return { data: page2Reviews };
+          return { data: [] };
+        }),
+        listReviewComments: vi.fn(async () => ({ data: [] })),
+      },
+      issues: {
+        listComments: vi.fn(async () => ({ data: [] })),
+      },
+    } as unknown as Octokit;
+
+    const bundle = await fetchPRCommentBundle(octokit, PR_URL, 'me');
+    // 101 total reviews — both pages concatenated, none duplicated.
+    expect(bundle.reviews).toHaveLength(101);
+    expect(extractFromFence(bundle.reviews[0].body)).toBe('review 1');
+    expect(extractFromFence(bundle.reviews[100].body)).toBe('final review');
+    // listReviews called exactly twice — page 1 (full), page 2 (short → stop).
+    expect((octokit.pulls.listReviews as unknown as ReturnType<typeof vi.fn>).mock.calls).toHaveLength(2);
+    // Pagination terminated naturally — no truncation flag on the bundle.
+    expect(bundle.truncated).toBeUndefined();
+  });
+
+  it('flags the bundle as truncated when a comment stream hits the pagination cap (#1456)', async () => {
+    // Every page of issue comments is full (100 == per_page), so the
+    // 10-page cap fires and the newest comments are missing. The bundle
+    // must say so instead of silently presenting a partial corpus.
+    const fullPage = Array.from({ length: 100 }, (_, i) => ({
+      user: { login: 'maintainer1' },
+      author_association: 'OWNER',
+      body: `comment ${i}`,
+      created_at: '2026-04-20T11:00:00Z',
+    }));
+    const octokit = {
+      pulls: {
+        get: vi.fn(async () => ({ data: makePR() })),
+        listReviews: vi.fn(async () => ({ data: [] })),
+        listReviewComments: vi.fn(async () => ({ data: [] })),
+      },
+      issues: {
+        listComments: vi.fn(async () => ({ data: fullPage })),
+      },
+    } as unknown as Octokit;
+
+    const bundle = await fetchPRCommentBundle(octokit, PR_URL, 'me');
+
+    expect(bundle.truncated).toBe(true);
+    expect(bundle.issueComments).toHaveLength(1000);
+    // Cap is 10 pages.
+    expect((octokit.issues.listComments as unknown as ReturnType<typeof vi.fn>).mock.calls).toHaveLength(10);
+  });
+});
+
+describe('fetchPRCommentBundlesBatch', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('returns a bundle per URL when all calls succeed', async () => {
+    const octokit = makeOctokit({
+      issueComments: [{ user: { login: 'maintainer1' }, author_association: 'OWNER', body: 'feedback' }],
+    });
+    const urls = [
+      'https://github.com/owner/repo/pull/1',
+      'https://github.com/owner/repo/pull/2',
+      'https://github.com/owner/repo/pull/3',
+    ];
+    const { bundles } = await fetchPRCommentBundlesBatch(octokit, urls, 'me');
+    expect(bundles).toHaveLength(3);
+  });
+
+  it('skips PRs that fail to fetch (404, transient errors) without aborting', async () => {
+    let call = 0;
+    const octokit = {
+      pulls: {
+        get: vi.fn(async () => {
+          call++;
+          if (call === 2) throw new Error('Not Found');
+          return { data: makePR() };
+        }),
+        listReviews: vi.fn(async () => ({ data: [] })),
+        listReviewComments: vi.fn(async () => ({ data: [] })),
+      },
+      issues: {
+        listComments: vi.fn(async () => ({ data: [] })),
+      },
+    } as unknown as Octokit;
+
+    const urls = [
+      'https://github.com/owner/repo/pull/1',
+      'https://github.com/owner/repo/pull/2',
+      'https://github.com/owner/repo/pull/3',
+    ];
+    const { bundles } = await fetchPRCommentBundlesBatch(octokit, urls, 'me', 1);
+    expect(bundles).toHaveLength(2); // skipped PR 2
+  });
+
+  it('respects the concurrency cap', async () => {
+    // Manual gate replaces the previous `setTimeout(resolve, 5)` simulated
+    // delay (#1209 L2) — no wallclock wait, but still keeps each call
+    // in-flight long enough for the parallel workers to bump `maxActive`.
+    let active = 0;
+    let maxActive = 0;
+    const releases: Array<() => void> = [];
+    const octokit = {
+      pulls: {
+        get: vi.fn(async () => {
+          active++;
+          maxActive = Math.max(maxActive, active);
+          await new Promise<void>((resolve) => releases.push(resolve));
+          active--;
+          return { data: makePR() };
+        }),
+        listReviews: vi.fn(async () => ({ data: [] })),
+        listReviewComments: vi.fn(async () => ({ data: [] })),
+      },
+      issues: {
+        listComments: vi.fn(async () => ({ data: [] })),
+      },
+    } as unknown as Octokit;
+
+    const urls = Array.from({ length: 6 }, (_, i) => `https://github.com/owner/repo/pull/${i + 1}`);
+    const batchPromise = fetchPRCommentBundlesBatch(octokit, urls, 'me', 2);
+    // Drain all pending workers in lock-step. After each release the freed
+    // worker's microtask schedules the next pulls.get; queueMicrotask gives
+    // it a chance to land before we pop the next release.
+    while (active > 0 || releases.length > 0) {
+      const release = releases.shift();
+      if (release) release();
+      await new Promise<void>((resolve) => queueMicrotask(resolve));
+    }
+    await batchPromise;
+    expect(maxActive).toBeLessThanOrEqual(2);
+  });
+
+  it('returns empty bundles + failures when given an empty URL list', async () => {
+    const octokit = makeOctokit({});
+    expect(await fetchPRCommentBundlesBatch(octokit, [], 'me')).toEqual({ bundles: [], failures: [] });
+  });
+
+  it('records per-PR failures alongside successful bundles (#1209 L8)', async () => {
+    // octokit.pulls.get fails for PR 2 only; other PRs succeed.
+    const octokit = {
+      pulls: {
+        get: vi.fn(async ({ pull_number }: { pull_number: number }) => {
+          if (pull_number === 2) throw new Error('Not Found');
+          return { data: makePR() };
+        }),
+        listReviews: vi.fn(async () => ({ data: [] })),
+        listReviewComments: vi.fn(async () => ({ data: [] })),
+      },
+      issues: {
+        listComments: vi.fn(async () => ({ data: [] })),
+      },
+    } as unknown as Octokit;
+
+    const urls = [
+      'https://github.com/owner/repo/pull/1',
+      'https://github.com/owner/repo/pull/2',
+      'https://github.com/owner/repo/pull/3',
+    ];
+    const result = await fetchPRCommentBundlesBatch(octokit, urls, 'me', 1);
+    expect(result.bundles).toHaveLength(2);
+    expect(result.failures).toHaveLength(1);
+    expect(result.failures[0]).toEqual({
+      prUrl: 'https://github.com/owner/repo/pull/2',
+      error: expect.stringContaining('Not Found'),
+    });
+  });
+
+  it('rejects the whole batch on a rate-limit error instead of degrading to a skip (#1391)', async () => {
+    const rateLimitError = Object.assign(new Error('API rate limit exceeded'), { status: 429 });
+    const octokit = {
+      pulls: {
+        get: vi.fn(async ({ pull_number }: { pull_number: number }) => {
+          if (pull_number === 2) throw rateLimitError;
+          return { data: makePR() };
+        }),
+        listReviews: vi.fn(async () => ({ data: [] })),
+        listReviewComments: vi.fn(async () => ({ data: [] })),
+      },
+      issues: {
+        listComments: vi.fn(async () => ({ data: [] })),
+      },
+    } as unknown as Octokit;
+
+    const urls = [
+      'https://github.com/owner/repo/pull/1',
+      'https://github.com/owner/repo/pull/2',
+      'https://github.com/owner/repo/pull/3',
+    ];
+    await expect(fetchPRCommentBundlesBatch(octokit, urls, 'me', 1)).rejects.toThrow('API rate limit exceeded');
+    // Abort flag stops the queue: PR 3 is never attempted after the 429.
+    const getCalls = (octokit.pulls.get as unknown as ReturnType<typeof vi.fn>).mock.calls as Array<
+      [{ pull_number: number }]
+    >;
+    expect(getCalls.map(([args]) => args.pull_number)).toEqual([1, 2]);
+  });
+
+  it('rejects the whole batch on an auth error (401) instead of degrading to a skip (#1391)', async () => {
+    const authError = Object.assign(new Error('Bad credentials'), { status: 401 });
+    const octokit = {
+      pulls: {
+        get: vi.fn(async () => {
+          throw authError;
+        }),
+        listReviews: vi.fn(async () => ({ data: [] })),
+        listReviewComments: vi.fn(async () => ({ data: [] })),
+      },
+      issues: {
+        listComments: vi.fn(async () => ({ data: [] })),
+      },
+    } as unknown as Octokit;
+
+    await expect(
+      fetchPRCommentBundlesBatch(octokit, ['https://github.com/owner/repo/pull/1'], 'me', 1),
+    ).rejects.toThrow('Bad credentials');
+  });
+
+  it('keeps the degrade-to-failures behavior for a 500 server error (#1391)', async () => {
+    const serverError = Object.assign(new Error('Internal Server Error'), { status: 500 });
+    const octokit = {
+      pulls: {
+        get: vi.fn(async ({ pull_number }: { pull_number: number }) => {
+          if (pull_number === 2) throw serverError;
+          return { data: makePR() };
+        }),
+        listReviews: vi.fn(async () => ({ data: [] })),
+        listReviewComments: vi.fn(async () => ({ data: [] })),
+      },
+      issues: {
+        listComments: vi.fn(async () => ({ data: [] })),
+      },
+    } as unknown as Octokit;
+
+    const urls = [
+      'https://github.com/owner/repo/pull/1',
+      'https://github.com/owner/repo/pull/2',
+      'https://github.com/owner/repo/pull/3',
+    ];
+    const result = await fetchPRCommentBundlesBatch(octokit, urls, 'me', 1);
+    expect(result.bundles).toHaveLength(2);
+    expect(result.failures).toEqual([
+      {
+        prUrl: 'https://github.com/owner/repo/pull/2',
+        error: expect.stringContaining('Internal Server Error'),
+      },
+    ]);
+  });
+});

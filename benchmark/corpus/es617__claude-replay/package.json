@@ -1,0 +1,39 @@
+{
+  "name": "claude-replay",
+  "version": "0.11.0",
+  "description": "Convert Claude Code, Cursor, and Codex session transcripts into self-contained, embeddable HTML replays",
+  "type": "module",
+  "bin": {
+    "claude-replay": "bin/claude-replay.mjs"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "template/"
+  ],
+  "scripts": {
+    "build": "node scripts/build-template.mjs",
+    "build:website": "node scripts/build-template.mjs && node scripts/build-website.mjs",
+    "test": "node --test test/test-*.mjs",
+    "test:e2e": "npx playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "esbuild": "^0.25.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "replay",
+    "transcript",
+    "html"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/es617/claude-replay"
+  },
+  "license": "MIT"
+}

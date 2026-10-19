@@ -1,5 +1,5 @@
 # tools/benchmark.py — Scannt das Corpus, misst Findings/Laufzeit, schreibt Tabelle
-"""Usage: python tools/benchmark.py [--limit N]"""
+"""Usage: python tools/benchmark.py [--limit N] [--max-files N]"""
 import json
 import sys
 import time
@@ -12,6 +12,7 @@ from modvet.mods import scan_mod  # noqa: E402
 
 CORPUS = ROOT / "benchmark" / "corpus"
 LIMIT = int(sys.argv[sys.argv.index("--limit") + 1]) if "--limit" in sys.argv else None
+MAX_FILES = int(sys.argv[sys.argv.index("--max-files") + 1]) if "--max-files" in sys.argv else 500
 
 rows = []
 cat_total = Counter()
@@ -21,14 +22,17 @@ for d in sorted(CORPUS.iterdir()):
     if LIMIT and len(rows) >= LIMIT:
         break
     t0 = time.perf_counter()
-    report = scan_mod(d)
+    report = scan_mod(d, max_files=MAX_FILES)
     ms = (time.perf_counter() - t0) * 1000
     cats = Counter(f.category for f in report.findings)
     for c, n in cats.items():
         cat_total[c] += n
+    n_files = len(list(d.rglob("*")))
+    capped = "capped" in report.source
     rows.append({
         "slug": d.name,
-        "files": len(list(d.rglob("*"))),
+        "files": n_files,
+        "capped": capped,
         "findings": report.total_findings,
         "risk": report.risk_level,
         "ms": round(ms, 1),
@@ -50,4 +54,5 @@ for c, n in cat_total.most_common(10):
     print(f"  {n:5d}  {c}")
 print("\nJe Repo:")
 for r in rows:
-    print(f"  {r['slug']:45s} {r['findings']:4d} Findings  {r['risk']:8s} {r['ms']:8.1f} ms  {r['top_categories']}")
+    cap = " [CAP]" if r["capped"] else ""
+    print(f"  {r['slug']:45s} {r['findings']:4d} Findings  {r['risk']:8s} {r['ms']:8.1f} ms  {r['top_categories']}{cap}")

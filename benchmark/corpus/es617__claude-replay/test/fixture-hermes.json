@@ -1,0 +1,53 @@
+{
+  "id": "20260819_000000_test",
+  "source": "desktop",
+  "title": "Hermes fixture",
+  "cwd": "/tmp",
+  "model": "test-model",
+  "messages": [
+    {
+      "id": 1,
+      "role": "user",
+      "content": "hello hermes",
+      "timestamp": 1700000000,
+      "tool_calls": null,
+      "tool_call_id": null,
+      "compacted": 0
+    },
+    {
+      "id": 2,
+      "role": "assistant",
+      "content": "let me check",
+      "timestamp": 1700000001,
+      "tool_calls": "[{\"id\":\"c1\",\"call_id\":\"c1\",\"type\":\"function\",\"function\":{\"name\":\"terminal\",\"arguments\":\"{\\\"command\\\":\\\"ls\\\"}\"}}]",
+      "reasoning_content": "thinking about ls",
+      "compacted": 0
+    },
+    {
+      "id": 3,
+      "role": "tool",
+      "content": "{\"output\":\"file.txt\"}",
+      "timestamp": 1700000002,
+      "tool_call_id": "c1",
+      "tool_name": "terminal",
+      "compacted": 0
+    },
+    {
+      "id": 4,
+      "role": "user",
+      "content": "thanks",
+      "timestamp": 1700000003,
+      "tool_calls": null,
+      "tool_call_id": null,
+      "compacted": 0
+    },
+    {
+      "id": 5,
+      "role": "assistant",
+      "content": "done!",
+      "timestamp": 1700000004,
+      "tool_calls": null,
+      "compacted": 0
+    }
+  ]
+}

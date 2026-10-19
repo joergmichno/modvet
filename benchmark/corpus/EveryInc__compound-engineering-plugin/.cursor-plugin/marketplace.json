@@ -1,0 +1,19 @@
+{
+  "name": "compound-engineering",
+  "owner": {
+    "name": "Kieran Klaassen",
+    "email": "kieran@every.to",
+    "url": "https://github.com/kieranklaassen"
+  },
+  "metadata": {
+    "description": "Cursor plugin marketplace for Every Inc plugins",
+    "version": "1.0.2"
+  },
+  "plugins": [
+    {
+      "name": "compound-engineering",
+      "source": ".",
+      "description": "Brainstorm, plan, debug, review, and compound learnings with AI agents"
+    }
+  ]
+}

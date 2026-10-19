@@ -1,0 +1,71 @@
+import { readFile } from "fs/promises"
+import path from "path"
+import { describe, expect, test } from "bun:test"
+
+const PLUGIN_ROOT = path.join(process.cwd(), "skills")
+
+// The peer-job runner is byte-duplicated into every consuming review skill
+// (the plugin has no cross-skill import mechanism — see AGENTS.md "File
+// References in Skills"). All copies must stay identical.
+const RUNNER_ASSETS = ["scripts/peer-job-runner.py"]
+
+const CONSUMER_SKILLS = [
+  "ce-doc-review",
+  "ce-code-review",
+  "ce-pov",
+  "ce-work",
+  "ce-plan",
+  "ce-brainstorm",
+]
+const PEER_WORKERS = [
+  "ce-doc-review/scripts/cross-model-doc-review.sh",
+  "ce-code-review/scripts/cross-model-adversarial-review.sh",
+  "ce-pov/scripts/cross-model-pov.sh",
+  "ce-plan/scripts/elevation-dispatch.sh",
+  "ce-brainstorm/scripts/elevation-dispatch.sh",
+]
+
+describe("peer-job-runner shared-asset parity", () => {
+  for (const asset of RUNNER_ASSETS) {
+    test(`${asset} exists in every consumer and is byte-identical`, async () => {
+      const contents = await Promise.all(
+        CONSUMER_SKILLS.map(async (skill) => {
+          const p = path.join(PLUGIN_ROOT, skill, asset)
+          return readFile(p, "utf8")
+        }),
+      )
+      for (let i = 1; i < contents.length; i++) {
+        expect(contents[i]).toBe(contents[0])
+      }
+    })
+  }
+
+  test("peer-worker heartbeat lifecycle is identical and exits with its parent", async () => {
+    const kernels = await Promise.all(
+      PEER_WORKERS.map(async (worker) => {
+        const body = await readFile(path.join(PLUGIN_ROOT, worker), "utf8")
+        expect(body).toContain('wait "$_HEARTBEAT_PID" 2>/dev/null || true')
+        // Tolerate CRLF checkouts (\r?\n) — Windows runners often set
+        // core.autocrlf=true; the heartbeat body itself must still match.
+        const match = body.match(/start_heartbeat\(\) \{[\s\S]*?\r?\n\}\r?\n(?=\r?\nrun_(?:codex|peer)_cmd\(\))/)
+        expect(match).not.toBeNull()
+        return match![0]
+      }),
+    )
+    for (let i = 1; i < kernels.length; i++) {
+      expect(kernels[i]).toBe(kernels[0])
+    }
+    expect(kernels[0]).toContain('parent_pid="$$"')
+    expect(kernels[0]).toContain('while kill -0 "$parent_pid" 2>/dev/null')
+    expect(kernels[0]).toContain("trap 'kill \"${sleeper:-}\" 2>/dev/null || true; exit 0' TERM INT")
+    expect(kernels[0]).toContain('wait "$sleeper" 2>/dev/null || exit 0')
+    expect(kernels[0]).toContain('kill -USR1 "$parent_pid"')
+    expect(kernels[0]).toContain('while [ "$_HEARTBEAT_READY" != 1 ]')
+    // Leader-only TERM is deferred across `wait $sleeper`; the group signal
+    // unblocks stop_heartbeat (CI 20s timeout on SIGTERM / failed grok).
+    expect(kernels[0]).toContain('kill -- -"$_HEARTBEAT_PID"')
+    // Heartbeat must be its own process group even after callers set +m.
+    expect(kernels[0]).toContain("local prev_m")
+    expect(kernels[0]).toContain("[ \"$prev_m\" = 0 ] && set +m")
+  })
+})

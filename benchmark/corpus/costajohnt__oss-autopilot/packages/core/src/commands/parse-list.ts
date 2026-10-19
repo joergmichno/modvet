@@ -1,0 +1,459 @@
+/**
+ * Parse issue list command (#82)
+ * Parses markdown issue lists into structured JSON with tier classification
+ */
+
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import type { ParseIssueListOutput, ParsedIssueItem } from '../formatters/json.js';
+import { errorMessage } from '../core/errors.js';
+
+interface ParseListOptions {
+  filePath: string;
+}
+
+export type { ParseIssueListOutput, ParsedIssueItem };
+
+/**
+ * Extract a GitHub issue URL from a markdown line.
+ *
+ * Guard 1: PR URLs (/pull/) are intentionally excluded. A pull-request URL is
+ * never a valid issue candidate — collecting them inflates `availableCount` and
+ * causes `vet-list` to spend API calls on URLs that cannot resolve as issues.
+ */
+function extractGitHubUrl(line: string): { repo: string; number: number; url: string } | null {
+  const match = line.match(/https:\/\/github\.com\/([^/]+\/[^/]+)\/issues\/(\d+)/);
+  if (match) {
+    return { repo: match[1], number: parseInt(match[2], 10), url: match[0] };
+  }
+  return null;
+}
+
+/** Extract issue title from a markdown line (text after URL or checkbox) */
+function extractTitle(line: string): string {
+  // Remove markdown link syntax: [title](url) -> title
+  let cleaned = line.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+  // Remove bare URLs
+  cleaned = cleaned.replace(/https?:\/\/\S+/g, '');
+  // Remove list markers (-, *, +, numbered)
+  cleaned = cleaned.replace(/^\s*[-*+]\s*/, '').replace(/^\s*\d+\.\s*/, '');
+  // Remove checkboxes
+  cleaned = cleaned.replace(/\[[ x]\]\s*/i, '');
+  // Remove strikethrough markers
+  cleaned = cleaned.replace(/~~/g, '');
+  // Remove "Done" markers
+  cleaned = cleaned.replace(/\bdone\b/gi, '');
+  // Remove leading/trailing punctuation and whitespace
+  cleaned = cleaned.replace(/^[\s\-\u2013\u2014:]+/, '').replace(/[\s\-\u2013\u2014:]+$/, '');
+  return cleaned.trim();
+}
+
+/** Determine if a line represents a completed item */
+function isCompleted(line: string): boolean {
+  // Strikethrough: ~~text~~
+  if (/~~.+~~/.test(line)) return true;
+  // Checked checkbox: [x] or [X]
+  if (/\[x\]/i.test(line)) return true;
+  // "Done" marker (standalone word, case insensitive). Hyphenated
+  // continuations ("Done-ish", "well-done") are prose, not markers.
+  if (/(?<!-)\bdone\b(?!-)/i.test(line)) return true;
+  return false;
+}
+
+/**
+ * Extract a score from a sub-bullet line. Accepts `Score 8/10` anywhere in the
+ * line, or any bare `N/10` / `N.N/10` inside the first bold span
+ * (`**Pursue (7/10)**`, `**Vetted 2026-09-16: 7/10, pursue first.**`) (#1730).
+ *
+ * `strict` (used by the on-disk prune) accepts only `Score N/10` and the pinned
+ * `(N/10)` form, so a date-like `3/10` in a span never deletes an entry.
+ */
+function extractScore(line: string, strict = false): number | undefined {
+  const bare = strict ? /\((\d+(?:\.\d+)?)\/10\)/ : /(?<![\d.])(\d+(?:\.\d+)?)\/10\b/;
+  const match = line.match(/Score\s+(\d+(?:\.\d+)?)\/10/i) ?? firstBoldSpan(line)?.match(bare);
+  return match ? parseFloat(match[1]) : undefined;
+}
+
+/**
+ * Extract the first bold span (`**...**`) from a line, trimmed.
+ * Anchoring status detection to the first bold span avoids false positives
+ * from explanatory tails that happen to bold an English verb (`...we should
+ * **hold** off until next quarter...`). Returns null when the line has no
+ * bold markup.
+ */
+function firstBoldSpan(line: string): string | null {
+  const m = line.match(/\*\*([^*]+)\*\*/);
+  return m ? m[1].trim() : null;
+}
+
+/**
+ * First bold span with leading decoration (emoji, checkmarks, punctuation)
+ * stripped, so `**✅ MERGED — re-vet...**` normalizes to `MERGED — re-vet...`.
+ */
+function normalizedBoldSpan(line: string): string | null {
+  const span = firstBoldSpan(line);
+  if (!span) return null;
+  return span.replace(/^[^\p{L}\p{N}]+/u, '');
+}
+
+/**
+ * Match a status keyword as a PREFIX of the normalized bold span, ending at a
+ * word boundary (end of span, whitespace, or punctuation). Real curator spans
+ * look like `✅ MERGED — re-vet 2026-08-07: ...`, not a bare keyword.
+ *
+ * Curators also commonly lead with the score
+ * (`**Score 8/10 — ✅ MERGED (confirmed ...).**`), so a `Score N/10` +
+ * separator prefix is stripped before testing keywords.
+ */
+function spanStartsWithKeyword(line: string, keywords: RegExp): boolean {
+  const kw = normalizedBoldSpan(line);
+  if (!kw) return false;
+  const stripped = kw.replace(/^Score\s+\d+(?:\.\d+)?\/10\s*[—–\-:.,;]?\s*/iu, '').replace(/^[^\p{L}\p{N}]+/u, '');
+  return keywords.test(stripped);
+}
+
+/**
+ * Check if a sub-bullet's first bold span is a terminal status — completed,
+ * abandoned, or being held back from pursuit (#1179). Used by
+ * `parseIssueList` for in-memory bucketing.
+ *
+ * Curators' freshness-sweep vocabulary has grown beyond the original five
+ * keywords. `hold`, `continue watch`, and `downgrade` all mean "this is no
+ * longer in the actionable bucket" — different from "completed", but
+ * equivalent for the question `parseIssueList` answers
+ * ("which URLs are still pursuable?").
+ *
+ * `pruneIssueList` uses the stricter {@link isSubBulletDeletable} instead,
+ * since on-disk deletion must not silently remove items the curator
+ * explicitly parked.
+ */
+function isSubBulletTerminal(line: string): boolean {
+  return spanStartsWithKeyword(
+    line,
+    /^(?:Skipped|Skip|Done|Dropped|Merged|Closed|Hold|Continue watch|Downgrade)(?![\p{L}\p{N}])/iu,
+  );
+}
+
+/**
+ * Check if a sub-bullet's first bold span is a "delete-from-disk" status.
+ * Strictly the original five keywords — `pruneIssueList` mutates the
+ * markdown file in place, and a curator's `**Hold**` annotation means
+ * "park", not "delete" (#1179).
+ *
+ * Stricter than the in-memory matchers: the keyword must be followed by
+ * end-of-span or a separator character, never whitespace + another word.
+ * `**Merged upstream fix doesn't cover our case — still pursue.**` is a
+ * sentence, not a status tag; deleting on it destroys curator entries.
+ * Under-counting availability is acceptable, disk deletion is not.
+ */
+function isSubBulletDeletable(line: string): boolean {
+  const kw = normalizedBoldSpan(line);
+  if (!kw) return false;
+  // Negative lookahead: the keyword must not continue as a hyphenated word
+  // ("Done-ish", "Merged-in-part" are hedged prose, not status tags).
+  return /^(?:Skip|Done|Dropped|Merged|Closed)(?![\p{L}\p{N}-])\s*(?:$|[—–\-:.,;()!])/iu.test(kw);
+}
+
+/**
+ * Check if a sub-bullet's first bold span is in-progress (not available,
+ * but NOT safe to prune). Includes the "decision pending" vocabulary
+ * curators use when an issue is being investigated but not yet bucketed
+ * (#1179).
+ */
+function isSubBulletInProgress(line: string): boolean {
+  return spanStartsWithKeyword(
+    line,
+    /^(?:In Progress|Waiting|Wait|Post findings first|Ship now|Viable not urgent|PR OPEN|IMPLEMENTED)(?![\p{L}\p{N}])/iu,
+  );
+}
+
+/**
+ * Check if a sub-bullet's first bold span says the item is blocked on
+ * something outside the user's control (#1730). Runs after the terminal /
+ * in-progress checks, so a span that STARTS with `Wait` still lands in
+ * `completed` as before; this catches `blocked` / `wait` later in the span.
+ */
+function isSubBulletBlocked(line: string): boolean {
+  const span = firstBoldSpan(line);
+  return span !== null && /\b(?:blocked|wait(?:ing|s)?)\b/i.test(span);
+}
+
+/** A `##` section whose items are vetted but blocked (`## Queued ...`, `## Blocked on ...`) (#1730). */
+function isBlockedSection(heading: string): boolean {
+  return /^Queued\b/i.test(heading) || /\bblocked\b/i.test(heading);
+}
+
+/** Leading-whitespace width with tabs expanded to two columns. */
+function indentWidth(line: string): number {
+  return line.match(/^\s*/)![0].replace(/\t/g, '  ').length;
+}
+
+/** Parse a markdown string into structured issue items */
+export function parseIssueList(content: string): ParseIssueListOutput {
+  const lines = content.split('\n');
+  const available: ParsedIssueItem[] = [];
+  const completed: ParsedIssueItem[] = [];
+  const blocked: ParsedIssueItem[] = [];
+  let currentTier = 'Uncategorized';
+  // Heading level that set currentTier. A `###` under a `##` tier is a
+  // sub-group (repo heading, blocker note) and must not clobber the tier (#1730).
+  let tierLevel = 0;
+  let currentGroup: string | undefined;
+  let sectionBlocked = false;
+  let lastItem: ParsedIssueItem | null = null;
+  // Track which array the last item was placed in so sub-bullets can move it
+  let lastBucket: ParsedIssueItem[] | null = null;
+  const moveLastItem = (to: ParsedIssueItem[]): void => {
+    const idx = lastBucket!.indexOf(lastItem!);
+    if (idx !== -1) lastBucket!.splice(idx, 1);
+    to.push(lastItem!);
+    lastBucket = to;
+  };
+  // Indentation of the line that created lastItem — a line is a sub-bullet
+  // only when indented deeper than its parent (handles wholly-indented lists
+  // whose sibling items share the same indent).
+  let lastItemIndent = 0;
+
+  for (const line of lines) {
+    // Check for section headings (# or ##)
+    const headingMatch = line.match(/^(#{1,3})\s+(.+)/);
+    if (headingMatch) {
+      const level = headingMatch[1].length;
+      const text = headingMatch[2].trim();
+      if (level === 3 && tierLevel === 2) {
+        currentGroup = text;
+      } else {
+        currentTier = text;
+        tierLevel = level;
+        currentGroup = undefined;
+        sectionBlocked = isBlockedSection(text);
+      }
+      lastItem = null;
+      continue;
+    }
+
+    // Skip empty lines and non-list items. Bullet markers need trailing
+    // whitespace so a `**bold**`-opening paragraph isn't mistaken for a
+    // `*` bullet; each alternative is anchored to line start.
+    if (!line.trim() || !/^\s*(?:[-*+]\s|\d+\.\s|\[[ x]\])/i.test(line)) {
+      continue;
+    }
+
+    // Indented lines are sub-bullets and NEVER create a new item. For
+    // URL-bearing lines (merged-PR links, competitor PRs, cross-references)
+    // the line must be indented DEEPER than its parent — lines at the
+    // parent's own indent are siblings in wholly-indented lists and fall
+    // through to create items. URL-less lines can't create items anyway, so
+    // any >=2-space indent makes them sub-bullets, even at the parent's own
+    // indent (a `  - **Done**` status line beside an equally-indented item).
+    // Tabs count as two columns so `\t- ...` sub-bullets nest correctly.
+    const indent = indentWidth(line);
+    const ghUrl = extractGitHubUrl(line);
+    if (lastItem && indent >= 2 && (ghUrl ? indent > lastItemIndent : true)) {
+      const score = extractScore(line);
+      if (score !== undefined) {
+        lastItem.score = score;
+      }
+      // Check if sub-bullet marks item as terminal/in-progress, or blocked
+      if (lastBucket !== completed && (isSubBulletTerminal(line) || isSubBulletInProgress(line))) {
+        moveLastItem(completed);
+      } else if (lastBucket === available && isSubBulletBlocked(line)) {
+        moveLastItem(blocked);
+      }
+      continue;
+    }
+
+    // Skip top-level lines without a GitHub URL
+    if (!ghUrl) {
+      continue;
+    }
+
+    const title = extractTitle(line);
+    const item: ParsedIssueItem = {
+      repo: ghUrl.repo,
+      number: ghUrl.number,
+      title: title || `#${ghUrl.number}`,
+      tier: currentTier,
+      ...(currentGroup !== undefined ? { group: currentGroup } : {}),
+      url: ghUrl.url,
+    };
+
+    lastBucket = isCompleted(line) ? completed : sectionBlocked ? blocked : available;
+    lastBucket.push(item);
+    lastItem = item;
+    lastItemIndent = indent;
+  }
+
+  // Dedupe by URL across both buckets (#1179). Curated lists routinely
+  // mention the same issue in multiple sections (e.g. an item under
+  // "Pursue" plus a freshness-sweep entry under "Pending Vet"), and the
+  // raw per-line counts overstate availability. Rules:
+  //   - If a URL appears in `completed[]` at all, it is filtered out of
+  //     `available[]`. Curators add a terminal annotation (`**hold**`,
+  //     `Done`, etc.) on a later occurrence precisely to override an
+  //     earlier "pursue" line; the terminal classification wins.
+  //   - Likewise a URL in `blocked[]` is filtered out of `available[]`,
+  //     and a URL in `completed[]` out of `blocked[]` (#1730).
+  //   - Within each bucket, the first occurrence is kept (preserves the
+  //     parse order and the tier of the original entry).
+  const dedupe = (items: ParsedIssueItem[], ...exclude: ParsedIssueItem[][]): ParsedIssueItem[] => {
+    const seen = new Set(exclude.flatMap((bucket) => bucket.map((item) => item.url)));
+    return items.filter((item) => {
+      if (seen.has(item.url)) return false;
+      seen.add(item.url);
+      return true;
+    });
+  };
+  const dedupedCompleted = dedupe(completed);
+  const dedupedBlocked = dedupe(blocked, completed);
+  const dedupedAvailable = dedupe(available, completed, blocked);
+
+  return {
+    available: dedupedAvailable,
+    completed: dedupedCompleted,
+    blocked: dedupedBlocked,
+    availableCount: dedupedAvailable.length,
+    completedCount: dedupedCompleted.length,
+    blockedCount: dedupedBlocked.length,
+  };
+}
+
+/**
+ * Prune a markdown issue list: remove completed, skipped, and low-score items.
+ * Rewrites the file in place, removing:
+ * - Items with strikethrough, [x], Done, Skip, or Dropped status
+ * - Items with score < minScore
+ * - Empty section headings left after removal
+ * - Sub-bullets belonging to removed items
+ *
+ * @returns Count of items removed
+ */
+export function pruneIssueList(content: string, minScore: number = 6): { pruned: string; removedCount: number } {
+  const lines = content.split('\n');
+  const output: string[] = [];
+  let removedCount = 0;
+  let skipSubBullets = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Always keep headings (we'll clean empty ones in a second pass)
+    if (/^#{1,3}\s+/.test(line)) {
+      skipSubBullets = false;
+      output.push(line);
+      continue;
+    }
+
+    // Sub-bullet of a removed item — skip it
+    if (skipSubBullets && indentWidth(line) >= 2) {
+      continue;
+    }
+    skipSubBullets = false;
+
+    // Check if this is a list item
+    const isList = /^\s*[-*+]\s/.test(line);
+
+    // Remove any completed list item (even without a GitHub URL)
+    if (isList && isCompleted(line)) {
+      removedCount++;
+      skipSubBullets = true;
+      continue;
+    }
+
+    // Prune looks at issue AND PR entries: a curator's PR line with a MERGED
+    // sub-bullet must still be removable even though extractGitHubUrl (Guard 1)
+    // refuses PR URLs as issue candidates (#1637).
+    if (/https:\/\/github\.com\/[^/]+\/[^/]+\/(?:issues|pull)\/\d+/.test(line)) {
+      // Look ahead at sub-bullets for terminal status or low score
+      let shouldRemove = false;
+      let j = i + 1;
+      while (j < lines.length && indentWidth(lines[j]) >= 2) {
+        if (isSubBulletDeletable(lines[j])) {
+          shouldRemove = true;
+        }
+        const score = extractScore(lines[j], true);
+        if (score !== undefined && score < minScore) {
+          shouldRemove = true;
+        }
+        j++;
+      }
+
+      if (shouldRemove) {
+        removedCount++;
+        skipSubBullets = true;
+        continue;
+      }
+    }
+
+    // Skip cruft lines: "Skip (N issues)", standalone "---", old "Removed" labels
+    if (/^\s*skip\s*\(\d+\s*issues?\)/i.test(line.replace(/[#*]/g, '').trim())) {
+      continue;
+    }
+    if (/^---\s*$/.test(line)) {
+      continue;
+    }
+    if (/^\s*(?:###?\s*)?(?:Removed|Previously dropped)/i.test(line)) {
+      continue;
+    }
+    // Skip blockquote metadata lines ("> Sources: ...", "> Prioritized ...")
+    if (/^>\s/.test(line)) {
+      continue;
+    }
+
+    // Non-list lines, metadata, and surviving items — keep
+    output.push(line);
+  }
+
+  // Second pass: remove empty section headings (heading followed by another heading or end of file)
+  const cleaned: string[] = [];
+  for (let i = 0; i < output.length; i++) {
+    const isHeading = /^#{1,3}\s+/.test(output[i]);
+    if (isHeading) {
+      // Check if next non-empty line is another heading or end of content
+      let nextContentIdx = i + 1;
+      while (nextContentIdx < output.length && output[nextContentIdx].trim() === '') {
+        nextContentIdx++;
+      }
+      const nextIsHeadingOrEnd = nextContentIdx >= output.length || /^#{1,3}\s+/.test(output[nextContentIdx]);
+      if (nextIsHeadingOrEnd) {
+        // Skip this empty heading and any blank lines after it
+        continue;
+      }
+    }
+    cleaned.push(output[i]);
+  }
+
+  // Collapse consecutive blank lines into at most one
+  const collapsed: string[] = [];
+  for (const line of cleaned) {
+    if (line.trim() === '' && collapsed.length > 0 && collapsed[collapsed.length - 1].trim() === '') {
+      continue;
+    }
+    collapsed.push(line);
+  }
+
+  // Remove trailing blank lines
+  while (collapsed.length > 0 && collapsed[collapsed.length - 1].trim() === '') {
+    collapsed.pop();
+  }
+
+  return { pruned: collapsed.join('\n') + '\n', removedCount };
+}
+
+export async function runParseList(options: ParseListOptions): Promise<ParseIssueListOutput> {
+  const filePath = path.resolve(options.filePath);
+
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`File not found: ${filePath}`);
+  }
+
+  let content: string;
+  try {
+    content = fs.readFileSync(filePath, 'utf8');
+  } catch (error) {
+    const msg = errorMessage(error);
+    throw new Error(`Failed to read file: ${msg}`, { cause: error });
+  }
+
+  return parseIssueList(content);
+}

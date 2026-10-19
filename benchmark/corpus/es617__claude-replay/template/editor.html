@@ -1,0 +1,1945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='none' stroke='%23bb9af7' stroke-width='2'/><polygon points='12,8 12,24 24,16' fill='%23bb9af7'/></svg>">
+<title>claude-replay editor</title>
+<style>
+:root, :root.dark {
+  --bg: #1a1b26;
+  --bg-surface: #24253a;
+  --bg-hover: #2f3147;
+  --text: #c0caf5;
+  --text-dim: #565f89;
+  --text-bright: #e0e6ff;
+  --accent: #bb9af7;
+  --accent-dim: #7957a8;
+  --green: #9ece6a;
+  --blue: #7aa2f7;
+  --orange: #ff9e64;
+  --red: #f7768e;
+  --cyan: #7dcfff;
+  --border: #3b3d57;
+  --tool-bg: #1e1f33;
+  --thinking-bg: #1c1d2e;
+}
+:root.light {
+  --bg: #f0f0f3;
+  --bg-surface: #ffffff;
+  --bg-hover: #e8e8ec;
+  --text: #3c3c43;
+  --text-dim: #8e8e93;
+  --text-bright: #1c1c1e;
+  --accent: #7c3aed;
+  --accent-dim: #a78bfa;
+  --green: #34c759;
+  --blue: #007aff;
+  --orange: #ff9500;
+  --red: #ff3b30;
+  --cyan: #32ade6;
+  --border: #d1d1d6;
+  --tool-bg: #f5f5f7;
+  --thinking-bg: #f0f0f3;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Three-panel grid layout */
+.app {
+  display: grid;
+  grid-template-columns: 260px 1fr 4px 1fr;
+  grid-template-rows: auto 1fr;
+  height: 100vh;
+}
+body.sidebar-collapsed .app {
+  grid-template-columns: 16px 1fr 4px 1fr;
+}
+body.sidebar-collapsed .app .sidebar {
+  overflow: hidden;
+}
+body.sidebar-collapsed .app .sidebar-section-toggle,
+body.sidebar-collapsed .app .sidebar-section {
+  display: none;
+}
+
+/* Top bar */
+.topbar {
+  grid-column: 1 / -1;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+}
+
+.topbar h1 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.topbar-title-input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 4px 8px;
+  font-size: 13px;
+  min-width: 0;
+}
+
+.topbar-title-input:focus { outline: 1px solid var(--accent); }
+
+.sidebar-edge-toggle {
+  position: fixed;
+  left: 260px;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  width: 16px;
+  height: 36px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-dim);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  padding: 0;
+  line-height: 1;
+  transition: left 0.15s;
+}
+.sidebar-edge-toggle:hover { color: var(--text-bright); background: var(--bg-hover); }
+body.sidebar-collapsed .sidebar-edge-toggle { left: 16px; }
+
+.btn {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--accent-dim); color: var(--text-bright); }
+.btn-primary { background: var(--accent); color: var(--bg); font-weight: 600; }
+.btn-primary:hover { background: var(--accent-dim); color: var(--text-bright); }
+.btn-warn { background: var(--orange); color: var(--bg); font-weight: 600; }
+.btn-warn:hover { background: #e0874e; color: var(--text-bright); }
+.theme-mode-btn { display: flex; align-items: center; padding: 4px 8px; }
+
+/* Left sidebar */
+.sidebar {
+  position: relative;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sidebar section toggle (shared by Sessions and Options) */
+.sidebar-section-toggle {
+  background: var(--bg-hover);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  color: var(--text-bright);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.sidebar-section-toggle:hover { background: var(--border); }
+.sidebar-section-toggle .arrow { font-size: 9px; transition: transform 0.15s; color: var(--text-dim); }
+.sidebar-section-toggle.open .arrow { transform: rotate(90deg); }
+
+.sidebar-section {
+  display: none;
+  overflow-y: auto;
+  min-height: 0;
+}
+.sidebar-section.open {
+  display: block;
+  flex: 1;
+}
+
+/* Sessions content */
+.sessions-content { padding: 4px 0; }
+
+.session-group-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  padding: 8px 12px 4px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+.session-group-label .arrow {
+  display: inline-block;
+  font-size: 10px;
+  transition: transform 0.15s;
+}
+.session-group-label.open .arrow { transform: rotate(90deg); }
+.session-group-content { display: none; }
+.session-group-label.open + .session-group-content { display: block; }
+
+.session-project { padding: 0; }
+
+.session-project-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  padding: 4px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.session-project-name:hover { background: var(--bg-hover); }
+
+.session-project-name .arrow {
+  font-size: 8px;
+  transition: transform 0.15s;
+  color: var(--text-dim);
+}
+
+.session-project-name.open .arrow { transform: rotate(90deg); }
+
+.session-list { display: none; }
+.session-list.open { display: block; }
+
+.session-item {
+  font-size: 11px;
+  padding: 3px 12px 3px 24px;
+  cursor: pointer;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.session-item:hover { background: var(--bg-hover); color: var(--text); }
+.session-item.active { background: var(--accent-dim); color: var(--text-bright); }
+.session-item.edited::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--orange);
+  border-radius: 50%;
+  margin-right: 4px;
+  margin-left: -12px;
+  flex-shrink: 0;
+}
+
+.session-item .badge {
+  font-size: 9px;
+  background: var(--bg-hover);
+  color: var(--text-dim);
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-left: 4px;
+}
+
+/* Browse folder UI */
+.browse-section {
+  border-top: 1px solid var(--border);
+  padding: 8px 0;
+}
+
+.browse-header {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  padding: 4px 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.browse-header:hover { color: var(--text); }
+.browse-header .arrow {
+  display: inline-block;
+  font-size: 8px;
+  transition: transform 0.15s;
+}
+.browse-header.open .arrow { transform: rotate(90deg); }
+
+.browse-item {
+  font-size: 11px;
+  padding: 3px 12px;
+  cursor: pointer;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.browse-item:hover { background: var(--bg-hover); color: var(--text); }
+.browse-item.selected { background: var(--accent-dim); color: var(--text-bright); }
+.browse-item .icon { font-size: 12px; flex-shrink: 0; }
+.browse-item .icon-folder { color: var(--blue); }
+.browse-item .icon-file { color: var(--green); }
+.browse-item .browse-date { margin-left: auto; font-size: 9px; color: var(--text-dim); }
+
+.browse-error { color: var(--red); }
+.browse-empty { color: var(--text-dim); }
+.browse-parent { color: var(--text-dim); }
+
+.empty-state-error { color: var(--red); }
+.empty-state-hint { padding: 12px; font-size: 11px; }
+
+.sessions-search {
+  width: calc(100% - 24px);
+  margin: 4px 12px 2px;
+  padding: 4px 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text);
+  font-size: 12px;
+}
+.sessions-search:focus { outline: 1px solid var(--accent); }
+.search-hint {
+  font-size: 10px;
+  color: var(--text-dim);
+  padding: 1px 14px 2px;
+}
+.search-results {
+  padding: 4px 12px;
+  font-size: 11px;
+}
+.search-result-item {
+  padding: 6px 8px;
+  margin-bottom: 4px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.search-result-item:hover { border-color: var(--accent); }
+.search-result-meta {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-bottom: 2px;
+}
+.search-result-snippet {
+  font-size: 11px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.search-result-snippet mark {
+  background: var(--orange);
+  color: var(--bg);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+.search-status {
+  color: var(--text-dim);
+  font-style: italic;
+  padding: 4px 0;
+}
+.browse-path-input {
+  width: calc(100% - 24px);
+  margin: 4px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text);
+  padding: 3px 6px;
+  font-size: 11px;
+}
+.browse-path-input:focus { outline: 1px solid var(--accent); }
+
+/* Options content */
+.options-content {
+  padding: 10px 12px;
+}
+
+.opt-group-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  margin: 12px 0 4px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--border);
+}
+.opt-group-label:first-child { margin-top: 0; }
+.opt-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+.opt-row[hidden] { display: none; }
+
+.opt-row label {
+  min-width: 100px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+.opt-row select,
+.opt-row input[type="text"],
+.opt-row input[type="number"],
+.opt-row textarea {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 3px 6px;
+  font-size: 11px;
+  min-width: 0;
+}
+
+.opt-row input:focus,
+.opt-row select:focus,
+.opt-row textarea:focus { outline: 1px solid var(--accent); }
+
+.opt-row input[type="checkbox"] { accent-color: var(--accent); }
+
+.redact-rules { margin-top: 4px; }
+
+.redact-rule {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+
+.redact-rule input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text);
+  padding: 2px 4px;
+  font-size: 11px;
+}
+
+.redact-rule input:focus { outline: 1px solid var(--accent); }
+.redact-rule .arrow { color: var(--text-dim); }
+
+.redact-rule .remove-rule {
+  background: none;
+  border: none;
+  color: var(--red);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 2px;
+}
+
+.add-rule-btn {
+  background: none;
+  border: 1px dashed var(--border);
+  color: var(--text-dim);
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.add-rule-btn:hover { color: var(--text); border-color: var(--text-dim); }
+
+/* Turns editor panel (center) */
+.editor-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.turns-toolbar {
+  display: none;
+  padding: 6px 12px;
+  gap: 6px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+  flex-shrink: 0;
+}
+.turns-toolbar.visible { display: flex; flex-wrap: wrap; }
+.toolbar-hint { font-size: 10px; color: var(--text-dim); margin-left: auto; align-self: center; }
+.btn-small { padding: 2px 8px; font-size: 11px; }
+
+.turns-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 12px;
+}
+
+.turn-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.turn-card.excluded { opacity: 0.4; }
+
+.turn-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--bg-hover);
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.turn-card-header input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
+.turn-card-header .turn-label {
+  font-weight: 600;
+  color: var(--text-bright);
+}
+
+.turn-card-header .turn-summary {
+  color: var(--text-dim);
+  font-size: 11px;
+  margin-left: auto;
+}
+
+.turn-card-body { padding: 8px 10px; }
+
+.turn-textarea {
+  width: 100%;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+  resize: vertical;
+  min-height: 40px;
+  line-height: 1.4;
+}
+
+.turn-textarea:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+
+.turn-blocks-summary {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 4px;
+  cursor: pointer;
+  user-select: none;
+}
+.turn-blocks-summary:hover { color: var(--text); }
+.turn-blocks-summary .arrow {
+  display: inline-block;
+  font-size: 8px;
+  transition: transform 0.15s;
+  margin-right: 2px;
+}
+.turn-blocks-summary.open .arrow { transform: rotate(90deg); }
+
+.turn-blocks-detail {
+  display: none;
+  margin-top: 6px;
+}
+.turn-blocks-detail.open { display: block; }
+
+.block-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin-bottom: 4px;
+  overflow: hidden;
+}
+.block-item-header {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  color: var(--text-dim);
+  cursor: pointer;
+  user-select: none;
+}
+.block-item-header .block-chevron {
+  display: inline-block;
+  font-size: 8px;
+  margin-right: 4px;
+  transition: transform 0.15s;
+}
+.block-item-header.open .block-chevron { transform: rotate(90deg); }
+.block-item-header.block-text { background: var(--bg-surface); }
+.block-item-header.block-thinking { background: var(--thinking-bg); color: var(--cyan); }
+.block-item-header.block-tool { background: var(--tool-bg); color: var(--orange); }
+.block-item-body {
+  display: none;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+  color: var(--text);
+}
+.block-item-header.open + .block-item-body { display: block; }
+.block-tool-name { color: var(--accent); font-weight: 600; }
+.block-tool-section {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 6px;
+  margin-bottom: 2px;
+}
+
+.turn-bookmark-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 11px;
+}
+
+.turn-bookmark-row label {
+  color: var(--text-dim);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bookmark-label-input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text);
+  padding: 2px 6px;
+  font-size: 11px;
+}
+
+.bookmark-label-input:focus { outline: 1px solid var(--accent); }
+
+/* Preview panel (right) */
+.resize-handle {
+  background: var(--border);
+  cursor: col-resize;
+  width: 4px;
+  transition: background 0.15s;
+}
+.resize-handle:hover, .resize-handle.active { background: var(--accent); }
+
+.preview-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.preview-header {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preview-header .refresh-indicator {
+  color: var(--orange);
+  font-size: 11px;
+  display: none;
+}
+
+.preview-header .refresh-indicator.active { display: inline; }
+
+.preview-iframe {
+  flex: 1;
+  border: none;
+  width: 100%;
+  background: var(--bg);
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-dim);
+  font-size: 13px;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Help modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 520px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-title { font-weight: 700; font-size: 14px; color: var(--accent); }
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+.modal-close:hover { color: var(--text-bright); }
+.modal-body {
+  padding: 16px;
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.modal-body h3 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-bright);
+  margin: 16px 0 6px;
+}
+.modal-body h3:first-child { margin-top: 0; }
+.modal-body ul { padding-left: 18px; margin: 4px 0; }
+.modal-body li { margin-bottom: 4px; }
+.modal-body code {
+  background: var(--bg);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+.modal-body a { color: var(--blue); text-decoration: none; }
+.modal-body a:hover { text-decoration: underline; }
+.modal-footer-link {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Top bar -->
+  <div class="topbar">
+    <h1>claude-replay</h1>
+    <input type="text" class="topbar-title-input" id="titleInput" placeholder="Session title..." disabled>
+    <button class="btn" id="resetBtn" disabled>Reset Edits</button>
+    <button class="btn" id="importHtmlBtn" title="Import a previously exported HTML replay for re-editing">Import HTML</button>
+    <input type="file" id="importHtmlFile" accept=".html" style="display:none">
+    <button class="btn" id="exportDataBtn" disabled title="Download session data as JSON">Export JSON</button>
+    <button class="btn btn-primary" id="exportBtn" disabled>Export HTML</button>
+    <button class="btn theme-mode-btn" id="themeModeBtn" title="Toggle dark/light mode">
+      <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+    <button class="btn" id="helpBtn" title="Help">?</button>
+  </div>
+
+  <!-- Left sidebar: Sessions + Options -->
+  <div class="sidebar">
+    <!-- Sessions section -->
+    <div class="sidebar-section-toggle open" id="sessionsToggle">
+      <span class="arrow">&#9654;</span> Sessions
+    </div>
+    <div class="sidebar-section open" id="sessionsSection">
+      <div class="sessions-content">
+        <input type="text" class="sessions-search" id="sessionsSearch" placeholder="Filter sessions...">
+        <div class="search-hint">Use <code>/</code> to search session content</div>
+        <div class="search-results" id="searchResults" style="display:none"></div>
+        <div id="sessionsTree"></div>
+        <div class="browse-section">
+          <div class="browse-header browse-toggle" id="browseToggle">
+            <span class="arrow">&#9654;</span> Open Folder
+          </div>
+          <div class="browse-body" id="browseBody" style="display:none">
+            <input type="text" class="browse-path-input" id="browsePathInput" placeholder="Enter path and press Enter...">
+            <div id="browseList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Options section -->
+    <div class="sidebar-section-toggle open" id="optionsToggle">
+      <span class="arrow">&#9654;</span> Options
+    </div>
+    <div class="sidebar-section open" id="optionsSection">
+      <div class="options-content">
+        <div class="opt-group-label">Playback <span style="font-weight:normal;text-transform:none">— viewer can change</span></div>
+        <div class="opt-row">
+          <label for="optSpeed" title="Initial playback speed (0.1 - 10x)">Speed</label>
+          <input type="number" id="optSpeed" value="1" min="0.1" max="10" step="0.1" title="Initial playback speed (0.1 - 10x)">
+        </div>
+        <div class="opt-row">
+          <label title="Show thinking blocks by default">Show Thinking</label>
+          <input type="checkbox" id="optThinking" checked title="Show thinking blocks by default">
+        </div>
+        <div class="opt-row">
+          <label title="Show tool call blocks by default">Show Tool Calls</label>
+          <input type="checkbox" id="optToolCalls" checked title="Show tool call blocks by default">
+        </div>
+        <div class="opt-row">
+          <label for="optFontSize" title="Default font size (viewer can change)">Font size</label>
+          <select id="optFontSize" title="Default font size">
+            <option value="small">Small</option>
+            <option value="normal" selected>Medium</option>
+            <option value="large">Large</option>
+          </select>
+        </div>
+
+        <div class="opt-group-label">Appearance</div>
+        <div class="opt-row">
+          <label for="optTheme" title="Color theme for the replay player">Theme</label>
+          <select id="optTheme" title="Color theme for the replay player"></select>
+        </div>
+        <div class="opt-row">
+          <label for="optTiming" title="Timestamp mode: auto, real, or paced">Timing</label>
+          <select id="optTiming" title="Timestamp mode: auto (use real if available, else paced), real (original timestamps), paced (synthetic even spacing)">
+            <option value="auto" selected>Auto</option>
+            <option value="real">Real</option>
+            <option value="paced">Paced</option>
+          </select>
+        </div>
+        <div class="opt-row" id="pacingStyleRow" hidden>
+          <label for="optPacing" title="How paced playback reveals prose">Text reveal</label>
+          <select id="optPacing" title="Reveal full sections or illuminate prose word by word">
+            <option value="sections" selected>Whole sections</option>
+            <option value="paced-wording">Paced wording</option>
+          </select>
+        </div>
+        <div class="opt-row" id="readingWpmRow" hidden>
+          <label for="optReadingWpm" title="Base reading pace before natural pauses">Base WPM</label>
+          <input type="number" id="optReadingWpm" value="/*DEFAULT_READING_WPM*/" min="/*MIN_READING_WPM*/" max="/*MAX_READING_WPM*/" step="1" title="Base reading pace in words per minute (/*MIN_READING_WPM*/ - /*MAX_READING_WPM*/)">
+        </div>
+
+        <div class="opt-group-label">Content</div>
+        <div class="opt-row">
+          <label for="optUserLabel" title="Display name for user messages">User label</label>
+          <input type="text" id="optUserLabel" value="User" title="Display name for user messages">
+        </div>
+        <div class="opt-row">
+          <label for="optAssistantLabel" title="Display name for assistant messages (auto-detected if empty)">Asst. label</label>
+          <input type="text" id="optAssistantLabel" placeholder="auto" title="Display name for assistant messages (auto-detected if empty)">
+        </div>
+        <div class="opt-row">
+          <label title="Automatically detect and redact API keys, tokens, and secrets">Auto-redact</label>
+          <input type="checkbox" id="optRedact" checked title="Automatically detect and redact API keys, tokens, and secrets">
+        </div>
+        <div class="opt-row">
+          <label title="Replace specific text in the output (e.g. usernames, paths)">Custom redact</label>
+          <div style="flex:1">
+            <div class="redact-rules" id="redactRules"></div>
+            <button class="add-rule-btn" id="addRuleBtn">+ Add rule</button>
+          </div>
+        </div>
+
+        <div class="opt-group-label">Metadata</div>
+        <div class="opt-row">
+          <label for="optDescription" title="Meta description for link previews when sharing">Description</label>
+          <textarea id="optDescription" rows="2" style="resize:vertical" title="Meta description for link previews when sharing"></textarea>
+        </div>
+        <div class="opt-row">
+          <label for="optOgImage" title="Image URL shown in link previews (Open Graph)">OG Image URL</label>
+          <input type="text" id="optOgImage" placeholder="https://..." title="Image URL shown in link previews (Open Graph)">
+        </div>
+
+        <div class="opt-group-label">Output</div>
+        <div class="opt-row">
+          <input type="checkbox" id="optMinify" checked title="Minify the output HTML for smaller file size">
+          <label for="optMinify" title="Minify the output HTML for smaller file size">Minify</label>
+        </div>
+        <div class="opt-row">
+          <input type="checkbox" id="optCompress" checked title="Compress embedded data (smaller file, requires modern browser)">
+          <label for="optCompress" title="Compress embedded data (smaller file, requires modern browser)">Compress</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Editor panel -->
+  <div class="editor-panel">
+    <div class="turns-toolbar" id="turnsToolbar">
+      <button class="btn btn-small" id="selectAllBtn" title="Include all turns in the replay">Include All</button>
+      <button class="btn btn-small" id="selectNoneBtn" title="Exclude all turns from the replay">Exclude All</button>
+      <button class="btn btn-small" id="expandAllBtn" title="Expand all assistant blocks">Expand All</button>
+      <button class="btn btn-small" id="collapseAllBtn" title="Collapse all assistant blocks">Collapse All</button>
+      <span class="toolbar-hint">Shift+click for range select</span>
+    </div>
+    <div class="turns-list" id="turnsList">
+      <div class="empty-state">Select a session to begin editing</div>
+    </div>
+  </div>
+
+  <div class="resize-handle" id="resizeHandle"></div>
+
+  <!-- Preview panel -->
+  <div class="preview-panel">
+    <div class="preview-header">
+      <span>Preview</span>
+      <span class="refresh-indicator" id="refreshIndicator">Refreshing...</span>
+    </div>
+    <iframe class="preview-iframe" id="previewIframe"></iframe>
+  </div>
+</div>
+<button class="sidebar-edge-toggle" id="sidebarToggleBtn" title="Toggle sidebar">&#8249;</button>
+
+<!-- Help modal -->
+<div class="modal-overlay" id="helpModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">claude-replay editor</span>
+      <button class="modal-close" id="helpModalClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <h3>Getting Started</h3>
+      <p>Select a session from the <b>Sessions</b> panel, use <b>Open Folder</b> to browse for transcript files, or click <b>Import HTML</b> to re-edit a previously exported replay.</p>
+
+      <h3>Editing</h3>
+      <ul>
+        <li><b>User prompts</b> are editable — changes appear live in the preview</li>
+        <li><b>Assistant blocks</b> can be expanded (click the summary line) — tool calls and thinking are collapsed by default, click headers to toggle</li>
+        <li>Use <b>checkboxes</b> to include or exclude individual turns</li>
+        <li>Use <b>Include All / Exclude All</b> for bulk selection</li>
+        <li>Use <b>Expand All / Collapse All</b> to toggle all block details</li>
+        <li>Add <b>bookmarks</b> to create chapter markers in the replay</li>
+        <li>Excluded turns and bookmarks persist when switching between sessions</li>
+      </ul>
+
+      <h3>Options</h3>
+      <ul>
+        <li><b>Theme</b> — color scheme for the exported replay</li>
+        <li><b>Speed</b> — initial playback speed</li>
+        <li><b>Show Thinking / Tool Calls</b> — toggle block visibility</li>
+        <li><b>Auto-redact</b> — automatically hide API keys and secrets</li>
+        <li><b>Custom redact</b> — replace specific text (usernames, paths, etc.)</li>
+        <li><b>Timing</b> — auto, real (original timestamps), or paced (synthetic). When using real or auto timing, viewers can switch to auto-paced in the player's speed menu</li>
+        <li><b>Minify / Compress</b> — optimize the exported HTML file size</li>
+      </ul>
+
+      <h3>Import &amp; Export</h3>
+      <ul>
+        <li><b>Import HTML</b> — load a previously exported replay for re-editing</li>
+        <li><b>Export HTML</b> — download the replay as a self-contained HTML file</li>
+        <li><b>Export JSON</b> — download the session data (turns and bookmarks) as JSON</li>
+      </ul>
+      <p>The preview updates live as you edit. Edits are automatically saved to <code>~/.claude-replay/autosave/</code> and restored when you reopen a session. Reset clears the autosave.</p>
+
+      <h3>Supported Formats</h3>
+      <ul>
+        <li><b>Claude Code</b> — <code>~/.claude/projects/</code></li>
+        <li><b>Cursor</b> — <code>~/.cursor/projects/</code></li>
+        <li><b>Codex</b> — <code>~/.codex/sessions/</code></li>
+        <li><b>HTML replays</b> — previously exported <code>.html</code> files</li>
+      </ul>
+
+      <h3>Privacy</h3>
+      <p>The editor runs locally on <code>127.0.0.1</code>. Your session data never leaves your machine. Original transcript files are never modified.</p>
+
+      <p class="modal-footer-link"><a href="https://github.com/anthropics/claude-replay" target="_blank" rel="noopener">GitHub</a> &middot; <a href="https://github.com/anthropics/claude-replay/issues" target="_blank" rel="noopener">Report an issue</a> &middot; <span id="helpVersion"></span></p>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal" style="width:380px">
+    <div class="modal-header">
+      <span class="modal-title" id="confirmTitle">Confirm</span>
+    </div>
+    <div class="modal-body">
+      <p id="confirmMessage"></p>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn" id="confirmCancel">Cancel</button>
+        <button class="btn btn-warn" id="confirmOk">Reset</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  // =========================================================================
+  // Utilities
+  // =========================================================================
+
+  function esc(s) {
+    const d = document.createElement("div");
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function debounce(fn, ms) {
+    let timer;
+    return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), ms); };
+  }
+
+  async function api(method, path, body) {
+    const opts = { method, headers: {} };
+    if (body !== undefined) {
+      opts.headers["Content-Type"] = "application/json";
+      opts.body = JSON.stringify(body);
+    }
+    const res = await fetch(path, opts);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || `HTTP ${res.status}`);
+    }
+    return res;
+  }
+
+  async function apiJson(method, path, body) {
+    return (await api(method, path, body)).json();
+  }
+
+  // =========================================================================
+  // State
+  // =========================================================================
+
+  let currentSessionId = null;
+  let currentTurns = [];
+  let excludedTurns = new Set();
+  let bookmarks = new Map();
+  let previewBlobUrl = null;
+  let dragging = false;
+
+  // =========================================================================
+  // DOM refs
+  // =========================================================================
+
+  const $ = (id) => document.getElementById(id);
+
+  const appEl             = document.querySelector(".app");
+  const sidebarToggleBtn  = $("sidebarToggleBtn");
+  const titleInput        = $("titleInput");
+  const resetBtn          = $("resetBtn");
+  const exportBtn         = $("exportBtn");
+  const exportDataBtn     = $("exportDataBtn");
+  const importHtmlBtn     = $("importHtmlBtn");
+  const importHtmlFile    = $("importHtmlFile");
+  const themeModeBtn      = $("themeModeBtn");
+  const helpBtn           = $("helpBtn");
+  const confirmModal      = $("confirmModal");
+  const confirmTitle      = $("confirmTitle");
+  const confirmMessage    = $("confirmMessage");
+  const confirmOk         = $("confirmOk");
+  const confirmCancel     = $("confirmCancel");
+
+  function showConfirm(title, message) {
+    confirmTitle.textContent = title;
+    confirmMessage.textContent = message;
+    confirmModal.classList.add("open");
+    return new Promise((resolve) => {
+      function cleanup() {
+        confirmModal.classList.remove("open");
+        confirmOk.removeEventListener("click", onOk);
+        confirmCancel.removeEventListener("click", onCancel);
+      }
+      function onOk() { cleanup(); resolve(true); }
+      function onCancel() { cleanup(); resolve(false); }
+      confirmOk.addEventListener("click", onOk);
+      confirmCancel.addEventListener("click", onCancel);
+    });
+  }
+  const helpModal         = $("helpModal");
+  const helpModalClose    = $("helpModalClose");
+  const sessionsToggle    = $("sessionsToggle");
+  const sessionsSection   = $("sessionsSection");
+  const optionsToggle     = $("optionsToggle");
+  const optionsSection    = $("optionsSection");
+  const sessionsTree      = $("sessionsTree");
+  const sessionsSearch    = $("sessionsSearch");
+  const browseToggle      = $("browseToggle");
+  const browseBody        = $("browseBody");
+  const browsePathInput   = $("browsePathInput");
+  const browseList        = $("browseList");
+  const turnsToolbar      = $("turnsToolbar");
+  const selectAllBtn      = $("selectAllBtn");
+  const selectNoneBtn     = $("selectNoneBtn");
+  const expandAllBtn      = $("expandAllBtn");
+  const collapseAllBtn    = $("collapseAllBtn");
+  const turnsList         = $("turnsList");
+  const previewIframe     = $("previewIframe");
+  const refreshIndicator  = $("refreshIndicator");
+  const resizeHandle      = $("resizeHandle");
+  const redactRulesContainer = $("redactRules");
+  const addRuleBtn        = $("addRuleBtn");
+
+  // Option controls
+  const opt = {
+    theme:     $("optTheme"),
+    speed:     $("optSpeed"),
+    thinking:  $("optThinking"),
+    toolCalls: $("optToolCalls"),
+    fontSize:  $("optFontSize"),
+    redact:    $("optRedact"),
+    userLabel: $("optUserLabel"),
+    asstLabel: $("optAssistantLabel"),
+    desc:      $("optDescription"),
+    ogImage:   $("optOgImage"),
+    timing:    $("optTiming"),
+    pacing:    $("optPacing"),
+    readingWpm: $("optReadingWpm"),
+    minify:    $("optMinify"),
+    compress:  $("optCompress"),
+  };
+
+  // =========================================================================
+  // Sidebar
+  // =========================================================================
+
+  function toggleSidebarSection(toggle, section) {
+    toggle.classList.toggle("open");
+    section.classList.toggle("open");
+  }
+
+  function showOptionsPanel() {
+    optionsToggle.classList.add("open");
+    optionsSection.classList.add("open");
+  }
+
+  // =========================================================================
+  // Sessions
+  // =========================================================================
+
+  async function loadSessions() {
+    try {
+      const data = await apiJson("GET", "/api/sessions");
+      const groups = data.groups || data;
+      if (data.homedir) browsePathInput.value = data.homedir;
+      if (data.version) $("helpVersion").textContent = "v" + data.version;
+      renderSessions(groups);
+    } catch (e) {
+      sessionsTree.innerHTML = `<div class="empty-state empty-state-error">Failed to load sessions: ${esc(e.message)}</div>`;
+    }
+  }
+
+  function renderSessions(groups) {
+    if (groups.length === 0) {
+      sessionsTree.innerHTML = `<div class="empty-state empty-state-hint">No sessions found in default locations.</div>`;
+      return;
+    }
+    let html = "";
+    for (const group of groups) {
+      html += `<div class="session-group-label open"><span class="arrow">&#9654;</span> ${esc(group.name)}</div>`;
+      html += `<div class="session-group-content">`;
+      for (const proj of group.projects) {
+        const projId = `proj-${esc(group.name)}-${esc(proj.dirName)}`;
+        html += `<div class="session-project">`;
+        html += `<div class="session-project-name" data-target="${projId}" title="${esc(proj.dirName.replace(/^-+/, ''))}"><span class="arrow">&#9654;</span> ${esc(proj.name)}</div>`;
+        html += `<div class="session-list" id="${projId}">`;
+        for (const sess of proj.sessions) {
+          const dateStr = sess.date ? new Date(sess.date).toLocaleDateString() : "";
+          const label = sess.title || sess.file.replace(".jsonl", "");
+          const uuid = sess.file.replace(".jsonl", "");
+          html += `<div class="session-item" data-path="${esc(sess.path)}" title="${esc(uuid)}">${esc(label)} <span class="badge">${dateStr}</span></div>`;
+        }
+        html += `</div></div>`;
+      }
+      html += `</div>`;
+    }
+    sessionsTree.innerHTML = html;
+
+    sessionsTree.querySelectorAll(".session-group-label").forEach((el) => {
+      el.addEventListener("click", () => el.classList.toggle("open"));
+    });
+    sessionsTree.querySelectorAll(".session-project-name").forEach((el) => {
+      el.addEventListener("click", () => {
+        el.classList.toggle("open");
+        const list = document.getElementById(el.dataset.target);
+        if (list) list.classList.toggle("open");
+      });
+    });
+    sessionsTree.querySelectorAll(".session-item").forEach((el) => {
+      el.addEventListener("click", () => loadSession(el.dataset.path, el));
+    });
+  }
+
+  // =========================================================================
+  // Session search/filter
+  // =========================================================================
+
+  const searchResults = $("searchResults");
+  let contentSearchDebounce;
+
+  function filterSessionsByName(q) {
+    searchResults.style.display = "none";
+    sessionsTree.style.display = "";
+    sessionsTree.querySelectorAll(".session-project").forEach((proj) => {
+      const projName = proj.querySelector(".session-project-name").textContent.toLowerCase();
+      const items = proj.querySelectorAll(".session-item");
+      let anyVisible = false;
+      items.forEach((item) => {
+        const match = !q || item.textContent.toLowerCase().includes(q) || projName.includes(q);
+        item.style.display = match ? "" : "none";
+        if (match) anyVisible = true;
+      });
+      proj.style.display = anyVisible ? "" : "none";
+      if (anyVisible && q) {
+        proj.querySelector(".session-project-name").classList.add("open");
+        proj.querySelector(".session-list").classList.add("open");
+      }
+    });
+    sessionsTree.querySelectorAll(".session-group-label").forEach((label) => {
+      const content = label.nextElementSibling;
+      if (!content || !content.classList.contains("session-group-content")) return;
+      const anyGroupVisible = content.querySelector(".session-project:not([style*='display: none'])") !== null;
+      label.style.display = anyGroupVisible ? "" : "none";
+      content.style.display = anyGroupVisible ? "" : "none";
+    });
+  }
+
+  function highlightSnippet(snippet, query) {
+    const lower = snippet.toLowerCase();
+    const idx = lower.indexOf(query.toLowerCase());
+    if (idx === -1) return esc(snippet);
+    return esc(snippet.slice(0, idx)) + "<mark>" + esc(snippet.slice(idx, idx + query.length)) + "</mark>" + esc(snippet.slice(idx + query.length));
+  }
+
+  async function searchContent(query) {
+    sessionsTree.style.display = "none";
+    searchResults.style.display = "";
+    searchResults.innerHTML = '<div class="search-status">Searching...</div>';
+    try {
+      const data = await apiJson("POST", "/api/search", { query });
+      if (data.results.length === 0) {
+        searchResults.innerHTML = '<div class="search-status">No matches found</div>';
+        return;
+      }
+      let html = "";
+      for (const r of data.results) {
+        html += `<div class="search-result-item" data-path="${esc(r.path)}">
+          <div class="search-result-meta">${esc(r.group)} / ${esc(r.project)} / ${esc(r.file)}</div>
+          <div class="search-result-snippet">${highlightSnippet(r.snippet, query)}</div>
+        </div>`;
+      }
+      searchResults.innerHTML = html;
+      searchResults.querySelectorAll(".search-result-item").forEach((el) => {
+        el.addEventListener("click", () => loadSession(el.dataset.path, null));
+      });
+    } catch (e) {
+      searchResults.innerHTML = `<div class="search-status">Search failed: ${esc(e.message)}</div>`;
+    }
+  }
+
+  sessionsSearch.addEventListener("input", () => {
+    const raw = sessionsSearch.value;
+    clearTimeout(contentSearchDebounce);
+    if (raw.startsWith("/")) {
+      const query = raw.slice(1).trim();
+      if (query.length < 3) {
+        sessionsTree.style.display = "none";
+        searchResults.style.display = "";
+        searchResults.innerHTML = '<div class="search-status">Type at least 3 characters to search content...</div>';
+        return;
+      }
+      contentSearchDebounce = setTimeout(() => searchContent(query), 400);
+    } else {
+      filterSessionsByName(raw.toLowerCase().trim());
+    }
+  });
+
+  // =========================================================================
+  // Folder browser
+  // =========================================================================
+
+  async function browseTo(dirPath) {
+    try {
+      const data = await apiJson("POST", "/api/browse", { path: dirPath });
+      browsePathInput.value = data.path;
+      renderBrowseResults(data);
+    } catch (e) {
+      browseList.innerHTML = `<div class="browse-item browse-error">${esc(e.message)}</div>`;
+    }
+  }
+
+  function renderBrowseResults(data) {
+    let html = "";
+    if (data.parent) {
+      html += `<div class="browse-item" data-browse="${esc(data.parent)}"><span class="icon">..</span> <span class="browse-parent">(parent)</span></div>`;
+    }
+    for (const dir of data.dirs) {
+      html += `<div class="browse-item" data-browse="${esc(dir.path)}"><span class="icon icon-folder">&#128193;</span> ${esc(dir.name)}</div>`;
+    }
+    for (const file of data.files) {
+      const dateStr = file.date ? new Date(file.date).toLocaleDateString() : "";
+      html += `<div class="browse-item" data-path="${esc(file.path)}"><span class="icon icon-file">&#128196;</span> ${esc(file.name)} <span class="browse-date">${dateStr}</span></div>`;
+    }
+    if (data.dirs.length === 0 && data.files.length === 0) {
+      html += `<div class="browse-item browse-empty">No folders or .jsonl files</div>`;
+    }
+    browseList.innerHTML = html;
+
+    browseList.querySelectorAll("[data-browse]").forEach((el) => {
+      el.addEventListener("click", () => browseTo(el.dataset.browse));
+    });
+    browseList.querySelectorAll("[data-path]").forEach((el) => {
+      el.addEventListener("click", () => {
+        document.querySelectorAll(".session-item.active").forEach((s) => s.classList.remove("active"));
+        el.classList.add("selected");
+        loadSession(el.dataset.path, null);
+      });
+    });
+  }
+
+  // =========================================================================
+  // Load session
+  // =========================================================================
+
+  let hasTextEdits = false;
+  function updateEditState(textEdits) {
+    if (textEdits !== undefined) hasTextEdits = textEdits;
+    const hasChanges = hasTextEdits || excludedTurns.size > 0 || bookmarks.size > 0;
+    resetBtn.classList.toggle("btn-warn", hasChanges);
+    const activeItem = document.querySelector(".session-item.active");
+    if (activeItem) activeItem.classList.toggle("edited", hasChanges);
+  }
+
+  async function loadSession(path, itemEl) {
+    document.querySelectorAll(".session-item.active").forEach((el) => el.classList.remove("active"));
+    if (itemEl) itemEl.classList.add("active");
+
+    try {
+      const data = await apiJson("POST", "/api/load", { path });
+      currentSessionId = data.sessionId;
+      currentTurns = data.turns;
+      excludedTurns = new Set(data.excludedTurns || []);
+      bookmarks = new Map();
+      lastToggleIndex = null;
+
+      // Restore bookmarks from session state
+      for (const bm of data.bookmarks || []) {
+        bookmarks.set(bm.turn, bm.label);
+      }
+
+
+
+      const parts = path.split("/");
+      const filename = parts[parts.length - 1].replace(/\.(jsonl|html)$/, "");
+      titleInput.value = "Replay \u2014 " + filename;
+      titleInput.disabled = false;
+      resetBtn.disabled = false;
+      exportBtn.disabled = false;
+      exportDataBtn.disabled = false;
+
+      updateEditState(data.hasEdits || false);
+      showOptionsPanel();
+      turnsToolbar.classList.add("visible");
+      renderTurns();
+      schedulePreview();
+    } catch (e) {
+      alert("Failed to load session: " + e.message);
+    }
+  }
+
+  // =========================================================================
+  // Turn cards
+  // =========================================================================
+
+  function renderTurns() {
+    if (currentTurns.length === 0) {
+      turnsList.innerHTML = `<div class="empty-state">No turns in this session</div>`;
+      return;
+    }
+
+    let html = "";
+    for (const turn of currentTurns) {
+      const excluded = excludedTurns.has(turn.index);
+      const checked = excluded ? "" : "checked";
+      const bkChecked = bookmarks.has(turn.index) ? "checked" : "";
+      const bkLabel = bookmarks.get(turn.index) || "";
+      const userText = turn.user_text || "";
+      const rows = Math.max(2, Math.min(8, userText.split("\n").length));
+
+      html += `<div class="turn-card ${excluded ? "excluded" : ""}" data-index="${turn.index}">
+        <div class="turn-card-header">
+          <input type="checkbox" ${checked} data-action="toggle" data-index="${turn.index}">
+          <span class="turn-label">Turn ${turn.index}</span>
+          <span class="turn-summary">${esc(turn.blockSummary)}</span>
+        </div>
+        <div class="turn-card-body">
+          <textarea class="turn-textarea" data-action="edit" data-index="${turn.index}" rows="${rows}">${esc(userText)}</textarea>
+          <div class="turn-blocks-summary" data-action="expand" data-index="${turn.index}"><span class="arrow">&#9654;</span> ${esc(turn.blockSummary)}</div>
+          <div class="turn-blocks-detail" id="blocks-${turn.index}">${renderBlocks(turn.blocks)}</div>
+          <div class="turn-bookmark-row">
+            <label><input type="checkbox" ${bkChecked} data-action="bookmark" data-index="${turn.index}"> Bookmark</label>
+            <input type="text" class="bookmark-label-input" data-action="bookmark-label" data-index="${turn.index}" placeholder="Chapter label..." value="${esc(bkLabel)}" ${bkChecked ? "" : "disabled"}>
+          </div>
+        </div>
+      </div>`;
+    }
+    turnsList.innerHTML = html;
+    turnsList.addEventListener("change", handleTurnEvent);
+    turnsList.addEventListener("input", handleTurnInput);
+    turnsList.addEventListener("click", handleTurnClick);
+  }
+
+  function renderBlocks(blocks) {
+    if (!blocks || blocks.length === 0) return `<div class="block-item"><div class="block-item-body">No blocks</div></div>`;
+    let html = "";
+    for (const b of blocks) {
+      if (b.kind === "tool_use") {
+        html += `<div class="block-item">
+          <div class="block-item-header block-tool"><span class="block-chevron">&#9654;</span>Tool: ${esc(b.name)}</div>
+          <div class="block-item-body"><span class="block-tool-name">${esc(b.name)}</span>
+<div class="block-tool-section">Input</div>${esc(b.input)}
+<div class="block-tool-section">Result</div>${esc(b.result)}</div>
+        </div>`;
+      } else if (b.kind === "thinking") {
+        html += `<div class="block-item">
+          <div class="block-item-header block-thinking"><span class="block-chevron">&#9654;</span>Thinking</div>
+          <div class="block-item-body">${esc(b.text)}</div>
+        </div>`;
+      } else {
+        html += `<div class="block-item">
+          <div class="block-item-header block-text open"><span class="block-chevron">&#9654;</span>Text</div>
+          <div class="block-item-body">${esc(b.text)}</div>
+        </div>`;
+      }
+    }
+    return html;
+  }
+
+  function handleTurnClick(e) {
+    // Block-level sub-collapse (tool/thinking/text headers)
+    const blockHeader = e.target.closest(".block-item-header");
+    if (blockHeader) {
+      blockHeader.classList.toggle("open");
+      return;
+    }
+    const summary = e.target.closest("[data-action='expand']");
+    if (summary) {
+      const index = summary.dataset.index;
+      const detail = document.getElementById("blocks-" + index);
+      if (detail) {
+        summary.classList.toggle("open");
+        detail.classList.toggle("open");
+      }
+      return;
+    }
+    // Click on turn card header → jump preview to that turn
+    const header = e.target.closest(".turn-card-header");
+    if (header && !e.target.closest("input")) {
+      const index = parseInt(header.dataset.index || header.closest(".turn-card").dataset.index);
+      if (index && previewIframe.contentWindow) {
+        // Map original index to display position (preview uses sequential 1-based numbering)
+        const included = currentTurns.filter((t) => !excludedTurns.has(t.index));
+        const pos = included.findIndex((t) => t.index === index);
+        if (pos >= 0) {
+          try { previewIframe.contentWindow.location.hash = "#turn=" + (pos + 1); } catch {}
+        }
+      }
+    }
+  }
+
+  let lastToggleIndex = null;
+  let lastClickShift = false;
+  // Track shift key from click since change events don't carry it
+  document.addEventListener("click", (e) => { lastClickShift = e.shiftKey; }, true);
+
+  function setTurnChecked(index, checked) {
+    const cb = turnsList.querySelector(`input[data-action="toggle"][data-index="${index}"]`);
+    if (!cb) return;
+    cb.checked = checked;
+    checked ? excludedTurns.delete(index) : excludedTurns.add(index);
+    const card = cb.closest(".turn-card");
+    card.classList.toggle("excluded", !checked);
+    if (!checked) {
+      card.querySelector("[data-action='expand']")?.classList.remove("open");
+      card.querySelector(".turn-blocks-detail")?.classList.remove("open");
+    }
+  }
+
+  function handleTurnEvent(e) {
+    const { action, index: rawIndex } = e.target.dataset;
+    const index = parseInt(rawIndex);
+
+    if (action === "toggle") {
+      const checked = e.target.checked;
+      // Shift+click: apply to range from last toggle
+      if (lastClickShift && lastToggleIndex != null && lastToggleIndex !== index) {
+        const from = Math.min(lastToggleIndex, index);
+        const to = Math.max(lastToggleIndex, index);
+        for (const t of currentTurns) {
+          if (t.index >= from && t.index <= to) {
+            setTurnChecked(t.index, checked);
+          }
+        }
+      } else {
+        checked ? excludedTurns.delete(index) : excludedTurns.add(index);
+        const card = e.target.closest(".turn-card");
+        card.classList.toggle("excluded", !checked);
+        if (!checked) {
+          card.querySelector("[data-action='expand']")?.classList.remove("open");
+          card.querySelector(".turn-blocks-detail")?.classList.remove("open");
+        }
+      }
+      lastToggleIndex = index;
+      updateEditState();
+      schedulePreview();
+    }
+
+    if (action === "bookmark") {
+      const labelInput = turnsList.querySelector(`input[data-action="bookmark-label"][data-index="${index}"]`);
+      if (e.target.checked) {
+        bookmarks.set(index, labelInput.value || `Turn ${index}`);
+        labelInput.disabled = false;
+      } else {
+        bookmarks.delete(index);
+        labelInput.disabled = true;
+      }
+      updateEditState();
+      schedulePreview();
+    }
+
+    // bookmark-label is handled by handleTurnInput (input event) with debounce
+  }
+
+  const debouncedEdit = debounce((sessionId, index, text) => {
+    if (sessionId !== currentSessionId) return; // session changed, discard
+    apiJson("POST", "/api/edit", { sessionId, turnIndex: index, user_text: text })
+      .then((data) => { updateEditState(data.hasEdits); schedulePreview(); })
+      .catch((e) => console.error("Edit failed:", e));
+  }, 300);
+
+  function handleTurnInput(e) {
+    const { action, index: rawIndex } = e.target.dataset;
+    const index = parseInt(rawIndex);
+    if (action === "edit") debouncedEdit(currentSessionId, index, e.target.value);
+    if (action === "bookmark-label" && bookmarks.has(index)) {
+      bookmarks.set(index, e.target.value || `Turn ${index}`);
+      debouncedPreview();
+    }
+  }
+
+  // =========================================================================
+  // Options & redact rules
+  // =========================================================================
+
+  async function loadThemes() {
+    try {
+      const themes = await apiJson("GET", "/api/themes");
+      opt.theme.innerHTML = themes.map((t) => `<option value="${esc(t)}" ${t === "tokyo-night" ? "selected" : ""}>${esc(t)}</option>`).join("");
+    } catch { /* ignore */ }
+  }
+
+  function addRedactRule(search, replacement) {
+    const row = document.createElement("div");
+    row.className = "redact-rule";
+    row.innerHTML = `<input type="text" placeholder="Search text" value="${esc(search)}">
+      <span class="arrow">&rarr;</span>
+      <input type="text" placeholder="Replacement" value="${esc(replacement)}">
+      <button class="remove-rule">&times;</button>`;
+    redactRulesContainer.appendChild(row);
+    row.querySelector(".remove-rule").addEventListener("click", () => { row.remove(); schedulePreview(); });
+    row.querySelectorAll("input").forEach((inp) => {
+      inp.addEventListener("input", debounce(() => schedulePreview(), 300));
+    });
+  }
+
+  function getRedactRules() {
+    const rules = [];
+    redactRulesContainer.querySelectorAll(".redact-rule").forEach((row) => {
+      const inputs = row.querySelectorAll("input");
+      if (inputs[0].value) rules.push({ search: inputs[0].value, replacement: inputs[1].value });
+    });
+    return rules;
+  }
+
+  function gatherOptions() {
+    return {
+      theme: opt.theme.value,
+      speed: parseFloat(opt.speed.value) || 1,
+      showThinking: opt.thinking.checked,
+      showToolCalls: opt.toolCalls.checked,
+      fontSize: opt.fontSize.value,
+      redactSecrets: opt.redact.checked,
+      redactRules: getRedactRules(),
+      userLabel: opt.userLabel.value || "User",
+      assistantLabel: opt.asstLabel.value || "",
+      title: titleInput.value || "Replay",
+      description: opt.desc.value || "",
+      ogImage: opt.ogImage.value || "",
+      timing: opt.timing.value,
+      pacing: opt.pacing.value,
+      readingWpm: parseFloat(opt.readingWpm.value) || parseFloat(opt.readingWpm.defaultValue),
+      minified: opt.minify.checked,
+      compress: opt.compress.checked,
+      excludeTurns: Array.from(excludedTurns),
+      bookmarks: Array.from(bookmarks.entries()).map(([turn, label]) => ({ turn, label })),
+    };
+  }
+
+  // =========================================================================
+  // Preview
+  // =========================================================================
+
+  const debouncedPreview = debounce(() => refreshPreview(), 150);
+
+  function schedulePreview() {
+    if (currentSessionId) debouncedPreview();
+  }
+
+  async function refreshPreview() {
+    if (!currentSessionId) return;
+    refreshIndicator.classList.add("active");
+    try {
+      const data = await apiJson("POST", "/api/preview", {
+        sessionId: currentSessionId,
+        options: gatherOptions(),
+      });
+      if (previewBlobUrl) URL.revokeObjectURL(previewBlobUrl);
+      previewBlobUrl = URL.createObjectURL(new Blob([data.html], { type: "text/html" }));
+      previewIframe.src = previewBlobUrl;
+    } catch (e) {
+      console.error("Preview failed:", e);
+    } finally {
+      refreshIndicator.classList.remove("active");
+    }
+  }
+
+  // =========================================================================
+  // Export & Reset
+  // =========================================================================
+
+  async function doReset() {
+    if (!currentSessionId) return;
+    const hasChanges = hasTextEdits || excludedTurns.size > 0 || bookmarks.size > 0;
+    if (hasChanges) {
+      const ok = await showConfirm("Reset Session", "Reset all edits, excluded turns, and bookmarks to the original session?");
+      if (!ok) return;
+    }
+    try {
+      const data = await apiJson("POST", "/api/reset", { sessionId: currentSessionId });
+      currentTurns = data.turns;
+      excludedTurns = new Set();
+      bookmarks = new Map();
+      updateEditState(false);
+      renderTurns();
+      schedulePreview();
+    } catch (e) {
+      alert("Reset failed: " + e.message);
+    }
+  }
+
+  async function doExport() {
+    if (!currentSessionId) return;
+    try {
+      const res = await api("POST", "/api/export", {
+        sessionId: currentSessionId,
+        options: gatherOptions(),
+      });
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = (titleInput.value || "replay").replace(/[^a-zA-Z0-9_-]/g, "_") + ".html";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert("Export failed: " + e.message);
+    }
+  }
+
+  async function doExportData() {
+    if (!currentSessionId) return;
+    try {
+      const res = await api("POST", "/api/export-data", {
+        sessionId: currentSessionId,
+        options: gatherOptions(),
+      });
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = (titleInput.value || "replay").replace(/[^a-zA-Z0-9_-]/g, "_") + ".json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert("Export failed: " + e.message);
+    }
+  }
+
+  // =========================================================================
+  // Resize handle (editor ↔ preview)
+  // =========================================================================
+
+  function stopDrag() {
+    if (!dragging) return;
+    dragging = false;
+    resizeHandle.classList.remove("active");
+    document.body.style.cursor = "";
+    document.body.style.userSelect = "";
+    previewIframe.style.pointerEvents = "";
+  }
+
+  // =========================================================================
+  // Event listeners (all in one place)
+  // =========================================================================
+
+  // Sidebar collapse/expand
+  sidebarToggleBtn.addEventListener("click", () => {
+    const collapsed = document.body.classList.toggle("sidebar-collapsed");
+    sidebarToggleBtn.innerHTML = collapsed ? "&#8250;" : "&#8249;";
+    // Clear inline grid style so CSS classes take effect
+    appEl.style.gridTemplateColumns = "";
+  });
+  sessionsToggle.addEventListener("click", () => toggleSidebarSection(sessionsToggle, sessionsSection));
+  optionsToggle.addEventListener("click", () => toggleSidebarSection(optionsToggle, optionsSection));
+  browseToggle.addEventListener("click", () => {
+    browseToggle.classList.toggle("open");
+    browseBody.style.display = browseToggle.classList.contains("open") ? "block" : "none";
+  });
+
+  // Folder browser
+  browsePathInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const path = browsePathInput.value.trim();
+      if (path) browseTo(path);
+    }
+  });
+
+  // Options: immediate change + debounced text input
+  Object.values(opt).forEach((el) => el.addEventListener("change", () => schedulePreview()));
+  function updatePacingControls() {
+    const paced = opt.timing.value === "paced";
+    const wordByWord = paced && opt.pacing.value === "paced-wording";
+    $("pacingStyleRow").hidden = !paced;
+    opt.pacing.disabled = !paced;
+    $("readingWpmRow").hidden = !wordByWord;
+    opt.readingWpm.disabled = !wordByWord;
+  }
+  opt.timing.addEventListener("change", updatePacingControls);
+  opt.pacing.addEventListener("change", updatePacingControls);
+  updatePacingControls();
+  [opt.userLabel, opt.asstLabel, opt.desc, opt.ogImage].forEach((el) => {
+    el.addEventListener("input", debounce(() => schedulePreview(), 300));
+  });
+  addRuleBtn.addEventListener("click", () => { addRedactRule("", "[REDACTED]"); schedulePreview(); });
+  titleInput.addEventListener("input", debounce(() => schedulePreview(), 300));
+
+  // Toolbar actions
+  resetBtn.addEventListener("click", doReset);
+  exportBtn.addEventListener("click", doExport);
+  exportDataBtn.addEventListener("click", doExportData);
+
+  // Import HTML replay
+  importHtmlBtn.addEventListener("click", () => importHtmlFile.click());
+  importHtmlFile.addEventListener("change", async () => {
+    const file = importHtmlFile.files[0];
+    if (!file) return;
+    importHtmlFile.value = ""; // reset so same file can be re-selected
+    try {
+      const htmlContent = await file.text();
+      const data = await apiJson("POST", "/api/import", { html: htmlContent, filename: file.name });
+      currentSessionId = data.sessionId;
+      currentTurns = data.turns;
+      excludedTurns = new Set(data.excludedTurns || []);
+      bookmarks = new Map();
+      for (const bm of data.bookmarks || []) bookmarks.set(bm.turn, bm.label);
+
+      const filename = file.name.replace(/\.html$/, "");
+      titleInput.value = "Replay \u2014 " + filename;
+      titleInput.disabled = false;
+      resetBtn.disabled = false;
+      exportBtn.disabled = false;
+      exportDataBtn.disabled = false;
+      updateEditState(false);
+      showOptionsPanel();
+      turnsToolbar.classList.add("visible");
+      renderTurns();
+      schedulePreview();
+    } catch (e) {
+      alert("Import failed: " + e.message);
+    }
+  });
+
+  // Select all / none
+  selectAllBtn.addEventListener("click", () => {
+    excludedTurns.clear();
+    turnsList.querySelectorAll("[data-action='toggle']").forEach((cb) => { cb.checked = true; });
+    turnsList.querySelectorAll(".turn-card").forEach((card) => card.classList.remove("excluded"));
+    updateEditState();
+    schedulePreview();
+  });
+  selectNoneBtn.addEventListener("click", () => {
+    currentTurns.forEach((t) => excludedTurns.add(t.index));
+    turnsList.querySelectorAll("[data-action='toggle']").forEach((cb) => { cb.checked = false; });
+    turnsList.querySelectorAll(".turn-card").forEach((card) => card.classList.add("excluded"));
+    turnsList.querySelectorAll("[data-action='expand']").forEach((s) => s.classList.remove("open"));
+    turnsList.querySelectorAll(".turn-blocks-detail").forEach((d) => d.classList.remove("open"));
+    updateEditState();
+    schedulePreview();
+  });
+
+  // Expand / collapse all blocks
+  expandAllBtn.addEventListener("click", () => {
+    turnsList.querySelectorAll("[data-action='expand']").forEach((s) => s.classList.add("open"));
+    turnsList.querySelectorAll(".turn-blocks-detail").forEach((d) => d.classList.add("open"));
+  });
+  collapseAllBtn.addEventListener("click", () => {
+    turnsList.querySelectorAll("[data-action='expand']").forEach((s) => s.classList.remove("open"));
+    turnsList.querySelectorAll(".turn-blocks-detail").forEach((d) => d.classList.remove("open"));
+  });
+
+  // Dark/light mode
+  themeModeBtn.addEventListener("click", () => {
+    const isLight = document.documentElement.classList.toggle("light");
+    document.documentElement.classList.toggle("dark", !isLight);
+    themeModeBtn.querySelector(".icon-moon").style.display = isLight ? "none" : "block";
+    themeModeBtn.querySelector(".icon-sun").style.display = isLight ? "block" : "none";
+  });
+
+  // Help modal
+  helpBtn.addEventListener("click", () => helpModal.classList.add("open"));
+  helpModalClose.addEventListener("click", () => helpModal.classList.remove("open"));
+  helpModal.addEventListener("click", (e) => {
+    if (e.target === helpModal) helpModal.classList.remove("open");
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && helpModal.classList.contains("open")) helpModal.classList.remove("open");
+    if (e.key === "Escape" && confirmModal.classList.contains("open")) confirmCancel.click();
+    // Ctrl/Cmd+F: expand all turns and blocks so browser find can search everything
+    if (e.key === "f" && (e.ctrlKey || e.metaKey) && currentSessionId) {
+      turnsList.querySelectorAll("[data-action='expand']").forEach((s) => s.classList.add("open"));
+      turnsList.querySelectorAll(".turn-blocks-detail").forEach((d) => d.classList.add("open"));
+      turnsList.querySelectorAll(".block-item-header").forEach((h) => h.classList.add("open"));
+    }
+  });
+
+  // Resize handle
+  resizeHandle.addEventListener("mousedown", (e) => {
+    e.preventDefault();
+    dragging = true;
+    resizeHandle.classList.add("active");
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    previewIframe.style.pointerEvents = "none";
+  });
+  document.addEventListener("mousemove", (e) => {
+    if (!dragging) return;
+    const appRect = appEl.getBoundingClientRect();
+    const sidebarWidth = document.querySelector(".sidebar").getBoundingClientRect().width;
+    const available = appRect.width - sidebarWidth - 4;
+    const editorWidth = Math.max(100, Math.min(available - 100, e.clientX - appRect.left - sidebarWidth));
+    const previewWidth = available - editorWidth;
+    appEl.style.gridTemplateColumns = `${sidebarWidth}px ${editorWidth}px 4px ${previewWidth}px`;
+  });
+  document.addEventListener("mouseup", stopDrag);
+  window.addEventListener("blur", stopDrag);
+
+  // =========================================================================
+  // Init
+  // =========================================================================
+
+  loadSessions().then(() => {
+    // Auto-load file from ?load= query param (after sessions are rendered)
+    const loadParam = new URLSearchParams(window.location.search).get("load");
+    if (!loadParam) return;
+
+    // Find matching sidebar item — try exact match, then match by filename
+    let item = sessionsTree.querySelector(`.session-item[data-path="${CSS.escape(loadParam)}"]`);
+    if (!item) {
+      const filename = loadParam.split("/").pop();
+      for (const el of sessionsTree.querySelectorAll(".session-item")) {
+        if (el.dataset.path && el.dataset.path.endsWith(filename)) {
+          item = el;
+          break;
+        }
+      }
+    }
+    // Expand parent project and group so the item is visible
+    if (item) {
+      const proj = item.closest(".session-project");
+      if (proj) {
+        proj.querySelector(".session-project-name")?.classList.add("open");
+        proj.querySelector(".session-list")?.classList.add("open");
+      }
+      const groupContent = item.closest(".session-group-content");
+      if (groupContent) {
+        const groupLabel = groupContent.previousElementSibling;
+        if (groupLabel) groupLabel.classList.add("open");
+      }
+    }
+    loadSession(loadParam, item);
+    history.replaceState(null, "", window.location.pathname);
+  });
+  loadThemes();
+})();
+</script>
+</body>
+</html>
