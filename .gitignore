@@ -1,8 +1,7 @@
-.modvet-snapshot.json
+benchmark/corpus/
+dist/
+work-*.json
+work-*.txt
 __pycache__/
 *.pyc
 .venv/
-dist/
-build/
-*.egg-info/
-demo-mods/

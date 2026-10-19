@@ -15,12 +15,13 @@ modvet diff ./my-mod --against .modvet-snapshot.json   # "The update is the atta
 
 Exit codes: `0` clean · `1` findings ≥ `--fail-on` (default HIGH) · `2` usage error.
 
-## Install (dev)
+## Install
 
 ```
-uv pip install -e .
-# oder: python -m modvet.cli scan ./some-mod
+pip install modvet
 ```
+
+Requires Python ≥ 3.9, zero dependencies. Development: `uv pip install -e .`
 
 ## What it checks
 
@@ -48,6 +49,6 @@ uv pip install -e .
 
 ## Status
 
-v0.2 — Phase 1 abgeschlossen (FP-Reduktion, Kontext-Engine), Phase 2 (Outputs/Verteilung) im Bau. PyPI-Publish folgt auf Jörg-GO.
+v0.2.2 — live on PyPI (`pip install modvet`). Phase 2 (Outputs/Verteilung) abgeschlossen: SARIF, Badge, OWASP-Mapping. Nächste Schritte: SKILL.md-/MCP-Scanning (Fast-Follow), Pro-/Audit-Angebot nach Traktion.
 
 (C) 2026 Jörg Michno. Engine portiert aus ClawGuard v0.5.0.

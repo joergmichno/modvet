@@ -1,2 +1,0 @@
-[procMacro]
-ignored = { "napi-derive" = ["napi"] }

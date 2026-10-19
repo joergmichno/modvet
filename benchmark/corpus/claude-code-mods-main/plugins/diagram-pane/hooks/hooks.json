@@ -1,4 +1,0 @@
-{
-  "description": "The diagram-pane hooks module",
-  "modules": ["./register.js"]
-}

@@ -1,4 +1,0 @@
-{
-  "description": "The cache-clock hooks module",
-  "modules": ["./register.js"]
-}

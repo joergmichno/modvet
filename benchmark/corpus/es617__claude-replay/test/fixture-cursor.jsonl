@@ -1,5 +1,0 @@
-{"role":"user","message":{"content":[{"type":"text","text":"<user_query>\nscan for ble devices\n</user_query>"}]}}
-{"role":"assistant","message":{"content":[{"type":"text","text":"**Planning scan**\n\nI'll scan for nearby BLE devices."}]}}
-{"role":"assistant","message":{"content":[{"type":"text","text":"Found 3 devices nearby."}]}}
-{"role":"user","message":{"content":[{"type":"text","text":"<user_query>\nconnect to the first one\n</user_query>"}]}}
-{"role":"assistant","message":{"content":[{"type":"text","text":"Connected successfully."}]}}

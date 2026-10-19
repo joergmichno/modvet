@@ -1,1 +1,0 @@
-Read scope is this fixture repository. Do not read other repositories or personal files. Do not implement application code. Native fresh candidate agents are authorized. Do not use rm/rmdir; use trash for cleanup.
