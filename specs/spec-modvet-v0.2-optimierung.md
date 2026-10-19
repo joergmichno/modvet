@@ -15,7 +15,7 @@ ModVet von einem Port alter ClawGuard-Muster zu einem **mod-zeitgemäßen Scanne
 - [x] A5 **OWASP-Mapping:** jedes Finding trägt `owasp_mcp` (Kategorie→MCP01–MCP10-Mapping in engine.py), ausgegeben in JSON + Human-Report (19.10.)
 - [x] A6 **SARIF-Output:** `modvet scan --format sarif` (SARIF 2.1.0, GitHub-Code-Scanning-kompatibel) + 4 Schema-Tests grün (18.10.)
 - [x] A7 **Badge:** `modvet badge --input report.json --out badge.svg` (CLEAN/WARN/CRITICAL-Farben) + 5 Tests grün (18.10.)
-- [x] A8 **Verteilung fertig:** `uv build` erzeugt wheel + sdist (modvet-0.1.0, 19.10. verifiziert); README mit Vergleichstabelle (vs. Snyk/mcp-triage). npm-Publish bleibt Jörg-GO.
+- [x] A8 **Verteilung fertig:** `uv build` erzeugt wheel + sdist (modvet-0.2.0, 19.10. verifiziert); README mit Vergleichstabelle (vs. Snyk/mcp-triage). PyPI-Publish bleibt Jörg-GO.
 - [~] A9 **Verification:** Test-Suite grün (5 + 6 + 4 + 5 = 20 Tests, 19.10.); Benchmark-Bericht im Repo aktualisiert; Spec-Checkboxen: A1–A8 abgehakt, A3/A9-Voll-Corpus-Nachweis = Phase-2-Arbeit (neue FP-Klassen: Code-Obfuscation in Hook-Sammlungen, Data-Exfil in DevOps-Skills, Laufzeit-Ø 41 s → Perf-Index).
 
 ## Non-Goals (v0.2)

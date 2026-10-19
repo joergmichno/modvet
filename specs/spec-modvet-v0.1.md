@@ -24,7 +24,7 @@ Developer installieren Claude-Code-Mods, die unsandboxed im Agentenprozess laufe
 - **FP-Reduktion:** „Command Injection in Output" feuerte auf Doku-Backticks → Refiner (Kommando-Verb-Heuristik) senkte 91→43 Findings. Rest-Rauschen: Mail-Adressen in READMEs (LOW) — dokumentierte Grenze, Woche-1-Polish.
 
 ## Non-Goals (Woche 1)
-Kein Web-UI · keine Badge-Registry · keine GitHub Action · kein MCP-Server · keine Cloud-API · kein Pro-/Payment · keine LLM-Aufrufe (deterministisch) · keine Publikation/npm-Publish (erst nach Jörg-GO).
+Kein Web-UI · keine Badge-Registry · keine GitHub Action · kein MCP-Server · keine Cloud-API · kein Pro-/Payment · keine LLM-Aufrufe (deterministisch) · keine Publikation/PyPI-Publish (erst nach Jörg-GO).
 
 ## Verification
 `modvet scan` auf Demo-Mods liefert JSON-Findings mit Datei/Zeile; Exitcodes 0/1 korrekt; `modvet diff` zeigt nur Delta-Findings; Test-Suite grün.

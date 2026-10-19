@@ -48,6 +48,6 @@ uv pip install -e .
 
 ## Status
 
-v0.2 — Phase 1 abgeschlossen (FP-Reduktion, Kontext-Engine), Phase 2 (Outputs/Verteilung) im Bau. npm-Publish folgt auf Jörg-GO.
+v0.2 — Phase 1 abgeschlossen (FP-Reduktion, Kontext-Engine), Phase 2 (Outputs/Verteilung) im Bau. PyPI-Publish folgt auf Jörg-GO.
 
 (C) 2026 Jörg Michno. Engine portiert aus ClawGuard v0.5.0.
