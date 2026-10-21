@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
-ClawGuard v0.5.0 – The Firewall for Autonomous AI Agents.
-A CLI tool that scans text for prompt injections, dangerous commands,
-and social engineering patterns.
+ModVet scan engine — deterministic pattern scanner for AI-agent security.
+Scans text for prompt injections, dangerous commands, and social
+engineering patterns. Offline, no LLM, zero dependencies.
 
-Usage:
-    python3 clawguard.py <file>          Scan a text file
-    python3 clawguard.py --stdin         Scan from standard input
-    echo "text" | python3 clawguard.py   Pipe text directly
+Lineage: the core pattern engine was ported from ClawGuard v0.5.0
+(Jörg Michno, Jul 2026) and reworked for mod vetting (21.10.2026
+evidence-report era). API and naming now follow ModVet.
 
 Exit Codes:
     0 = Clean (no threats found)
@@ -2315,7 +2314,7 @@ def main():
     parser.add_argument("file", nargs="?", help="Text file to scan")
     parser.add_argument("--stdin", action="store_true", help="Read from standard input")
     parser.add_argument("--json", action="store_true", help="Output report as JSON (for automation)")
-    parser.add_argument("--version", action="version", version=f"ModVet v{__version__} (engine: ClawGuard 0.5.0 port)")
+    parser.add_argument("--version", action="version", version=f"ModVet v{__version__} (deterministic scan engine)")
 
     args = parser.parse_args()
 
