@@ -502,6 +502,7 @@ def scan_single_file(rel: str, text: str) -> list[Finding]:
     refined = _refine_code_findings(findings, rel)
     refined = _dedupe_cmd_line(refined)  # 1 Command-Finding je Zeile
     for f in refined:
+        f.file = rel  # Evidenz-Zuordnung (21.10.): jedes Finding trägt seine Datei
         if not f.owasp_mcp:
             f.owasp_mcp = CATEGORY_OWASP_MCP.get(f.category, "")  # A5: OWASP-Mapping
     return refined

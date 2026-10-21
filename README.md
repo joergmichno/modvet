@@ -7,11 +7,14 @@ Mods run unsandboxed inside the agent process with your full permissions. ModVet
 ```
 modvet scan ./my-mod                    # Pre-Install-Check (human output)
 modvet scan ./my-mod --json             # machine-readable report
+modvet scan ./my-mod --evidence ev.json # deterministischer Evidenz-Report (Beweis-Kette)
 modvet scan ./my-mod --format sarif     # GitHub Code Scanning kompatibel
 modvet badge --input report.json        # Status-Badge als SVG
 modvet snapshot ./my-mod                # Baseline nach sauberer Installation
 modvet diff ./my-mod --against .modvet-snapshot.json   # "The update is the attack"
 ```
+
+**Evidenz-Report** (`--evidence`): beantwortet für einen externen Prüfer *wer* gescannt hat (Scanner-Version), *mit welchen Regeln* (SHA-256-Fingerprint des Regelwerks inkl. Kombinationslogik + Detektoren), *was* gescannt wurde (Datei-Manifest mit SHA-256 je Datei) und *warum* jedes Finding zustandekam (Datei + Zeile + Regel + gematchter Text). Der Befund-Teil ist deterministisch: gleicher Input + gleiche Regeln = identischer `evidence_body_sha256` — reproduzierbar für Audits, ohne LLM.
 
 Exit codes: `0` clean · `1` findings ≥ `--fail-on` (default HIGH) · `2` usage error.
 

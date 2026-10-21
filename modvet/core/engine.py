@@ -54,6 +54,7 @@ class Finding:
     recommendation: str
     confidence: int = 0
     owasp_mcp: str = ""  # OWASP MCP Top 10 Referenz (MCP01–MCP10), A5
+    file: str = ""  # Relativpfad der Fund-Datei (Evidenz-Zuordnung, 21.10.)
 
 
 # Kategorie → OWASP MCP Top 10 (2025) Mapping (A5)
@@ -2274,7 +2275,7 @@ def format_human(report: ScanReport) -> str:
 def format_json(report: ScanReport) -> str:
     """Format the report as machine-readable JSON."""
     data = {
-        "clawguard_version": "0.3.0",
+        "modvet_version": __version__,
         "timestamp": report.timestamp,
         "source": report.source,
         "total_lines": report.total_lines,
@@ -2288,6 +2289,7 @@ def format_json(report: ScanReport) -> str:
                 "pattern_name": f.pattern_name,
                 "matched_text": f.matched_text,
                 "line_number": f.line_number,
+                "file": f.file,
                 "context": f.context,
                 "recommendation": f.recommendation,
                 "confidence": f.confidence,

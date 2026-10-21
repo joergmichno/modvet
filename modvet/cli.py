@@ -41,6 +41,11 @@ def cmd_scan(args: argparse.Namespace) -> int:
         print(format_json(report))
     else:
         print(format_human(report))
+    if getattr(args, "evidence", None):
+        from .evidence import write_evidence_report
+        out = Path(args.evidence)
+        write_evidence_report(root, report, out, sys.argv)
+        print(f"evidence: report -> {out}")
     threshold = Severity[args.fail_on.upper()].score()
     return 1 if any(f.severity.score() >= threshold for f in report.findings) else 0
 
@@ -131,6 +136,7 @@ def main(argv: list[str] | None = None) -> int:
     p_scan = sub.add_parser("scan", help="Scan a mod directory")
     p_scan.add_argument("path")
     p_scan.add_argument("--json", action="store_true", help="JSON output")
+    p_scan.add_argument("--evidence", metavar="OUT.json", help="Write deterministic evidence report (ruleset hash + file manifest + per-finding file/line/rule)")
     p_scan.add_argument("--format", choices=["human", "sarif"], default="human", help="Output format (SARIF 2.1.0 for GitHub Code Scanning)")
     p_scan.add_argument("--fail-on", default="HIGH", choices=["LOW", "MEDIUM", "HIGH", "CRITICAL"])
     p_scan.set_defaults(fn=cmd_scan)
