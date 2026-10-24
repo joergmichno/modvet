@@ -1,6 +1,6 @@
 [project]
 name = "modvet"
-version = "0.2.5"
+version = "0.2.6"
 authors = [{ name = "Joerg Michno" }]
 description = "ModVet — deterministic pre-install security scanner for Claude Code mods (and later: skills, MCP servers)."
 readme = "README.md"

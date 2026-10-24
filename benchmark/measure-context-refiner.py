@@ -4,7 +4,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from modvet.mods import scan_single_file
 
-CORPUS = Path(r'D:\AI-Labs\modvet\benchmark\repos')
+CORPUS = Path(r'D:\AI-Labs\modvet\benchmark\corpus')
 ALT = Path(r'D:\AI-Labs\modvet\benchmark\rescan-2026-10-24')
 REPOS = sorted(p.stem for p in ALT.glob('*.json')
                if p.stem not in ('_summary', 'authors', 'davila7__claude-code-templates'))
