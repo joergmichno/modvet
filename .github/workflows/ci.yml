@@ -22,8 +22,8 @@ jobs:
         run: modvet --version
       - name: Scan self-test (fixtures MUST trigger CRITICAL, exit 1 = detection works)
         run: |
-          modvet scan tests/fixtures --fail-on CRITICAL
-          code=$?
+          code=0
+          modvet scan tests/fixtures --fail-on CRITICAL || code=$?
           if [ "$code" -ne 1 ]; then
             echo "Erwartet Exit 1 (CRITICAL erkannt), erhalten: $code"
             exit 1
