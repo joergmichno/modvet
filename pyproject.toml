@@ -1,6 +1,6 @@
 [project]
 name = "modvet"
-version = "0.2.3"
+version = "0.2.4"
 authors = [{ name = "Joerg Michno" }]
 description = "ModVet — deterministic pre-install security scanner for Claude Code mods (and later: skills, MCP servers)."
 readme = "README.md"
@@ -20,3 +20,7 @@ packages = ["modvet"]
 
 [tool.hatch.build.targets.sdist]
 exclude = ["/benchmark", "/dist", "/work-*.json", "/work-*.txt", "/.gitignore"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = ["benchmark", "demo-mods", "dist", "tools", "specs", "docs"]

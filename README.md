@@ -1,6 +1,6 @@
 # ModVet
 
-**Vet your Claude Code mods before you install them — deterministic, offline, in milliseconds.**
+**Vet your Claude Code mods before you install them — deterministic, offline, ~0.1 s per file.**
 
 Mods run unsandboxed inside the agent process with your full permissions. ModVet scans a mod directory for prompt-injection patterns, dangerous capabilities (shell exec, exfiltration, env/file access, permission-lift hooks, update trojans) and hardcoded secrets — no cloud, no LLM, no account. Findings with `file:line`, OWASP MCP Top 10 mapping, JSON/SARIF/human output, CI-ready exit codes.
 
@@ -28,7 +28,7 @@ Requires Python ≥ 3.9, zero dependencies. Development: `uv pip install -e .`
 
 ## What it checks
 
-- **Prompt Injection / Instruction Override** (EN + DE, ~400 deterministische Pattern inkl. Homoglyph-/Leet-/Base64-/Zero-Width-/Reverse-Normalisierung)
+- **Prompt Injection / Instruction Override** (EN + DE, 236 deterministische Pattern inkl. Homoglyph-/Leet-/Base64-/Zero-Width-/Reverse-Normalisierung)
 - **Capability-Kombinationslogik:** Einzel-Capabilities (fetch, process.env, fs) sind normale Mod-Arbeit — erst KOMBINATIONEN im selben Ausdruck (Env-Read + POST, Exec + Fetch) werden gemeldet. Plus Angriffsprimitive: Shell-Pipe-Downloads, Base64-Exec, Reverse Shells, Hook-Permission-Lift, Config-Rewrite, Committed-Env-Files, npm-Lifecycle-Skripte.
 - **Mod-spezifische Detektoren (v0.2):** Prompt-Compose-Rewrite, PreToolUse-Argument-Rewrite, Update-Delta-Trojan.
 - **OWASP MCP Top 10 Mapping:** jedes Finding trägt seine MCP01–MCP10-Referenz (JSON-Feld `owasp_mcp`).

@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install (package + pytest)
+        run: uv pip install --system . pytest
+      - name: Tests
+        run: pytest -q
+      - name: Version smoke
+        run: modvet --version
+      - name: Scan self-test (fixtures MUST trigger CRITICAL, exit 1 = detection works)
+        run: |
+          modvet scan tests/fixtures --fail-on CRITICAL
+          code=$?
+          if [ "$code" -ne 1 ]; then
+            echo "Erwartet Exit 1 (CRITICAL erkannt), erhalten: $code"
+            exit 1
+          fi
+          echo "Selbsttest bestanden: CRITICAL-Findings werden erkannt."
+      - name: Build wheel + sdist
+        run: uv build

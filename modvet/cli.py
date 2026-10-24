@@ -13,6 +13,12 @@ from pathlib import Path
 from .core.engine import Severity, format_human, format_json
 from .mods import discover_mod_files, scan_mod
 
+try:  # installierte Version ist die Wahrheit; Repo-Fallback fuer Dev-Checkouts
+    from importlib.metadata import version as _pkg_version
+    _VERSION = _pkg_version("modvet")
+except Exception:
+    from . import __version__ as _VERSION
+
 SNAPSHOT_VERSION = 1
 
 
@@ -131,6 +137,7 @@ def scan_mod_report_on_single_file(rel: str, text: str):
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="modvet", description="ModVet — pre-install security scanner for Claude Code mods")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {_VERSION}")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p_scan = sub.add_parser("scan", help="Scan a mod directory")
