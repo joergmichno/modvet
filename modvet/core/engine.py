@@ -1828,6 +1828,10 @@ COMPILED_PATTERNS = [
 # (statt 400 finditer-Aufrufen pro Zeile nur ~10 Kombi-Searches).
 # Zeilen > _COMBINED_MAX_LEN laufen den langsamen Einzel-Pfad (Backtracking-Schutz).
 _COMBINED_MAX_LEN = 500
+# Perf-Gate (24.10., davila7-Befund): Minified-JSON/TS-Riesenzeilen (100 KB–1 MB) kosten
+# ~9 s PRO Normalisierungs-Variante (6+ Varianten = ~52 s/Zeile). Der Pattern-Loop läuft
+# deshalb nur auf einem Fenster; Secrets/Primitives/Detektoren sehen weiterhin die volle Zeile.
+_PATTERN_LINE_WINDOW = 20000
 
 
 def _build_combined() -> dict[str, re.Pattern]:
@@ -2016,6 +2020,10 @@ def scan_text(text: str, source: str = "stdin") -> ScanReport:
             scan_items.insert(0, (0, joined))
 
     for line_num, line in scan_items:
+        # Perf-Gate: Riesenzeilen (minified JSON/TS) auf Fenster begrenzen — sonst
+        # multiplizieren sich die finditer-Kosten mit jeder Normalisierungs-Variante.
+        if len(line) > _PATTERN_LINE_WINDOW:
+            line = line[:_PATTERN_LINE_WINDOW]
         # Generate normalized variants for evasion detection
         line_variants = [line]
         # Strip zero-width characters
