@@ -415,7 +415,7 @@ def detect_kind(root: Path) -> str:
 
 # ─── Kontext-Refiner (24.10., Corpus-Studie): Test-/Doku-/Security-Tool-/Echo-Kontexte ───
 _TEST_FILE_RE = re.compile(
-    r"(?:^|[/\\])(?:tests?|__tests__|fixtures|testdata|evals)(?:[/\\])"
+    r"(?:^|[/\\])(?:tests?|__tests__|__fixtures__|__mocks__|__snapshots__|fixtures|testdata|evals)(?:[/\\])"
     r"|(?:^|[/\\])test_[^/\\]+\.py$"
     r"|\.(?:test|spec)\.[a-z]+$", re.I)
 _SECURITY_TOOL_PATH_RE = re.compile(
@@ -424,6 +424,21 @@ _REGEX_META_RE = re.compile(r"(?:\\[sdw]|\.\*|\(\?:|\[\^?[A-Za-z0-9_ -]+\])")
 _NETWORK_EXFIL_RE = re.compile(
     r"(?:https?://|curl|wget|fetch\(|requests\.|urlopen|axios|socket|webhook|http\.request|\.post\()", re.I)
 _ECHO_PREFIX_RE = re.compile(r"^\s*echo\s+", re.I)
+
+
+_TEMPLATE_SECRET_RE = re.compile(r"(?:\{\{.*?\}\}|\$\{[^}]+\}|<[^>]*(?:your|placeholder|example|xxx)[^>]*>)", re.I)
+_TEST_CARDS = frozenset({
+    "4242424242424242", "4000000000000002", "5555555555554444", "5200828282828210",
+    "5105105105105100", "378282246310005", "371449635398431", "6011111111111117",
+    "6011000990139424", "4111111111111111", "4012888888881881", "4000056655665556",
+    "4000002500003155", "4000000000009995", "4000000000009987", "4000000000009979",
+    "4000000000000069", "4000000000000127", "4000000000000101", "4000000000000341",
+    "4000000000003220", "4000000000003063", "4000000000003055",
+})
+_BENIGN_DUNDERS = frozenset({
+    "__class__", "__name__", "__init__", "__doc__", "__file__", "__version__",
+    "__dict__", "__module__", "__main__", "__qualname__", "__annotations__",
+})
 
 
 def _luhn_ok(digits: str) -> bool:
@@ -455,7 +470,23 @@ def _context_downgrade(findings: list[Finding], source: str = "", text: str = ""
             digits = re.sub(r"\D", "", f.matched_text or "")
             if not _luhn_ok(digits):
                 continue  # Dezimalzahl, keine Karte (evals-Geister)
+        # Template-Platzhalter sind keine hartcodierten Secrets ({{ var }}, ${var}, <your-key>)
+        if f.pattern_name in ("Secret Assignment", "Hardcoded Secret") and _TEMPLATE_SECRET_RE.search(f.matched_text or ""):
+            continue
+        # Bekannte Test-Kreditkarten (Stripe/Braintree) sind keine echte PII
+        if f.pattern_name.startswith("Credit Card Number"):
+            if re.sub(r"\D", "", f.matched_text or "") in _TEST_CARDS:
+                continue
+        # Harmlose Dunder (__class__, __name__ ...) sind kein Sandbox-Ausbruch
+        if f.pattern_name == "Python Magic Attributes" and (f.matched_text or "").strip() in _BENIGN_DUNDERS:
+            continue
+        # Doku (keine Instruktionsdatei): Secret-Beispiele + Python-Magic-Beispiele entfallen
+        if plain_doc and f.pattern_name in ("Secret Assignment", "Hardcoded Secret", "Python Magic Attributes"):
+            continue
         sev = f.severity
+        # Doku-Prosa: Prompt-Injection-/Agentic-Behauptungen auf MEDIUM kappen (sichtbar bleiben)
+        if plain_doc and f.category in ("Prompt Injection", "Agentic Security") and sev.score() >= Severity.HIGH.score():
+            sev = Severity.MEDIUM
         if plain_doc and f.pattern_name.startswith("Toxic Flow"):
             continue  # Doku-Prosa: Wortkette ist keine Exfiltrations-Kette
         if is_test and sev.score() >= Severity.HIGH.score():
