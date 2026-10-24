@@ -1,0 +1,83 @@
+{
+  "modvet_version": "0.2.4",
+  "timestamp": "2026-10-24T12:13:00.240253+00:00",
+  "source": "generic:D:\\AI-Labs\\modvet\\benchmark\\corpus\\data-goblin__claude-code-filetree",
+  "total_lines": 0,
+  "total_findings": 6,
+  "risk_score": 6,
+  "risk_level": "HIGH",
+  "findings": [
+    {
+      "severity": "MEDIUM",
+      "category": "Agentic Security",
+      "pattern_name": "Exception Swallowing (ASI08)",
+      "matched_text": "catch { gnu = \"rejected\" } console.log(\"BSD find with GNU -newermt @epoch:\", gnu) for (const c of [\"open\", \"stat\", \"date",
+      "line_number": 0,
+      "file": ".github\\workflows\\platforms.yml",
+      "context": "...print\"], { stdio: \"pipe\" }) } catch { gnu = \"rejected\" } console.log(\"BSD find with GNU -newermt @epoch:\", gnu) for (const c of [\"open\", \"stat\", \"date\", \"ps\", \"uname\"]) console.log(c, cp.execFileSync(\"sh\", [\"-c\", \"command -v \" + c]).toString().trim()) } if (process.platform === \"linux\") { cp.execFileSync(\"sleep\", [\"1.2\"]); const since = (Date.now() - 600) / 1000 fs.writeFileSync(path.join(dir, \"sub/deep/new.txt\"), \"b\") const out = cp.execFileSync(\"find\", [\"-H\", dir, \"-xdev\", \"-newermt\", \"@\" + since.toFixed(3), \"-print\"]).toString() console.log(\"GNU find -newermt:\", out.trim().split(\"\\n\").map(p => path.relative(dir, p))) if (!out.includes(\"new.txt\")) throw new Error(\"GNU scan wrong\") } if (process.platform === \"win32\") { console.log(\"OS env:\", process.env.OS, \"USERPROFILE:\", process.env.USERPROFILE) console.log(\"find on PATH:\", cp.execFileSync(\"where.exe\", [\"find\"]).toString().trim().split(\"\\n\")[0]) const target = path.join(dir, \"sub\", \"a&calc&%USERNAME%.txt\") fs.writeFileSync(target, \"c\") const r = cp.spawnSync(\"powershell\", [\"-NoProfile\", \"-NonInteractive\", \"-Command\", \"Invoke-Item -LiteralPath $env:FILETREE_OPEN\"], { timeout: 10000, env: { ...process.env, FILETREE_OPEN: target } }) console.log(\"powershell Invoke-Item exit:\", r.status, String(r.stderr).trim()) if (r.status !== 0) throw new Error(\"opener failed\") } const git = cp.execFileSync(\"git\", [\"--no-optional-locks\", \"-C\", process.cwd(), \"status\", \"--porcelain=v1\", \"-b\", \"-z\", \"--ignored=traditional\", \"--untracked-f...",
+      "recommendation": "Exception swallowing: Silently discarding errors can mask cascading failures. OWASP Agentic ASI08.",
+      "confidence": 80,
+      "owasp_mcp": "MCP03"
+    },
+    {
+      "severity": "HIGH",
+      "category": "Output Injection",
+      "pattern_name": "Template Injection (LLM05)",
+      "matched_text": "${{ matrix.os }} defaults: run: shell: bash steps: - uses: actions/checkout@v4 - uses: actions/setup-node@v4 with: node-",
+      "line_number": 0,
+      "file": ".github\\workflows\\platforms.yml",
+      "context": "...est, windows-latest] runs-on: ${{ matrix.os }} defaults: run: shell: bash steps: - uses: actions/checkout@v4 - uses: actions/setup-node@v4 with: node-version: 22 - name: Install Claude Code 2.1.287 run: npm install -g @anthropic-ai/claude-code@2.1.287 && claude --version - name: Validate the plugin and marketplace run: claude plugin validate .claude-plugin/plugin.json && claude plugin validate .claude-plugin/marketplace.json - name: Plugin tests on this OS run: claude plugin test . - name: Platform commands the mod runs run: | set -u echo \"OS=${OS:-unset} uname=$(uname -s)\" node -e ' const fs = require(\"fs\"), cp = require(\"child_process\"), os = require(\"os\"), path = require(\"path\") const src = fs.readFileSync(\"hooks/register.tsx\", \"utf8\").replace(/\\r\\n/g, \"\\n\") const block = src.match(/const FONT_SCRIPT =\\n((?:\\s*\\x27.*?\\x27\\s*\\+?\\n)+)/)[1] const font = [...block.matchAll(/\\x27((?:[^\\x27\\\\]|\\\\.)*)\\x27/g)].map(m => m[1].replace(/\\\\(.)/g, \"$1\")).join(\"\") if (process.platform !== \"win32\") console.log(\"font probe:\", cp.execFileSync(\"sh\", [\"-c\", font, \"sh\", \"f04eb\"]).toString().trim()) const dir = fs.mkdtempSync(path.join(os.tmpdir(), \"ft-\")) fs.mkdirSync(path.join(dir, \"sub/deep\"), { recursive: true }) fs.writeFileSync(path.join(d...",
+      "recommendation": "Server-side template injection (SSTI) payload. Can lead to remote code execution. OWASP LLM05.",
+      "confidence": 95,
+      "owasp_mcp": "MCP05"
+    },
+    {
+      "severity": "LOW",
+      "category": "Dangerous Command",
+      "pattern_name": "Package / Dependency Install",
+      "matched_text": "npm install ",
+      "line_number": 30,
+      "file": ".github\\workflows\\platforms.yml",
+      "context": "run: npm install -g @anthropic-ai/claude-code@2...",
+      "recommendation": "Software installation command detected. Verify the package source for supply-chain safety.",
+      "confidence": 65,
+      "owasp_mcp": "MCP05"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "Shell Injection",
+      "pattern_name": "Bash Command Substitution $(...)",
+      "matched_text": "$(uname",
+      "line_number": 38,
+      "file": ".github\\workflows\\platforms.yml",
+      "context": "...  echo \"OS=${OS:-unset} uname=$(uname -s)\"",
+      "recommendation": "Bash command substitution $() — normal in Shell-Skripten; prüfen, ob die Eingabe unkontrolliert in die Substitution fließt. (v0.2-Phase-1: CRITICAL→MEDIUM, da $() Standard-Bash ist)",
+      "confidence": 65,
+      "owasp_mcp": "MCP05"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "Shell Injection",
+      "pattern_name": "Node.js child_process",
+      "matched_text": "require(\"child_process\")",
+      "line_number": 40,
+      "file": ".github\\workflows\\platforms.yml",
+      "context": "...onst fs = require(\"fs\"), cp = require(\"child_process\"), os = require(\"os\"), path = r...",
+      "recommendation": "Node.js child_process execution — normal für CLI-Mods; nur bei unkontrollierter Eingabe gefährlich. (v0.2-Phase-1: CRITICAL→MEDIUM)",
+      "confidence": 70,
+      "owasp_mcp": "MCP05"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "Shell Injection",
+      "pattern_name": "Bash Command Substitution $(...)",
+      "matched_text": "$(id",
+      "line_number": 41,
+      "file": "hooks\\open.ts",
+      "context": "...${TMP:-${TEMP:-/tmp}}}\"/nvim.\"$(id -un)\"/*/nvim.*.0; do',",
+      "recommendation": "Bash command substitution $() — normal in Shell-Skripten; prüfen, ob die Eingabe unkontrolliert in die Substitution fließt. (v0.2-Phase-1: CRITICAL→MEDIUM, da $() Standard-Bash ist)",
+      "confidence": 65,
+      "owasp_mcp": "MCP05"
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "modvet_version": "0.2.4",
+  "timestamp": "2026-10-24T12:32:28.734451+00:00",
+  "source": "generic:D:\\AI-Labs\\modvet\\benchmark\\corpus\\jarrodwatts__claude-image-view",
+  "total_lines": 0,
+  "total_findings": 6,
+  "risk_score": 6,
+  "risk_level": "HIGH",
+  "findings": [
+    {
+      "severity": "HIGH",
+      "category": "Prompt Injection",
+      "pattern_name": "Encoded Bypass (Base64 hint)",
+      "matched_text": "atob(base64.slice(0, 32)), char => char.charCodeAt(0))",
+      "line_number": 26,
+      "file": "hooks\\layout.ts",
+      "context": "... const head = Uint8Array.from(atob(base64.slice(0, 32)), char => char.charCodeAt(0))",
+      "recommendation": "Possible attempt to smuggle encoded payloads past text filters.",
+      "confidence": 85,
+      "owasp_mcp": "MCP01"
+    },
+    {
+      "severity": "HIGH",
+      "category": "Prompt Injection",
+      "pattern_name": "Encoded Bypass (Base64 hint)",
+      "matched_text": "Base64(): string }).toBase64()",
+      "line_number": 130,
+      "file": "hooks\\layout.ts",
+      "context": "...s.buffer) as Uint8Array & { toBase64(): string }).toBase64()",
+      "recommendation": "Possible attempt to smuggle encoded payloads past text filters.",
+      "confidence": 85,
+      "owasp_mcp": "MCP01"
+    },
+    {
+      "severity": "HIGH",
+      "category": "Prompt Injection",
+      "pattern_name": "Encoded Bypass (Base64 hint)",
+      "matched_text": "decode(codes)",
+      "line_number": 118,
+      "file": "hooks\\png.ts",
+      "context": "const symbol = decode(codes)",
+      "recommendation": "Possible attempt to smuggle encoded payloads past text filters.",
+      "confidence": 80,
+      "owasp_mcp": "MCP01"
+    },
+    {
+      "severity": "HIGH",
+      "category": "Prompt Injection",
+      "pattern_name": "Encoded Bypass (Base64 hint)",
+      "matched_text": "decode(literals)",
+      "line_number": 136,
+      "file": "hooks\\png.ts",
+      "context": "const symbol = decode(literals)",
+      "recommendation": "Possible attempt to smuggle encoded payloads past text filters.",
+      "confidence": 80,
+      "owasp_mcp": "MCP01"
+    },
+    {
+      "severity": "HIGH",
+      "category": "Prompt Injection",
+      "pattern_name": "Encoded Bypass (Base64 hint)",
+      "matched_text": "decode(distances)",
+      "line_number": 147,
+      "file": "hooks\\png.ts",
+      "context": "const distanceSymbol = decode(distances)",
+      "recommendation": "Possible attempt to smuggle encoded payloads past text filters.",
+      "confidence": 80,
+      "owasp_mcp": "MCP01"
+    },
+    {
+      "severity": "HIGH",
+      "category": "Prompt Injection",
+      "pattern_name": "Encoded Bypass (Base64 hint)",
+      "matched_text": "Base64(base64)",
+      "line_number": 244,
+      "file": "tests\\claude-image-view.test.ts",
+      "context": "...64: string) => Uint8Array.fromBase64(base64)",
+      "recommendation": "Possible attempt to smuggle encoded payloads past text filters.",
+      "confidence": 80,
+      "owasp_mcp": "MCP01"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "modvet_version": "0.2.4",
+  "timestamp": "2026-10-24T12:33:46.807771+00:00",
+  "source": "generic:D:\\AI-Labs\\modvet\\benchmark\\corpus\\scasella__claude-flightdeck",
+  "total_lines": 0,
+  "total_findings": 0,
+  "risk_score": 0,
+  "risk_level": "CLEAN",
+  "findings": []
+}

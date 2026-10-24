@@ -1,0 +1,143 @@
+{
+  "modvet_version": "0.2.4",
+  "timestamp": "2026-10-24T12:10:10.786992+00:00",
+  "source": "generic:D:\\AI-Labs\\modvet\\benchmark\\corpus\\briansmith80__claude-code-status-bar",
+  "total_lines": 0,
+  "total_findings": 11,
+  "risk_score": 10,
+  "risk_level": "CRITICAL",
+  "findings": [
+    {
+      "severity": "MEDIUM",
+      "category": "Shell Injection",
+      "pattern_name": "Backtick Command Substitution",
+      "matched_text": "`bash ~/.claude/statusline-command.sh --version`",
+      "line_number": 30,
+      "file": ".github\\ISSUE_TEMPLATE\\bug_report.yml",
+      "context": "description: Output of `bash ~/.claude/statusline-command.sh --version`",
+      "recommendation": "Backtick command substitution — normal in Shell-Skripten/Doku; nur bei unkontrollierter Eingabe gefährlich. (v0.2-Phase-1: CRITICAL→MEDIUM)",
+      "confidence": 80,
+      "owasp_mcp": "MCP05"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "Shell Injection",
+      "pattern_name": "Backtick Command Substitution",
+      "matched_text": "`bash ~/.claude/statusline-command.sh --dump-config`",
+      "line_number": 56,
+      "file": ".github\\ISSUE_TEMPLATE\\bug_report.yml",
+      "context": "... and optionally the output of `bash ~/.claude/statusline-command.sh --dump-config`. Redact anything sensitive.",
+      "recommendation": "Backtick command substitution — normal in Shell-Skripten/Doku; nur bei unkontrollierter Eingabe gefährlich. (v0.2-Phase-1: CRITICAL→MEDIUM)",
+      "confidence": 80,
+      "owasp_mcp": "MCP05"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "Shell Injection",
+      "pattern_name": "Bash Command Substitution $(...)",
+      "matched_text": "$(grep",
+      "line_number": 25,
+      "file": ".github\\workflows\\release.yml",
+      "context": "plugin_version=\"$(grep -o '\"version\"[[:space:]]*:[[:...",
+      "recommendation": "Bash command substitution $() — normal in Shell-Skripten; prüfen, ob die Eingabe unkontrolliert in die Substitution fließt. (v0.2-Phase-1: CRITICAL→MEDIUM, da $() Standard-Bash ist)",
+      "confidence": 65,
+      "owasp_mcp": "MCP05"
+    },
+    {
+      "severity": "LOW",
+      "category": "Dangerous Command",
+      "pattern_name": "Package / Dependency Install",
+      "matched_text": "brew install ",
+      "line_number": 33,
+      "file": ".github\\workflows\\tests.yml",
+      "context": "run: brew install bats-core",
+      "recommendation": "Software installation command detected. Verify the package source for supply-chain safety.",
+      "confidence": 65,
+      "owasp_mcp": "MCP05"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "Shell Injection",
+      "pattern_name": "Node.js child_process",
+      "matched_text": "require('child_process')",
+      "line_number": 14,
+      "file": "docs\\assets\\generate-subagent-demo.js",
+      "context": "const { execFileSync } = require('child_process');",
+      "recommendation": "Node.js child_process execution — normal für CLI-Mods; nur bei unkontrollierter Eingabe gefährlich. (v0.2-Phase-1: CRITICAL→MEDIUM)",
+      "confidence": 70,
+      "owasp_mcp": "MCP05"
+    },
+    {
+      "severity": "HIGH",
+      "category": "Tool Manipulation",
+      "pattern_name": "MCP Schema Hash Mismatch",
+      "matched_text": "checksum mismatch",
+      "line_number": 63,
+      "file": "install.sh",
+      "context": "# download. On a checksum mismatch we abort leaving ~/.claude un...",
+      "recommendation": "Schema hash or checksum mismatch detected. Tool definition may have been tampered with after approval.",
+      "confidence": 65,
+      "owasp_mcp": "MCP04"
+    },
+    {
+      "severity": "HIGH",
+      "category": "Mod Capability",
+      "pattern_name": "Config Rewrite",
+      "matched_text": "settings.json` are never touched. It stays off by default so the tool never replace",
+      "line_number": 369,
+      "file": "README.md",
+      "context": "Set `auto_update=true` in `statusline.conf` and the bar installs new versions for you: once the background check flags a newer release, it runs the same self-update in a detached background process (i",
+      "recommendation": "Modifies Claude configuration files at runtime.",
+      "confidence": 95,
+      "owasp_mcp": "MCP03"
+    },
+    {
+      "severity": "CRITICAL",
+      "category": "Dangerous Command",
+      "pattern_name": "Remote Code Execution",
+      "matched_text": "curl -fsSL ${REPO_RAW}/install.sh | bash",
+      "line_number": 352,
+      "file": "statusline-command.sh",
+      "context": "echo \"    curl -fsSL ${REPO_RAW}/install.sh | bash\"",
+      "recommendation": "CRITICAL: Pipe-to-shell pattern detected. This downloads and executes remote code without inspection.",
+      "confidence": 95,
+      "owasp_mcp": "MCP05"
+    },
+    {
+      "severity": "CRITICAL",
+      "category": "Dangerous Command",
+      "pattern_name": "Remote Code Execution",
+      "matched_text": "curl -fsSL ${REPO_RAW}/install.sh | bash",
+      "line_number": 368,
+      "file": "statusline-command.sh",
+      "context": "echo \"    curl -fsSL ${REPO_RAW}/install.sh | bash\"",
+      "recommendation": "CRITICAL: Pipe-to-shell pattern detected. This downloads and executes remote code without inspection.",
+      "confidence": 95,
+      "owasp_mcp": "MCP05"
+    },
+    {
+      "severity": "HIGH",
+      "category": "Mod Capability",
+      "pattern_name": "Config Rewrite",
+      "matched_text": ".claude/statusline.conf with your override",
+      "line_number": 537,
+      "file": "statusline-command.sh",
+      "context": "# To customise, create ~/.claude/statusline.conf with your overrides.",
+      "recommendation": "Modifies Claude configuration files at runtime.",
+      "confidence": 95,
+      "owasp_mcp": "MCP03"
+    },
+    {
+      "severity": "HIGH",
+      "category": "Mod Capability",
+      "pattern_name": "Config Rewrite",
+      "matched_text": ".claude/statusline.conf` override",
+      "line_number": 36,
+      "file": "tests\\README.md",
+      "context": "- `config.bats` — `~/.claude/statusline.conf` overrides.",
+      "recommendation": "Modifies Claude configuration files at runtime.",
+      "confidence": 95,
+      "owasp_mcp": "MCP03"
+    }
+  ]
+}

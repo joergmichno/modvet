@@ -1,0 +1,155 @@
+{
+  "akin-ozer": {
+    "login": "akin-ozer",
+    "name": "Akin Ozer",
+    "email": "ozer_akin@outlook.com",
+    "blog": "",
+    "twitter_username": null,
+    "bio": "DevOps Manager @hepapi \r\n\r\nhttps://www.linkedin.com/in/akin-ozer/",
+    "public_repos": 5
+  },
+  "BeLazy167": {
+    "login": "BeLazy167",
+    "name": "Dhruv Khara",
+    "email": null,
+    "blog": "",
+    "twitter_username": "belazyAF",
+    "bio": null,
+    "public_repos": 64
+  },
+  "briansmith80": {
+    "login": "briansmith80",
+    "name": "Brian Smith",
+    "email": "mixmethod@gmail.com",
+    "blog": "https://creativestudio.co.za",
+    "twitter_username": null,
+    "bio": "Full Stack Developer",
+    "public_repos": 7
+  },
+  "costajohnt": {
+    "login": "costajohnt",
+    "name": "John Costa",
+    "email": null,
+    "blog": "jcosta.tech",
+    "twitter_username": null,
+    "bio": "I work across the stack, but I always come back to developer experience.",
+    "public_repos": 83
+  },
+  "data-goblin": {
+    "login": "data-goblin",
+    "name": "Kurt",
+    "email": "klonk@data-goblins.com",
+    "blog": "https://www.data-goblins.com",
+    "twitter_username": "kurtbuhler",
+    "bio": "Just a goblin trying to make it to tomorrow.",
+    "public_repos": 29
+  },
+  "davila7": {
+    "login": "davila7",
+    "name": "Daniel Avila",
+    "email": "dan.avila7@gmail.com",
+    "blog": "https://danielavila.me",
+    "twitter_username": "dani_avila7",
+    "bio": "Building AI dev tools with LLMs",
+    "public_repos": 216
+  },
+  "disler": {
+    "login": "disler",
+    "name": "IndyDevDan",
+    "email": null,
+    "blog": "",
+    "twitter_username": null,
+    "bio": "Betting the next 10 years of my career on AGENTIC software.\r\n\r\nJoin the journey on YT.",
+    "public_repos": 57
+  },
+  "es617": {
+    "login": "es617",
+    "name": null,
+    "email": null,
+    "blog": "es617.dev",
+    "twitter_username": null,
+    "bio": "I work at the intersection of AI, software, and embedded systems.\r\n",
+    "public_repos": 18
+  },
+  "EveryInc": {
+    "login": "EveryInc",
+    "name": "Every",
+    "email": "hello@every.to",
+    "blog": "https://every.to",
+    "twitter_username": null,
+    "bio": "The only subscription you need to stay at the edge of AI.",
+    "public_repos": 53
+  },
+  "jarrodwatts": {
+    "login": "jarrodwatts",
+    "name": "Jarrod Watts",
+    "email": null,
+    "blog": "https://jarrodwatts.com",
+    "twitter_username": "jarrodwatts",
+    "bio": null,
+    "public_repos": 151
+  },
+  "karanb192": {
+    "login": "karanb192",
+    "name": "Karan Bansal",
+    "email": null,
+    "blog": "https://karanbansal.in/",
+    "twitter_username": "karanb192",
+    "bio": "Head of AI at ArmorCode. Creator of Anya (autonomous ASPM agent). Building agentic AI for enterprise security. IIT Kanpur CS. 4000+ GitHub stars.",
+    "public_repos": 88
+  },
+  "NahumLitvin": {
+    "login": "NahumLitvin",
+    "name": "Nahum Litvin",
+    "email": "lnahum@gmail.com",
+    "blog": "https://www.catchkill9.dev",
+    "twitter_username": null,
+    "bio": "Untrusted site code on Kubernetes at Wix (2.5% of the web). gVisor, containerd, cold starts, cost. I fix the bugs upstream.",
+    "public_repos": 17
+  },
+  "noeltock": {
+    "login": "noeltock",
+    "name": "Noel Tock",
+    "email": null,
+    "blog": "http://www.noeltock.com",
+    "twitter_username": "noeltock",
+    "bio": "Building systems for freedom. Open source at @humanmade, agentic WordPress, and Volara for Ukraine's frontline charities 🇺🇦",
+    "public_repos": 25
+  },
+  "oikon48": {
+    "login": "oikon48",
+    "name": "Oikon",
+    "email": "oikon48.dev@gmail.com",
+    "blog": "https://oikon48.dev",
+    "twitter_username": "oikon48",
+    "bio": "Software Engineer in Japan.",
+    "public_repos": 22
+  },
+  "scasella": {
+    "login": "scasella",
+    "name": "Stephen Casella",
+    "email": null,
+    "blog": "https://casella.dev",
+    "twitter_username": null,
+    "bio": "I study how language models reason and respond to training, and put AI agents to work on hard, checkable problems: formal proofs, faster code, real bugs.",
+    "public_repos": 59
+  },
+  "wshobson": {
+    "login": "wshobson",
+    "name": "Seth Hobson",
+    "email": "seth@major7apps.com",
+    "blog": "https://major7apps.com",
+    "twitter_username": null,
+    "bio": "Senior Applied AI Engineer @UnitedDataTechnologies | Founder @major7apps ",
+    "public_repos": 35
+  },
+  "zenbu-labs": {
+    "login": "zenbu-labs",
+    "name": null,
+    "email": null,
+    "blog": "",
+    "twitter_username": null,
+    "bio": null,
+    "public_repos": 11
+  }
+}

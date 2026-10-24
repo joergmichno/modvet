@@ -1,0 +1,132 @@
+[
+  {
+    "repo": "akin-ozer__cc-devops-skills",
+    "findings": 231,
+    "risk": null,
+    "s": 118.2
+  },
+  {
+    "repo": "anthropics__claude-code-security-review",
+    "findings": 32,
+    "risk": null,
+    "s": 10.0
+  },
+  {
+    "repo": "BeLazy167__claude-mods-skill",
+    "findings": 1,
+    "risk": null,
+    "s": 1.8
+  },
+  {
+    "repo": "briansmith80__claude-code-status-bar",
+    "findings": 11,
+    "risk": null,
+    "s": 15.7
+  },
+  {
+    "repo": "claude-code-mods-main",
+    "findings": 35,
+    "risk": null,
+    "s": 15.1
+  },
+  {
+    "repo": "costajohnt__oss-autopilot",
+    "findings": 150,
+    "risk": null,
+    "s": 151.3
+  },
+  {
+    "repo": "data-goblin__claude-code-filetree",
+    "findings": 6,
+    "risk": null,
+    "s": 3.0
+  },
+  {
+    "repo": "davila7__claude-code-templates",
+    "error": "Command '['D:\\\\tmp\\\\modvet-verify\\\\Scripts\\\\modvet.exe', 'scan', 'D:\\\\AI-Labs\\\\modvet\\\\benchmark\\\\corpus\\\\davila7__claude-code-templates', '--json']' timed out after 600 seconds"
+  },
+  {
+    "repo": "disler__claude-code-hooks-mastery",
+    "findings": 49,
+    "risk": null,
+    "s": 28.7
+  },
+  {
+    "repo": "disler__claude-code-hooks-multi-agent-observability",
+    "findings": 57,
+    "risk": null,
+    "s": 31.8
+  },
+  {
+    "repo": "es617__claude-replay",
+    "findings": 30,
+    "risk": null,
+    "s": 17.7
+  },
+  {
+    "repo": "EveryInc__compound-engineering-plugin",
+    "findings": 509,
+    "risk": null,
+    "s": 453.3
+  },
+  {
+    "repo": "hesreallyhim__awesome-claude-code",
+    "findings": 36,
+    "risk": null,
+    "s": 35.3
+  },
+  {
+    "repo": "jarrodwatts__claude-image-view",
+    "findings": 6,
+    "risk": null,
+    "s": 1.7
+  },
+  {
+    "repo": "karanb192__cache-tax",
+    "findings": 4,
+    "risk": null,
+    "s": 4.6
+  },
+  {
+    "repo": "karanb192__claude-code-hooks",
+    "findings": 74,
+    "risk": null,
+    "s": 42.9
+  },
+  {
+    "repo": "NahumLitvin__prismantis",
+    "findings": 16,
+    "risk": null,
+    "s": 25.7
+  },
+  {
+    "repo": "noeltock__mod-builder",
+    "findings": 2,
+    "risk": null,
+    "s": 1.5
+  },
+  {
+    "repo": "oikon48__prompt-rail",
+    "findings": 1,
+    "risk": null,
+    "s": 0.9
+  },
+  {
+    "repo": "scasella__claude-flightdeck",
+    "findings": 0,
+    "risk": null,
+    "s": 2.4
+  },
+  {
+    "repo": "wshobson__agents",
+    "findings": 169,
+    "risk": null,
+    "s": 230.5
+  },
+  {
+    "repo": "zenbu-labs__terminal-browser",
+    "findings": 47,
+    "risk": null,
+    "s": 41.3
+  }
+]

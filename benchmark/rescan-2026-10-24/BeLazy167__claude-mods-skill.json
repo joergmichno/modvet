@@ -1,0 +1,23 @@
+{
+  "modvet_version": "0.2.4",
+  "timestamp": "2026-10-24T12:09:55.127475+00:00",
+  "source": "generic:D:\\AI-Labs\\modvet\\benchmark\\corpus\\BeLazy167__claude-mods-skill",
+  "total_lines": 0,
+  "total_findings": 1,
+  "risk_score": 3,
+  "risk_level": "MEDIUM",
+  "findings": [
+    {
+      "severity": "MEDIUM",
+      "category": "Dangerous Command",
+      "pattern_name": "Destructive Shell Command",
+      "matched_text": "rm -rf /",
+      "line_number": 8,
+      "file": "examples\\hello-mod\\tests\\register.test.ts",
+      "context": "...all({ tool: 'Bash', command: 'rm -rf /tmp/x' })",
+      "recommendation": "CRITICAL: Destructive system command detected (disk wipe, fork bomb, or recursive delete).",
+      "confidence": 90,
+      "owasp_mcp": "MCP05"
+    }
+  ]
+}

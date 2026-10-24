@@ -1,0 +1,35 @@
+{
+  "modvet_version": "0.2.4",
+  "timestamp": "2026-10-24T12:33:43.421457+00:00",
+  "source": "generic:D:\\AI-Labs\\modvet\\benchmark\\corpus\\noeltock__mod-builder",
+  "total_lines": 0,
+  "total_findings": 2,
+  "risk_score": 6,
+  "risk_level": "HIGH",
+  "findings": [
+    {
+      "severity": "HIGH",
+      "category": "Prompt Injection",
+      "pattern_name": "Encoded Bypass (Base64 hint)",
+      "matched_text": "decode() w = sys.argv[3] def frame(bg, scheme)",
+      "line_number": 0,
+      "file": "skills\\mod-builder\\scripts\\svg-check.sh",
+      "context": "...e64,' + base64.b64encode(svg).decode() w = sys.argv[3] def frame(bg, scheme): return (f'<div style=\"backgr...",
+      "recommendation": "Possible attempt to smuggle encoded payloads past text filters.",
+      "confidence": 85,
+      "owasp_mcp": "MCP01"
+    },
+    {
+      "severity": "HIGH",
+      "category": "Prompt Injection",
+      "pattern_name": "Encoded Bypass (Base64 hint)",
+      "matched_text": "decode()",
+      "line_number": 16,
+      "file": "skills\\mod-builder\\scripts\\svg-check.sh",
+      "context": "...e64,' + base64.b64encode(svg).decode()",
+      "recommendation": "Possible attempt to smuggle encoded payloads past text filters.",
+      "confidence": 80,
+      "owasp_mcp": "MCP01"
+    }
+  ]
+}

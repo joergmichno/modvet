@@ -1,0 +1,23 @@
+{
+  "modvet_version": "0.2.4",
+  "timestamp": "2026-10-24T12:33:44.361199+00:00",
+  "source": "generic:D:\\AI-Labs\\modvet\\benchmark\\corpus\\oikon48__prompt-rail",
+  "total_lines": 0,
+  "total_findings": 1,
+  "risk_score": 1,
+  "risk_level": "LOW",
+  "findings": [
+    {
+      "severity": "LOW",
+      "category": "Dangerous Command",
+      "pattern_name": "Package / Dependency Install",
+      "matched_text": "npm install ",
+      "line_number": 28,
+      "file": ".github\\workflows\\ci.yml",
+      "context": "- run: npm install -g @anthropic-ai/claude-code@l...",
+      "recommendation": "Software installation command detected. Verify the package source for supply-chain safety.",
+      "confidence": 65,
+      "owasp_mcp": "MCP05"
+    }
+  ]
+}
