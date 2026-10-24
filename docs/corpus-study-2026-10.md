@@ -1,7 +1,7 @@
 # Corpus-Studie: 21 populäre Claude-Code-Mods mit ModVet 0.2.4 gescannt
 
 **Datum:** 24.10.2026 · **Engine:** ModVet 0.2.4 (frische PyPI-Installation, 236 deterministische Pattern, 0 Dependencies)
-**Methode:** Voll-Scan aller 22 Benchmark-Repos (`benchmark/rescan-2026-10-24/`, JSON-Rohdaten je Repo) + **manuelle Verifikation aller CRITICAL-Cluster** der Top-Repos. `davila7__claude-code-templates` lief in Timeout (600 s) — Nachlauf separat, nicht in dieser Statistik.
+**Methode:** Voll-Scan aller 22 Benchmark-Repos (`benchmark/rescan-2026-10-24/`, JSON-Rohdaten je Repo) + **manuelle Verifikation aller CRITICAL-Cluster** der Top-Repos. `davila7__claude-code-templates` ist **nicht vollständig** in dieser Statistik: Der Vollscan (8.050 Dateien, 140 MB) wurde nach langer Laufzeit abgebrochen — die langsamsten Dateien sind Benchmark-/Minified-JSONs (bis ~90 s/Datei). Der Perf-Fix in v0.2.5 (52,2 s → 0,45 s für die 765-KB-Testzeile) behebt die Hauptursache, aber nicht alle Großdateien; weitere Optimierung ist offen. Er wird als **Laufzeit-Befund** dokumentiert statt als fertiges Repo.
 **Wichtig:** `benchmark/results.json` ist Stand VOR der FP-Verfeinerung (1.817 Findings) und wird hier NICHT zitiert.
 
 ## Zahlen (21 Repos)
