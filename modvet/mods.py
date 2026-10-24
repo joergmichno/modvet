@@ -412,6 +412,70 @@ def detect_kind(root: Path) -> str:
     return "generic"
 
 
+
+# ─── Kontext-Refiner (24.10., Corpus-Studie): Test-/Doku-/Security-Tool-/Echo-Kontexte ───
+_TEST_FILE_RE = re.compile(
+    r"(?:^|[/\\])(?:tests?|__tests__|fixtures|testdata|evals)(?:[/\\])"
+    r"|(?:^|[/\\])test_[^/\\]+\.py$"
+    r"|\.(?:test|spec)\.[a-z]+$", re.I)
+_SECURITY_TOOL_PATH_RE = re.compile(
+    r"(?:block-dangerous|guard-?pack|detect\.ts|scan_secrets|instructions-audit|protect-secrets|secret-box|security-)", re.I)
+_REGEX_META_RE = re.compile(r"(?:\\[sdw]|\.\*|\(\?:|\[\^?[A-Za-z0-9_ -]+\])")
+_NETWORK_EXFIL_RE = re.compile(
+    r"(?:https?://|curl|wget|fetch\(|requests\.|urlopen|axios|socket|webhook|http\.request|\.post\()", re.I)
+_ECHO_PREFIX_RE = re.compile(r"^\s*echo\s+", re.I)
+
+
+def _luhn_ok(digits: str) -> bool:
+    if not digits.isdigit() or len(digits) < 12:
+        return False
+    total = 0
+    for i, ch in enumerate(reversed(digits)):
+        n = int(ch)
+        if i % 2 == 1:
+            n *= 2
+            if n > 9:
+                n -= 9
+        total += n
+    return total % 10 == 0
+
+
+def _context_downgrade(findings: list[Finding], source: str = "", text: str = "") -> list[Finding]:
+    """Kontext-Refiner: senkt Severity in bewiesenen FP-Kontexten (statt zu loeschen).
+    Nur Luhn-Fail-Kreditkarten werden verworfen (eindeutige Geister)."""
+    is_doc = source.endswith((".md", ".txt"))
+    is_instruction = bool(_INSTRUCTION_FILE_RE.search(source))
+    plain_doc = is_doc and not is_instruction
+    is_test = bool(_TEST_FILE_RE.search(source))
+    is_sec_tool = bool(_SECURITY_TOOL_PATH_RE.search(source))
+    _lines = text.splitlines()
+    out = []
+    for f in findings:
+        if f.pattern_name.startswith("Credit Card Number"):
+            digits = re.sub(r"\D", "", f.matched_text or "")
+            if not _luhn_ok(digits):
+                continue  # Dezimalzahl, keine Karte (evals-Geister)
+        sev = f.severity
+        if plain_doc and f.pattern_name.startswith("Toxic Flow"):
+            continue  # Doku-Prosa: Wortkette ist keine Exfiltrations-Kette
+        if is_test and sev.score() >= Severity.HIGH.score():
+            sev = Severity.MEDIUM  # Test-/Eval-Dateien: Alarm kappen, sichtbar lassen
+        if is_sec_tool and sev.score() >= Severity.HIGH.score():
+            sev = Severity.MEDIUM  # Detektionslisten im Security-Tool selbst
+        if f.category in ("Dangerous Command", "Data Exfiltration") and _REGEX_META_RE.search(f.matched_text or ""):
+            if sev.score() > Severity.MEDIUM.score():
+                sev = Severity.MEDIUM  # matched_text ist ein Regex-Muster, kein Befehl
+        if f.category in ("Dangerous Command", "Mod Capability"):
+            _ln = getattr(f, "line_number", 0)
+            _orig = _lines[_ln - 1] if 0 < _ln <= len(_lines) else (f.context or "")
+            if _ECHO_PREFIX_RE.match(_orig.strip()):
+                sev = Severity.LOW  # Kommando wird nur ausgegeben, nicht ausgefuehrt
+        if f.pattern_name.startswith("Toxic Flow") and not _NETWORK_EXFIL_RE.search((f.context or "") + " " + (f.matched_text or "")):
+            sev = Severity.LOW  # Kein Netz-Indikator = keine Exfiltration (z. B. K8s-Probes)
+        out.append(replace(f, severity=sev))
+    return out
+
+
 def scan_single_file(rel: str, text: str) -> list[Finding]:
     """Engine-Scan + Capability-Kombinationslogik für EINE Datei (genutzt von scan_mod und diff)."""
     findings: list[Finding] = []
@@ -500,6 +564,7 @@ def scan_single_file(rel: str, text: str) -> list[Finding]:
     findings.extend(extra_scan(rel, text))
     # Ein Refiner-Durchlauf über ALLE Findings (Engine + Primitive + Kombinationen)
     refined = _refine_code_findings(findings, rel)
+    refined = _context_downgrade(refined, rel, text)  # Kontext-Refiner (24.10.)
     refined = _dedupe_cmd_line(refined)  # 1 Command-Finding je Zeile
     for f in refined:
         f.file = rel  # Evidenz-Zuordnung (21.10.): jedes Finding trägt seine Datei
