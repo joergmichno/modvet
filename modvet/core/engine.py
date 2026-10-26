@@ -1371,7 +1371,7 @@ SOCIAL_ENGINEERING_PATTERNS = [
     ),
     (
         "Toxic Flow - Data Exfiltration Chain",
-        r"(?i)(read.{1,30}?(then|and|before|after).{1,30}?(send|post|upload|transmit|exfiltrat)|fetch.{1,30}?(encode|encrypt|compress).{1,30}?(send|post|http|url|webhook)|extract.{1,30}?(data|content|secret|key|token).{1,30}?(forward|relay|pipe|redirect))",
+        r"(?i)(read.{1,30}?(then|and|before|after).{1,30}?(send|post|upload|transmit|exfiltrat)|fetch.{1,30}?(encode|encrypt|compress).{1,30}?(send|post|http|url|webhook)|extract.{1,30}?(data|content|secret|key|token).{1,30}?(forward|relay|pipe|redirect)|(?:search|scan|collect|gather|find|extract|read).{1,100}?(?:secrets?|credentials?|api[\s_-]?keys?|tokens?|private\s+(?:data|repos?|repositories|files?)).{1,150}?(?:include|send|post|upload|forward|leak|exfiltrat|publish).{1,60}?(?:pull\s+request|public|external|attacker|http))",
         Severity.CRITICAL,
         "Data Exfiltration",
         "Toxic flow: Multi-step data exfiltration chain (read+encode+send). CoSAI Threat #8.",

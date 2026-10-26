@@ -318,7 +318,12 @@ def _refine_code_findings(findings: list[Finding], source: str = "") -> list[Fin
                 continue  # CI/Release-Doku (echo "curl ... | bash" in Publish-Steps)
             line = f.context or f.matched_text or ""
             if _QUOTE_CHARS_RE.search(line) and re.search(r"\b(evil|example|test|localhost|127\.0\.0\.1)\b", line, re.I):
-                continue  # Teststring in Quotes (Paste-Protection-Tests)
+                # Nur bei nachgewiesenem Test-/Doku-/Security-Tool-Kontext droppen.
+                # Quotes + Platzhalter-Domain (evil.example.com) ist bei echten JSON-Payloads
+                # (.mcp.json/package.json mit curl|bash) der Normalfall -> sonst CRITICAL False Negative.
+                if _TEST_FILE_RE.search(source) or _is_readme_doc(source) \
+                        or _SECURITY_TOOL_PATH_RE.search(source) or _TEST_CONTEXT_RE.search(line):
+                    continue  # Teststring in Quotes (Paste-Protection-Tests)
         if f.pattern_name == "Toxic Flow - Data Exfiltration Chain" and "|" in (f.context or ""):
             continue  # Markdown-Tabellen-Zeile (Doku), keine Anweisung
         if f.pattern_name in ("Direct Override (EN/LLM01)", "Broad Ignore Instructions (EN)") and not is_doc:
@@ -422,7 +427,7 @@ _SECURITY_TOOL_PATH_RE = re.compile(
     r"(?:block-dangerous|guard-?pack|detect\.ts|scan_secrets|instructions-audit|protect-secrets|secret-box|security-)", re.I)
 _REGEX_META_RE = re.compile(r"(?:\\[sdw]|\.\*|\(\?:|\[\^?[A-Za-z0-9_ -]+\])")
 _NETWORK_EXFIL_RE = re.compile(
-    r"(?:https?://|curl|wget|fetch\(|requests\.|urlopen|axios|socket|webhook|http\.request|\.post\()", re.I)
+    r"(?:https?://|curl|wget|fetch\(|requests\.|urlopen|axios|socket|webhook|http\.request|\.post\(|pull\s+request|public\s+(?:repos?|repository|repositories))", re.I)
 _ECHO_PREFIX_RE = re.compile(r"^\s*echo\s+", re.I)
 
 
